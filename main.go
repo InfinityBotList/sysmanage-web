@@ -1,0 +1,130 @@
+package main
+
+import (
+	"crypto/hmac"
+	"crypto/sha512"
+	"fmt"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"gopkg.in/yaml.v3"
+)
+
+var config *Config
+
+func ensureDpAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-DP-UserID") != "" {
+			// Check if user is allowed
+			for _, user := range config.AllowedUsers {
+				if user == r.Header.Get("X-DP-UserID") {
+					// User is possibly allowed
+					if r.Header.Get("X-DP-Signature") == "" {
+						w.WriteHeader(http.StatusUnauthorized)
+						w.Write([]byte("Unauthorized. X-DP-Signature header not found."))
+						return
+					}
+
+					// Check for X-DP-Timestamp
+					if r.Header.Get("X-DP-Timestamp") == "" {
+						w.WriteHeader(http.StatusUnauthorized)
+						w.Write([]byte("Unauthorized. X-DP-Timestamp header not found."))
+						return
+					}
+
+					ts := r.Header.Get("X-DP-Timestamp")
+
+					// Validate DP-Secret next
+					h := hmac.New(sha512.New, []byte(config.DPSecret))
+					h.Write([]byte(ts))
+					h.Write([]byte(r.Header.Get("X-DP-UserID")))
+
+					if r.Header.Get("X-DP-Signature") != string(h.Sum(nil)) {
+						w.WriteHeader(http.StatusUnauthorized)
+						w.Write([]byte("Unauthorized. Signature from deployproxy mismatch"))
+						return
+					}
+
+					// Check if timestamp is valid
+					timestamp, err := strconv.ParseInt(ts, 10, 64)
+
+					if err != nil {
+						w.WriteHeader(http.StatusUnauthorized)
+						w.Write([]byte("Unauthorized. X-DP-Timestamp is not a valid integer."))
+						return
+					}
+
+					if time.Now().Unix()-timestamp > 10 {
+						w.WriteHeader(http.StatusUnauthorized)
+						w.Write([]byte("Unauthorized. X-DP-Timestamp is too old."))
+						return
+					}
+
+					// User is allowed
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
+			// User is not allowed
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized, user not in allowlist"))
+			return
+		} else {
+			// User is not authenticated
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. Not running under deployproxy?"))
+			return
+		}
+	})
+}
+
+func main() {
+	// Load config.yaml into Config struct
+	file, err := os.Open("config.yaml")
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+
+	err = decoder.Decode(&config)
+
+	if err != nil {
+		panic(err)
+	}
+
+	// Create wildcard route
+	r := chi.NewRouter()
+
+	// A good base middleware stack
+	r.Use(
+		ensureDpAuth,
+		middleware.Recoverer,
+		middleware.RealIP,
+		middleware.CleanPath,
+		middleware.Logger,
+		middleware.Timeout(30*time.Second),
+	)
+
+	// Create server
+	s := &http.Server{
+		Addr:    ":30010",
+		Handler: r,
+	}
+
+	// Start server
+	fmt.Println("Starting server on port 30010")
+	err = s.ListenAndServe()
+
+	if err != nil {
+		panic(err)
+	}
+}
