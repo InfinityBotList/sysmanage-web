@@ -2,4 +2,6 @@ allowed_users:
   - 728871946456137770
   - 510065483693817867
 infra_folder: /root/infra
+service_definitions: 
+  - /root/infra/service-templates
 dp_secret: 
