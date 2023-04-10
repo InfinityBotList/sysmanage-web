@@ -3,16 +3,24 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/sha512"
+	"embed"
+	"encoding/hex"
 	"fmt"
+	"io/fs"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"gopkg.in/yaml.v3"
 )
+
+//go:embed all:frontend/build
+var frontend embed.FS
 
 var config *Config
 
@@ -42,8 +50,9 @@ func ensureDpAuth(next http.Handler) http.Handler {
 					h := hmac.New(sha512.New, []byte(config.DPSecret))
 					h.Write([]byte(ts))
 					h.Write([]byte(r.Header.Get("X-DP-UserID")))
+					hexed := hex.EncodeToString(h.Sum(nil))
 
-					if r.Header.Get("X-DP-Signature") != string(h.Sum(nil)) {
+					if r.Header.Get("X-DP-Signature") != hexed {
 						w.WriteHeader(http.StatusUnauthorized)
 						w.Write([]byte("Unauthorized. Signature from deployproxy mismatch"))
 						return
@@ -83,6 +92,33 @@ func ensureDpAuth(next http.Handler) http.Handler {
 	})
 }
 
+func routeStatic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.URL.Path, "/api") {
+			// Serve frontend
+			serverRoot, err := fs.Sub(frontend, "frontend/build")
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// Get file extension
+			fileExt := ""
+			if strings.Contains(r.URL.Path, ".") {
+				fileExt = r.URL.Path[strings.LastIndex(r.URL.Path, "."):]
+			}
+
+			if fileExt == "" && r.URL.Path != "/" {
+				r.URL.Path += ".html"
+			}
+
+			http.FileServer(http.FS(serverRoot)).ServeHTTP(w, r)
+		} else {
+			// Serve API
+			next.ServeHTTP(w, r)
+		}
+	})
+}
+
 func main() {
 	// Load config.yaml into Config struct
 	file, err := os.Open("config.yaml")
@@ -106,13 +142,20 @@ func main() {
 
 	// A good base middleware stack
 	r.Use(
-		ensureDpAuth,
 		middleware.Recoverer,
+		middleware.Logger,
+		ensureDpAuth,
+		routeStatic,
 		middleware.RealIP,
 		middleware.CleanPath,
-		middleware.Logger,
 		middleware.Timeout(30*time.Second),
 	)
+
+	loadApi(r)
+
+	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hmmmm..."))
+	})
 
 	// Create server
 	s := &http.Server{
