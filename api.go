@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/infinitybotlist/eureka/crypto"
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 
@@ -91,18 +93,70 @@ func loadApi(r *chi.Mux) {
 		w.Write(jsonStr)
 	})
 
-	r.Post("/api/restartService", func(w http.ResponseWriter, r *http.Request) {
-		sid := r.URL.Query().Get("id")
+	r.Post("/api/systemctl", func(w http.ResponseWriter, r *http.Request) {
+		tgt := r.URL.Query().Get("tgt")
+		act := r.URL.Query().Get("act")
 
-		if sid == "" {
+		if !slices.Contains([]string{"start", "stop", "restart", "list-dependencies"}, act) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Missing id parameter."))
+			w.Write([]byte("Invalid action."))
 			return
 		}
 
-		cmd := exec.Command("systemctl", "restart", sid)
+		if tgt == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Missing tgt parameter."))
+			return
+		}
+
+		cmd := exec.Command("systemctl", act, tgt)
 		out, _ := cmd.CombinedOutput()
 
 		w.Write(out)
+	})
+
+	r.Post("/api/buildServices", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("consoleOf") != "" {
+			// Fetch from redis
+			console := rdb.Get(ctx, logPrefix+r.URL.Query().Get("consoleOf")).Val()
+
+			isDone := rdb.Get(ctx, logPrefix+r.URL.Query().Get("consoleOf")+markerDoneSuffix).Val()
+
+			if isDone == "1" {
+				w.Header().Set("X-Is-Done", "1")
+			}
+
+			w.Write([]byte(console))
+			return
+		}
+
+		reqId := crypto.RandString(64)
+
+		go func() {
+			addToLog(reqId, "Waiting for other builds to finish...", true)
+
+			inDeploy.Lock()
+			defer inDeploy.Unlock()
+
+			addToLog(reqId, "Starting build process to convert service templates to systemd services...", true)
+
+			cmd := exec.Command("make", "systemd")
+			cmd.Dir = config.InfraFolder
+			cmd.Env = os.Environ()
+			cmd.Stdout = autoLogger{id: reqId}
+			cmd.Stderr = autoLogger{id: reqId, Error: true}
+
+			err := cmd.Run()
+
+			if err != nil {
+				addToLog(reqId, "Failed to build services: "+err.Error(), true)
+				return
+			}
+
+			addToLog(reqId, "Finished building services.", false)
+			markLogDone(reqId)
+		}()
+
+		w.Write([]byte(reqId))
 	})
 }

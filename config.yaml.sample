@@ -5,3 +5,4 @@ infra_folder: /root/infra
 service_definitions: 
   - /root/infra/service-templates
 dp_secret: 
+redis_url: redis://localhost:6379/15

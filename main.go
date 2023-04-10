@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha512"
 	"embed"
@@ -16,16 +17,27 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
 )
 
 //go:embed all:frontend/build
 var frontend embed.FS
 
-var config *Config
+var (
+	config *Config
+	rdb    *redis.Client
+	ctx    = context.Background()
+)
 
 func ensureDpAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/__external__/") {
+			// External route, skip auth
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		if r.Header.Get("X-DP-UserID") != "" {
 			// Check if user is allowed
 			for _, user := range config.AllowedUsers {
@@ -137,6 +149,15 @@ func main() {
 		panic(err)
 	}
 
+	// Connect to redis
+	rOptions, err := redis.ParseURL(config.RedisURL)
+
+	if err != nil {
+		panic(err)
+	}
+
+	rdb = redis.NewClient(rOptions)
+
 	// Create wildcard route
 	r := chi.NewRouter()
 
@@ -144,17 +165,18 @@ func main() {
 	r.Use(
 		middleware.Recoverer,
 		middleware.Logger,
+		middleware.CleanPath,
+		middleware.RealIP,
 		ensureDpAuth,
 		routeStatic,
-		middleware.RealIP,
-		middleware.CleanPath,
 		middleware.Timeout(30*time.Second),
 	)
 
 	loadApi(r)
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hmmmm..."))
+		w.WriteHeader(http.StatusUnavailableForLegalReasons)
+		w.Write([]byte("API endpoint not found..."))
 	})
 
 	// Create server

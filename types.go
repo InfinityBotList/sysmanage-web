@@ -5,6 +5,7 @@ type Config struct {
 	InfraFolder        string   `yaml:"infra_folder"`
 	ServiceDefinitions []string `yaml:"service_definitions"` // List of folders where definitions can be found
 	DPSecret           string   `yaml:"dp_secret"`
+	RedisURL           string   `yaml:"redis_url"`
 }
 
 type ServiceManage struct {

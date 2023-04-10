@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let showArrow: boolean = true;
+    export let showArrow: boolean = false;
 
     export let onclick = () => {};
 </script>

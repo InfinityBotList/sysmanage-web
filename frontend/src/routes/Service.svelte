@@ -10,23 +10,63 @@
 	let showServiceInfo = false;
 
 	const restartService = async () => {
-		let restartService = await fetch(`/api/restartService?id=${service?.ID}`, {
+		let res = await fetch(`/api/systemctl?tgt=${service?.ID}&act=restart`, {
 			method: "POST",
 		});
 
-		if(!restartService.ok) {
-			let errorText = await restartService.text()
+		if(!res.ok) {
+			let errorText = await res.text()
 
 			error(errorText)
 		}
 
-		let out = await restartService.text();
+		let out = await res.text();
 
 		if(out) {
 			warning(out)
 		}
 
 		success("Service restarted successfully")
+	}
+
+	const stopService = async () => {
+		let res = await fetch(`/api/systemctl?tgt=${service?.ID}&act=stop`, {
+			method: "POST",
+		});
+
+		if(!res.ok) {
+			let errorText = await res.text()
+
+			error(errorText)
+		}
+
+		let out = await res.text();
+
+		if(out) {
+			warning(out)
+		}
+
+		success("Service stopped successfully")
+	}
+
+	const startService = async () => {
+		let res = await fetch(`/api/systemctl?tgt=${service?.ID}&act=start`, {
+			method: "POST",
+		});
+
+		if(!res.ok) {
+			let errorText = await res.text()
+
+			error(errorText)
+		}
+
+		let out = await res.text();
+
+		if(out) {
+			warning(out)
+		}
+
+		success("Service started successfully")
 	}
 </script>
 
@@ -70,7 +110,19 @@
 			onclick={() => restartService()}
 		>
 			<Icon icon="carbon:restart" color="white" />
-			<span class="mr-2">Restart</span>
+			<span class="ml-2">Restart</span>
+		</ButtonReact>
+		<ButtonReact 
+			onclick={() => startService()}
+		>
+			<Icon icon="mdi:auto-start" color="white" />
+			<span class="ml-2">Start</span>
+		</ButtonReact>
+		<ButtonReact 
+			onclick={() => stopService()}
+		>
+			<Icon icon="material-symbols:stop" color="white" />
+			<span class="ml-2">Stop</span>
 		</ButtonReact>
 	{/if}
 </Card>
