@@ -2,7 +2,7 @@
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import Card from "$lib/components/DefaultCard.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
-	import { title, error, warning } from "$lib/strings";
+	import { title, error, warning, success } from "$lib/strings";
 	import Icon from "@iconify/svelte"
 
 	export let service: any;
@@ -25,6 +25,8 @@
 		if(out) {
 			warning(out)
 		}
+
+		success("Service restarted successfully")
 	}
 </script>
 
