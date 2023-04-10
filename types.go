@@ -9,6 +9,8 @@ type Config struct {
 
 type ServiceManage struct {
 	Service          TemplateYaml
+	Status           string
+	ID               string
 	DefinitionFolder string // Folder where the service is located
 }
 

@@ -4,11 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"gopkg.in/yaml.v3"
 )
+
+func getServiceStatus(id string) string {
+	cmd := exec.Command("systemctl", "check", id)
+	out, _ := cmd.CombinedOutput()
+
+	return strings.ReplaceAll(string(out), "\n", "")
+}
 
 func loadApi(r *chi.Mux) {
 	// Returns the list of services
@@ -58,9 +66,14 @@ func loadApi(r *chi.Mux) {
 					return
 				}
 
+				// Service name is the name without .yaml
+				sname := strings.TrimSuffix(file.Name(), ".yaml")
+
 				defines = append(defines, ServiceManage{
 					DefinitionFolder: path,
 					Service:          service,
+					ID:               sname,
+					Status:           getServiceStatus(sname),
 				})
 			}
 		}
