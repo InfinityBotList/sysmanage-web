@@ -87,6 +87,22 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonStr)
+	})
+
+	r.Post("/api/restartService", func(w http.ResponseWriter, r *http.Request) {
+		sid := r.URL.Query().Get("id")
+
+		if sid == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Missing id parameter."))
+			return
+		}
+
+		cmd := exec.Command("systemctl", "restart", sid)
+		out, _ := cmd.CombinedOutput()
+
+		w.Write(out)
 	})
 }

@@ -1,4 +1,6 @@
 <script>
+	import Service from './Service.svelte';
+
 	const getServiceList = async () => {
 		let serviceList = await fetch(`/api/getServiceList`, {
 			method: "POST" 
@@ -12,6 +14,8 @@
 
 		return await serviceList.json();
 	}
+
+	let getServiceListPromise = getServiceList();
 </script>
 
 <svelte:head>
@@ -20,12 +24,17 @@
 </svelte:head>
 
 <section>
-	{#await getServiceList()}
-		<h2>Loading service list</h2>
+	{#await getServiceListPromise}
+		<h2 class="text-red">Loading service list</h2>
 	{:then data}
-		{#each data as service}
-			<h2>{JSON.stringify(service)}</h2>
-		{/each}
+		<div class="flex flex-wrap justify-center items-center justify-evenly">
+			{#each data as service}
+				<Service 
+					service={service} 
+				/>
+				<!--<h2>{JSON.stringify(service)}</h2>-->
+			{/each}
+		</div>
 	{:catch err}
 		<h2 class="text-red-500">{err}</h2>
 	{/await}
