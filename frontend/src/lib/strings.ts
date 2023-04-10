@@ -18,14 +18,14 @@ export function castToObj(a: any): any {
 export const success = (m: string) => toast.push(m, {
   theme: {
     '--toastBackground': 'black',
-    '--toastColor': 'black',
+    '--toastColor': 'white',
     '--toastBarBackground': 'olive'
   }
 })
 
 export const warning = (m: string) => toast.push(m, { theme: { 
     '--toastBackground': 'black',
-    '--toastColor': 'black',
+    '--toastColor': 'white',
     '--toastBarBackground': 'orange'
  } 
 })
