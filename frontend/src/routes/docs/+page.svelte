@@ -10,12 +10,6 @@
 <div class="text-column">
 	<h1 class="font-semibold">Documentation</h1>
 
-	<Doc docTitle="first-time-setup">
-		<ol class="list-decimal list-inside">
-			<li>Clone all relevant repositories</li>
-			<li>Clone <code>https://github.com/InfinityBotList/assets</code> to <code>/iblcdn</code>.</li>
-		</ol>
-	</Doc>
 	<Doc docTitle="install-nirn-proxy">
 		<p>
 			Due to VPS ratelimits, IBL uses the <code>nirn-proxy</code>
