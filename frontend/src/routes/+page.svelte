@@ -112,7 +112,7 @@
 	/>
 
 	{#await getServiceList()}
-		<h2 class="text-red">Loading service list</h2>
+		<h2 class="text-xl">Loading service list</h2>
 	{:then data}
 		<div class="flex flex-wrap justify-center items-center justify-evenly">
 			{#each data as service}
