@@ -7,6 +7,7 @@ type Config struct {
 	RedisURL           string   `yaml:"redis_url"`
 	DPDisable          bool     `yaml:"dp_disable"`
 	ServiceOut         string   `yaml:"service_out"`
+	SrvModBypass      []string `yaml:"srvmod_bypass"`
 }
 
 type ServiceManage struct {

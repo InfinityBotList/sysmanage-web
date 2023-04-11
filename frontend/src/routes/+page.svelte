@@ -5,6 +5,8 @@
 	import { error, success } from '$lib/strings';
 	import TaskWindow from '../lib/components/TaskWindow.svelte';
 	import { newTask } from '$lib/tasks';
+	import DangerButton from '$lib/components/DangerButton.svelte';
+	import Button from '$lib/components/Button.svelte';
 
 	const getServiceList = async () => {
 		let serviceList = await fetch(`/api/getServiceList`, {
@@ -62,6 +64,8 @@
 			let errorStr = await taskId.text()
 
 			error(errorStr)
+
+			return
 		}
 
 		buildServicesTaskId = await taskId.text()
@@ -86,10 +90,36 @@
 			let errorStr = await res.text()
 
 			error(errorStr)
+
+			return
 		}
 
 		success("Server is now restarting...")
 	}
+
+	const srvmod = async (action: string) => {
+		let confirm = window.prompt(`Are you sure you want to ${action} all services? (YES to confirm)`)
+
+		if(confirm != "YES") {
+			return
+		}
+
+		let res = await fetch(`/api/serviceMod?act=${action}`, {
+			method: "POST",
+		});
+
+		if(!res.ok) {
+			let errorStr = await res.text()
+
+			error(errorStr)
+
+			return
+		}
+
+		success(`All services are now ${action}...`)
+	}
+
+	let showDangerous = false;
 </script>
 
 <svelte:head>
@@ -104,11 +134,44 @@
 	>
 		Build Services
 	</ButtonReact>
-	<ButtonReact 
-		onclick={() => restartServer()}
+	<Button 
+		link="/new/service"
 	>
-		Restart Server
-	</ButtonReact>
+		New Service
+	</Button>
+
+	{#if showDangerous}
+		<DangerButton 
+			onclick={() => showDangerous = false}
+		>
+			Hide Dangerous Actions
+		</DangerButton>
+	{:else}
+		<DangerButton 
+			onclick={() => showDangerous = true}
+		>
+			Show Dangerous Actions
+		</DangerButton>
+	{/if}
+
+	{#if showDangerous}
+		<h2 class="mt-2 text-xl font-semibold text-red-400">Dangerous Actions</h2>
+		<DangerButton 
+			onclick={() => restartServer()}
+		>
+			Restart Server
+		</DangerButton>
+		<DangerButton 
+			onclick={() => srvmod("killall")}
+		>
+			Kill Services For Maintenance
+		</DangerButton>
+		<DangerButton 
+			onclick={() => srvmod("startall")}
+		>
+			Start All Services
+		</DangerButton>
+	{/if}
 
 	<div class="mb-3"></div>
 	

@@ -2,7 +2,6 @@
     import Card from "$lib/components/DefaultCard.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
 	import { title } from "$lib/strings";
-    import { marked } from "marked"
 
     let showContent = false;
 

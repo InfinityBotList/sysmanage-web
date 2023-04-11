@@ -15,11 +15,12 @@ import (
 	"sysmanage-web/types"
 )
 
-func getServiceStatus(id string) string {
-	cmd := exec.Command("systemctl", "check", id)
+func getServiceStatus(ids []string) []string {
+	ids = append([]string{"check"}, ids...)
+	cmd := exec.Command("systemctl", ids...)
 	out, _ := cmd.CombinedOutput()
 
-	return strings.ReplaceAll(string(out), "\n", "")
+	return strings.Split(string(out), "\n")
 }
 
 func loadApi(r *chi.Mux) {
@@ -27,6 +28,7 @@ func loadApi(r *chi.Mux) {
 	r.Post("/api/getServiceList", func(w http.ResponseWriter, r *http.Request) {
 		defines := []types.ServiceManage{}
 
+		ids := []string{}
 		for _, path := range config.ServiceDefinitions {
 			// Get all files in path
 			fsd, err := os.ReadDir(path)
@@ -73,13 +75,21 @@ func loadApi(r *chi.Mux) {
 				// Service name is the name without .yaml
 				sname := strings.TrimSuffix(file.Name(), ".yaml")
 
+				ids = append(ids, sname)
+
 				defines = append(defines, types.ServiceManage{
 					DefinitionFolder: path,
 					Service:          service,
 					ID:               sname,
-					Status:           getServiceStatus(sname),
 				})
 			}
+		}
+
+		// Get status of services
+		statuses := getServiceStatus(ids)
+
+		for i := range defines {
+			defines[i].Status = statuses[i]
 		}
 
 		// JSON encode defines
@@ -145,5 +155,121 @@ func loadApi(r *chi.Mux) {
 		go buildServices(reqId)
 
 		w.Write([]byte(reqId))
+	})
+
+	r.Post("/api/serviceMod", func(w http.ResponseWriter, r *http.Request) {
+		act := r.URL.Query().Get("act")
+
+		switch act {
+		case "killall":
+			// List all services and kill them
+			services := []string{"stop"}
+			for _, path := range config.ServiceDefinitions {
+				fsd, err := os.ReadDir(path)
+
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte("Failed to read service definition " + err.Error()))
+					return
+				}
+
+				for _, file := range fsd {
+					if file.Name() == "_meta.yaml" {
+						continue // Skip _meta.yaml
+					}
+
+					if file.IsDir() {
+						continue // Skip directories
+					}
+
+					var sname = strings.TrimSuffix(file.Name(), ".yaml") + ".service"
+					if !strings.HasSuffix(file.Name(), ".yaml") {
+						sname = file.Name()
+					}
+
+					if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+						continue
+					}
+
+					services = append(services, sname)
+				}
+			}
+
+			cmd := exec.Command("systemctl", services...)
+			err := cmd.Run()
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to kill services."))
+				return
+			}
+		case "startall":
+			// List all services and start them
+			services := []string{"start"}
+			for _, path := range config.ServiceDefinitions {
+				fsd, err := os.ReadDir(path)
+
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte("Failed to read service definition " + err.Error()))
+					return
+				}
+
+				for _, file := range fsd {
+					if file.Name() == "_meta.yaml" {
+						continue // Skip _meta.yaml
+					}
+
+					if file.IsDir() {
+						continue // Skip directories
+					}
+
+					var sname = strings.TrimSuffix(file.Name(), ".yaml") + ".service"
+					if !strings.HasSuffix(file.Name(), ".yaml") {
+						sname = file.Name()
+					} else {
+						var service types.TemplateYaml
+
+						f, err := os.Open(path + "/" + file.Name())
+
+						if err != nil {
+							w.WriteHeader(http.StatusInternalServerError)
+							w.Write([]byte("Failed to read service definition." + err.Error() + file.Name()))
+							return
+						}
+
+						err = yaml.NewDecoder(f).Decode(&service)
+
+						if err != nil {
+							w.WriteHeader(http.StatusInternalServerError)
+							w.Write([]byte("Failed to read service definition" + err.Error() + file.Name()))
+							return
+						}
+
+						if service.Broken {
+							continue
+						}
+					}
+
+					if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+						continue
+					}
+
+					services = append(services, sname)
+				}
+			}
+
+			cmd := exec.Command("systemctl", services...)
+
+			err := cmd.Run()
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to start services."))
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusNoContent)
 	})
 }
