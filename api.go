@@ -117,6 +117,15 @@ func loadApi(r *chi.Mux) {
 		w.Write(out)
 	})
 
+	r.Post("/api/restartServer", func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			cmd := exec.Command("reboot")
+			_ = cmd.Run()
+		}()
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	r.Post("/api/getLogEntry", func(w http.ResponseWriter, r *http.Request) {
 		// Fetch from redis
 		console := rdb.Get(ctx, logPrefix+r.URL.Query().Get("id")).Val()

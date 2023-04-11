@@ -2,7 +2,7 @@
 	import Service from './Service.svelte';
 	import InputSm from '$lib/components/InputSm.svelte';
 	import ButtonReact from '$lib/components/ButtonReact.svelte';
-	import { error } from '$lib/strings';
+	import { error, success } from '$lib/strings';
 	import TaskWindow from '../lib/components/TaskWindow.svelte';
 	import { newTask } from '$lib/tasks';
 
@@ -70,6 +70,26 @@
 			buildServicesTaskOutput = output
 		})
 	}
+
+	const restartServer = async () => {
+		let confirm = window.prompt("Are you sure you want to restart the server? (YES to confirm))")
+
+		if(confirm != "YES") {
+			return
+		}
+
+		let res = await fetch(`/api/restartServer`, {
+			method: "POST"
+		});
+
+		if(!res.ok) {
+			let errorStr = await res.text()
+
+			error(errorStr)
+		}
+
+		success("Server is now restarting...")
+	}
 </script>
 
 <svelte:head>
@@ -83,6 +103,11 @@
 		onclick={() => buildServices()}
 	>
 		Build Services
+	</ButtonReact>
+	<ButtonReact 
+		onclick={() => restartServer()}
+	>
+		Restart Server
 	</ButtonReact>
 
 	<div class="mb-3"></div>
