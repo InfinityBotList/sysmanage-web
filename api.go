@@ -105,6 +105,19 @@ func loadApi(r *chi.Mux) {
 		w.Write(jsonStr)
 	})
 
+	r.Post("/api/getDefinitionFolders", func(w http.ResponseWriter, r *http.Request) {
+		jsonStr, err := json.Marshal(config.ServiceDefinitions)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode service definitions."))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonStr)
+	})
+
 	r.Post("/api/systemctl", func(w http.ResponseWriter, r *http.Request) {
 		tgt := r.URL.Query().Get("tgt")
 		act := r.URL.Query().Get("act")

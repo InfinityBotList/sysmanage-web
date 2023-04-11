@@ -7,7 +7,7 @@ type Config struct {
 	RedisURL           string   `yaml:"redis_url"`
 	DPDisable          bool     `yaml:"dp_disable"`
 	ServiceOut         string   `yaml:"service_out"`
-	SrvModBypass      []string `yaml:"srvmod_bypass"`
+	SrvModBypass       []string `yaml:"srvmod_bypass"`
 }
 
 type ServiceManage struct {
@@ -15,6 +15,13 @@ type ServiceManage struct {
 	Status           string
 	ID               string
 	DefinitionFolder string // Folder where the service is located
+}
+
+// Struct used to create a service
+type CreateTemplate struct {
+	DefinitionFolder string
+	Name             string
+	Service          TemplateYaml
 }
 
 /* From service-gen:/main.go */

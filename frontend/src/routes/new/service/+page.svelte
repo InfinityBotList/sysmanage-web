@@ -10,6 +10,24 @@
     let description: string;
     let after: string = "ibl-maint"; // Usually what you want
     let brokenValue: string = "0";
+    let folder: string
+
+    let folderList: string[] = [];
+
+    const getDefinitionFolders = async () => {
+        let definitionFolders = await fetch(`/api/getDefinitionFolders`, {
+            method: "POST",
+        });
+
+        if(!definitionFolders.ok) {
+            let error = await definitionFolders.text()
+
+            throw new Error(error)
+        }
+
+        folderList = await definitionFolders.json();
+        folder = folderList[0];
+    }
 </script>
 
 <h1 class="text-2xl font-semibold">Create New Service</h1>
@@ -17,6 +35,18 @@
 <GreyText>If you want to add a build integration or a git deploy hook, you can do so later after creating the service!</GreyText>
 
 <div>
+    {#await getDefinitionFolders()}
+        <GreyText>Loading folder list...</GreyText>
+    {:then fl}
+        <div id={JSON.stringify(fl)}></div>
+        <Select
+            name="folder"
+            placeholder="Folder"
+            bind:value={folder}
+            options={new Map(folderList?.map(folder => [folder, folder]))}
+        />
+        <div class="mb-2"></div>
+    {/await}
     <InputSm 
         id="name"
         label="Service Name"
