@@ -45,7 +45,7 @@
             bind:value={folder}
             options={new Map(folderList?.map(folder => [folder, folder]))}
         />
-        <div class="mb-2"></div>
+        <div class="mb-3"></div>
     {/await}
     <InputSm 
         id="name"
