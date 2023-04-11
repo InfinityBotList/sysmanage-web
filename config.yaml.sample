@@ -1,8 +1,9 @@
 allowed_users:
   - 728871946456137770
   - 510065483693817867
-infra_folder: /root/infra
 service_definitions: 
-  - /root/infra/service-templates
+  - data/services
+service_out: /etc/systemd/system
 dp_secret: 
 redis_url: redis://localhost:6379/15
+dp_disable: false # Only enable when bootstrapping

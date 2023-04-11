@@ -13,10 +13,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sysmanage-web/types"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
 	"github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
 )
@@ -25,15 +27,22 @@ import (
 var frontend embed.FS
 
 var (
-	config *Config
+	config *types.Config
 	rdb    *redis.Client
 	ctx    = context.Background()
+	v      *validator.Validate
+
+	//go:embed data/servicegen/service.tmpl
+	serviceTemplate string
+
+	//go:embed data/servicegen/target.tmpl
+	targetTemplate string
 )
 
 func ensureDpAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/__external__/") {
-			// External route, skip auth
+		if strings.HasPrefix(r.URL.Path, "/__external__/") || config.DPDisable {
+			// External route or under DPDisable, skip auth
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -157,6 +166,8 @@ func main() {
 	}
 
 	rdb = redis.NewClient(rOptions)
+
+	v = validator.New()
 
 	// Create wildcard route
 	r := chi.NewRouter()

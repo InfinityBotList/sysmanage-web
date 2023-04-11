@@ -1,0 +1,5 @@
+cmd: "/usr/bin/npm start"
+dir: "/root/Tweeter"
+target: tweeter
+after: ibl-maint
+description: Tweeter Bot

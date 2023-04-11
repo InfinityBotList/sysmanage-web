@@ -1,0 +1,5 @@
+cmd: "/root/JobCordAPI-v2/jobcord"
+dir: "/root/JobCordAPI-v2"
+target: ibl
+after: ibl-maint
+description: JobCord

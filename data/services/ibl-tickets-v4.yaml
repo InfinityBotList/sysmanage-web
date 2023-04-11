@@ -1,0 +1,5 @@
+cmd: "/root/ibl-tickets/ibl-tickets"
+dir: "/root/ibl-tickets"
+target: ibl
+after: ibl-maint
+description: IBL Tickets Bot [v4]

@@ -1,0 +1,5 @@
+cmd: "/root/sysmanage-web/sysmanage-web"
+dir: "/root/sysmanage-web"
+target: ibl
+after: ibl-maint
+description: System Management [v4]

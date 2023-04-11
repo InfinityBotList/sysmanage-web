@@ -1,0 +1,5 @@
+cmd: "/root/github-v2/bot"
+dir: "/root/github-v2"
+target: github
+after: ibl-maint
+description: Github Bot [v2]

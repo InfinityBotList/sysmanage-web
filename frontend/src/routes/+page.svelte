@@ -3,7 +3,8 @@
 	import InputSm from '$lib/components/InputSm.svelte';
 	import ButtonReact from '$lib/components/ButtonReact.svelte';
 	import { error } from '$lib/strings';
-	import Task from './Task.svelte';
+	import TaskWindow from '../lib/components/TaskWindow.svelte';
+	import { newTask } from '$lib/tasks';
 
 	const getServiceList = async () => {
 		let serviceList = await fetch(`/api/getServiceList`, {
@@ -51,6 +52,7 @@
 	}
 
 	let buildServicesTaskId: string = "";
+	let buildServicesTaskOutput: string[] = [];
 	const buildServices = async () => {
 		let taskId = await fetch(`/api/buildServices`, {
 			method: "POST"
@@ -63,6 +65,10 @@
 		}
 
 		buildServicesTaskId = await taskId.text()
+
+		newTask(buildServicesTaskId, (output: string[]) => {
+			buildServicesTaskOutput = output
+		})
 	}
 </script>
 
@@ -85,8 +91,8 @@
 
 	{#if buildServicesTaskId != ""}
 		<h2 class="text-red-500">Build services ID: {buildServicesTaskId}</h2>
-		<Task 
-			pollUrl={`/api/buildServices?consoleOf=${buildServicesTaskId}`}
+		<TaskWindow 
+			output={buildServicesTaskOutput}
 		/>
 	{/if}
 

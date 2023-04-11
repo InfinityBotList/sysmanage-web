@@ -1,0 +1,5 @@
+cmd: "/root/Popplio-V2-SL/popplio"
+dir: "/root/Popplio-V2-SL"
+target: ibl
+after: ibl-maint
+description: Popplio Server List [v4]

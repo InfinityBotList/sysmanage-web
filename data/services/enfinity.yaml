@@ -1,0 +1,5 @@
+cmd: "/usr/bin/npm start"
+dir: "/root/enfinity"
+target: ibl
+after: ibl-maint
+description: Infinity Support Bot

@@ -1,0 +1,5 @@
+cmd: "/usr/bin/npm start"
+dir: "/root/ArtieAI"
+target: artie
+after: ibl-maint
+description: Artie the AI

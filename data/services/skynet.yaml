@@ -1,0 +1,5 @@
+cmd: "/root/skynet/skynet"
+dir: "/root/skynet"
+target: skynet
+after: ibl-maint
+description: Skynet
