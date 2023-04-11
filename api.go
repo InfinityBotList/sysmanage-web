@@ -137,4 +137,39 @@ func loadApi(r *chi.Mux) {
 
 		w.Write([]byte(reqId))
 	})
+
+	r.Post("/api/getDocList", func(w http.ResponseWriter, r *http.Request) {
+		fsd, err := os.ReadDir("data/docs")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read docs directory."))
+			return
+		}
+
+		files := []string{}
+
+		for _, file := range fsd {
+			if file.IsDir() {
+				continue
+			}
+
+			if !strings.HasSuffix(file.Name(), ".md") {
+				continue
+			}
+
+			files = append(files, file.Name())
+		}
+
+		jsonStr, err := json.Marshal(files)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode docs list."))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonStr)
+	})
 }
