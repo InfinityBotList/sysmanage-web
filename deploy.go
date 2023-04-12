@@ -190,7 +190,12 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 	logMap.Add(logId, "Deploy finished on: "+time.Now().Format(time.RFC3339), true)
 
-	logMap.Persist(logId)
+	err := logMap.Persist(logId)
+
+	if err != nil {
+		logMap.Add(logId, "Error persisting log: "+err.Error(), true)
+	}
+
 	time.Sleep(2 * time.Second)
 
 	// Run systemctl restart deploy.Git.Service
@@ -199,7 +204,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	cmd.Stdout = autoLogger{id: logId}
 	cmd.Stderr = autoLogger{id: logId, Error: true}
 
-	err := cmd.Run()
+	err = cmd.Run()
 
 	if err != nil {
 		logMap.Add(logId, "Error restarting service: "+err.Error(), true)
