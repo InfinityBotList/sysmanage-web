@@ -1,5 +1,16 @@
-cmd: "/root/Popplio-V2-SL/popplio"
-dir: "/root/Popplio-V2-SL"
+cmd: /root/Popplio-V2-SL/popplio
+dir: /root/Popplio-V2-SL
 target: ibl
-after: ibl-maint
 description: Popplio Server List [v4]
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/infinitybotlist/popplio
+    ref: refs/heads/priv-serverlist
+    build_commands:
+        - go build -v
+    env:
+        CGO_ENABLED: "0"
+    allow_dirty: false
+    config_files:
+        - config.yaml
