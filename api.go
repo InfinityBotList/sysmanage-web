@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -341,13 +340,10 @@ func loadApi(r *chi.Mux) {
 		w.Write(out)
 	})
 
-	logController := make(chan string, 1)
-	openEntries := make(map[string]time.Time)
-	openEntriesMutex := sync.Mutex{}
-	r.Post("/api/getServiceLogs", func(w http.ResponseWriter, r *http.Request) {
-		openEntriesMutex.Lock()
-		defer openEntriesMutex.Unlock()
+	// Simple goroutine to clean up open entries
+	const maxOpenTime = time.Minute * 5 // for now, 5 minutes
 
+	r.Post("/api/getServiceLogs", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("id")
 
 		if name == "" {
@@ -358,9 +354,6 @@ func loadApi(r *chi.Mux) {
 
 		logId := crypto.RandString(32)
 
-		// Add to open entries
-		openEntries[logId] = time.Now()
-
 		// Run command for service, and pipe output to logController
 		cmd := exec.Command("journalctl", "-u", name, "-n", "50")
 		cmd.Stdout = autoLogger{id: logId}
@@ -369,36 +362,16 @@ func loadApi(r *chi.Mux) {
 		go func() {
 			_ = cmd.Start()
 
-			for exit := range logController {
-				if exit == logId {
-					logMap.MarkDone(logId)
-					break
-				}
-			}
+			time.Sleep(maxOpenTime)
+
+			logMap.Add(logId, "Max open time reached, closing log.", true)
+
+			logMap.MarkDone(logId)
+			logMap.Set(logId, LogEntry{LastUpdate: time.Now()})
 		}()
 
 		w.Write([]byte(logId))
 	})
-
-	// Simple goroutine to clean up open entries
-	const maxOpenTime = time.Minute * 30 // for now, 30 seconds
-	go func() {
-		for {
-			time.Sleep(time.Second * 10)
-
-			openEntriesMutex.Lock()
-
-			for id, t := range openEntries {
-				if time.Since(t) > maxOpenTime {
-					logMap.Add(id, "Log entry timed out.", true)
-					logController <- id
-					delete(openEntries, id)
-				}
-			}
-
-			openEntriesMutex.Unlock()
-		}
-	}()
 
 	r.Post("/api/restartServer", func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
