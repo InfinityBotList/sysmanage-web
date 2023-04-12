@@ -1,16 +1,14 @@
 <script lang="ts">
 	import ButtonReact from "./ButtonReact.svelte";
 	import DangerButton from "./DangerButton.svelte";
-	import Input from "./Input.svelte";
-    import InputSm from "./InputSm.svelte";
-
+	import KvMultiInputElement from "./KVMultiInputElement.svelte";
+    
     export let id: string;
-    export let values: string[];
+    export let values: [string, string][] = [];
     export let title: string;
     export let label: string = title;
     export let placeholder: string;
     export let minlength: number;
-    export let small: boolean = true;
     export let showErrors: boolean = false;
 
     const deleteValue = (i: number) => {
@@ -18,32 +16,21 @@
     }
 
     const addValue = (i: number) => {
-        values = [...values.slice(0, i + 1), "", ...values.slice(i + 1)];
+        values = [...values.slice(0, i + 1), "", ...values.slice(i + 1)] as [string, string][];
     }
 </script>
 
 <label for={id} class="block mb-1 font-medium text-gray-900 dark:text-gray-300">{label}</label>
 <div id={id}>
     {#each values as value, i}
-        {#if small}
-            <InputSm
-                id={i.toString()}
-                label={title + " " + (i + 1)}
-                placeholder={placeholder}
-                bind:value={value} 
-                minlength={minlength}
-                showErrors={showErrors}
-            />
-        {:else}
-            <Input 
-                id={i.toString()}
-                label={title + " " + (i + 1)}
-                placeholder={placeholder}
-                bind:value={value} 
-                minlength={minlength}
-            />
-        {/if}
-
+        <KvMultiInputElement 
+            title={title}
+            placeholder={placeholder}
+            minlength={minlength}
+            showErrors={showErrors}
+            i={i}
+            bind:value={value}
+        />
         <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
         <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>
     {/each}

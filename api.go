@@ -19,7 +19,7 @@ import (
 func loadApi(r *chi.Mux) {
 	// Returns the list of services
 	r.Post("/api/getServiceList", func(w http.ResponseWriter, r *http.Request) {
-		serviceList, err := getServiceList()
+		serviceList, err := getServiceList(true)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -461,5 +461,156 @@ func loadApi(r *chi.Mux) {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+	})
+
+	r.Post("/api/initDeploy", func(w http.ResponseWriter, r *http.Request) {
+		name := r.URL.Query().Get("id")
+
+		services, err := getServiceList(false)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to get service list."))
+			return
+		}
+
+		var gotService *types.ServiceManage
+		for _, service := range services {
+			if service.ID == name {
+				gotService = &service
+				break
+			}
+		}
+
+		if gotService == nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Service not found."))
+			return
+		}
+
+		logId := crypto.RandString(64)
+
+		go initDeploy(logId, *gotService)
+
+		w.Write([]byte(logId))
+	})
+
+	r.Post("/api/createGit", func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Query().Get("id")
+
+		services, err := getServiceList(false)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to get service list."))
+			return
+		}
+
+		// Check if service exists
+		var gotService *types.ServiceManage
+
+		for _, service := range services {
+			if service.ID == id {
+				gotService = &service
+				break
+			}
+		}
+
+		if gotService == nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Service not found."))
+			return
+		}
+
+		var git *types.Git
+
+		err = yaml.NewDecoder(r.Body).Decode(&git)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to decode git data."))
+			return
+		}
+
+		err = v.Struct(git)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid git data."))
+			return
+		}
+
+		if !strings.HasPrefix(git.Repo, "https://") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid git URL."))
+			return
+		}
+
+		if !strings.HasPrefix(git.Ref, "refs/heads/") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Currently, only refs starting with refs/heads/ are supported."))
+			return
+		}
+
+		if len(git.BuildCommands) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("No build commands specified."))
+			return
+		}
+
+		gotService.Service.Git = git
+
+		// Save service
+		f, err := os.Create(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+
+			return
+		}
+
+		err = yaml.NewEncoder(f).Encode(gotService.Service)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+
+			return
+		}
+
+		err = f.Close()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+
+			return
+		}
+
+		err = os.Rename(config.ServiceDefinitions+"/"+gotService.ID+".yaml-1", config.ServiceDefinitions+"/"+gotService.ID+".yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+
+			return
+		}
 	})
 }

@@ -8,7 +8,15 @@ redis_url: redis://localhost:6379/15
 dp_disable: false # Only enable when bootstrapping
 
 # Protected from killall 
-kill_all_bypass:
+srvmod_bypass:
   - sysmanage
   - deployproxy
   - ibl-maint
+
+url: https://sysmanage.infinitybots.gg
+
+# Only relevant for git
+github_webhook_sig: 
+github_pat: 
+bot_token: 
+log_channel:

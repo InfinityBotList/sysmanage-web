@@ -189,6 +189,7 @@
 		label="Filter by ID"
 		bind:value={query}
 		placeholder="E.g. arcadia"
+		showErrors={false}
 		minlength={0}
 	/>
 	<InputSm
@@ -196,6 +197,7 @@
 		label="Filter by systemd target"
 		bind:value={targetFilter}
 		placeholder="E.g. arcadia"
+		showErrors={false}
 		minlength={0}
 	/>
 

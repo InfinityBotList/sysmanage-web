@@ -13,9 +13,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"sysmanage-web/types"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
@@ -27,13 +29,17 @@ import (
 var frontend embed.FS
 
 var (
-	config *types.Config
-	rdb    *redis.Client
-	ctx    = context.Background()
-	v      *validator.Validate
+	config  *types.Config
+	rdb     *redis.Client
+	discord *discordgo.Session
+	ctx     = context.Background()
+	v       *validator.Validate
 
 	// Subbed frontend embed
 	serverRootSubbed fs.FS
+
+	// Mutex to ensure only one large scale operation is running at a time
+	lsOp = sync.Mutex{}
 
 	//go:embed data/servicegen/service.tmpl
 	serviceTemplate string
@@ -44,6 +50,18 @@ var (
 
 func ensureDpAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-DP-Host") == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. X-DP-Host header not found."))
+			return
+		}
+
+		if r.Header.Get("X-DP-Host") != config.URL {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. Domain rebind detected. Expected " + config.URL + " but got " + r.Header.Get("X-DP-Host")))
+			return
+		}
+
 		if strings.HasPrefix(r.URL.Path, "/__external__/") || config.DPDisable {
 			// External route or under DPDisable, skip auth
 			next.ServeHTTP(w, r)
@@ -196,6 +214,13 @@ func main() {
 	serverRootSubbed, err = fs.Sub(frontend, "frontend/build")
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Connect to discord, no intents though
+	discord, err = discordgo.New("Bot " + config.BotToken)
+
+	if err != nil {
+		panic(err)
 	}
 
 	// Create wildcard route

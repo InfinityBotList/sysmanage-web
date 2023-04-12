@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"sync"
 	"time"
 )
 
@@ -93,7 +92,7 @@ func (l LogEntryMap) Persist(id string) error {
 	return nil
 }
 
-func (l LogEntryMap) Add(id string, data string, newline bool) error {
+func (l LogEntryMap) Add(id string, data string, newline bool) {
 	if newline {
 		data += "\n"
 	}
@@ -109,18 +108,20 @@ func (l LogEntryMap) Add(id string, data string, newline bool) error {
 		}
 
 		l.Set(id, currLog)
-		return nil
+		return
 	}
 
 	currLog.LastLog = append(currLog.LastLog, data)
 
 	if currLog.Persistance {
-		l.Persist(id)
+		err := l.Persist(id)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	l.Set(id, currLog)
-
-	return nil
 }
 
 func (l LogEntryMap) MarkDone(id string) {
@@ -137,18 +138,17 @@ func (l LogEntryMap) MarkDone(id string) {
 
 var logMap = LogEntryMap{}
 
-var inDeploy = sync.Mutex{}
-
 type autoLogger struct {
-	id    string
-	Error bool
+	id      string
+	Error   bool
+	Newline bool
 }
 
 func (a autoLogger) Write(p []byte) (n int, err error) {
 	if a.Error {
-		logMap.Add(a.id, "ERROR: "+string(p), false)
+		logMap.Add(a.id, "ERROR: "+string(p), a.Newline)
 	} else {
-		logMap.Add(a.id, string(p), false)
+		logMap.Add(a.id, string(p), a.Newline)
 	}
 
 	return len(p), nil

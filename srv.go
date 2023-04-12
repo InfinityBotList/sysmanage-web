@@ -21,7 +21,7 @@ func getServiceStatus(ids []string) []string {
 	return strings.Split(string(out), "\n")
 }
 
-func getServiceList() ([]types.ServiceManage, error) {
+func getServiceList(getStatus bool) ([]types.ServiceManage, error) {
 	// Get all files in path
 	fsd, err := os.ReadDir(config.ServiceDefinitions)
 
@@ -73,10 +73,12 @@ func getServiceList() ([]types.ServiceManage, error) {
 	}
 
 	// Get status of services
-	statuses := getServiceStatus(ids)
+	if getStatus {
+		statuses := getServiceStatus(ids)
 
-	for i := range services {
-		services[i].Status = statuses[i]
+		for i := range services {
+			services[i].Status = statuses[i]
+		}
 	}
 
 	return services, nil
@@ -87,8 +89,8 @@ func buildServices(reqId string) {
 
 	logMap.Add(reqId, "Waiting for other builds to finish...", true)
 
-	inDeploy.Lock()
-	defer inDeploy.Unlock()
+	lsOp.Lock()
+	defer lsOp.Unlock()
 
 	logMap.Add(reqId, "Starting build process to convert service templates to systemd services...", true)
 

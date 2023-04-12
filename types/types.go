@@ -8,6 +8,10 @@ type Config struct {
 	DPDisable          bool     `yaml:"dp_disable"`
 	ServiceOut         string   `yaml:"service_out"`
 	SrvModBypass       []string `yaml:"srvmod_bypass"`
+	GithubPat          string   `yaml:"github_pat"`
+	LogChannel         string   `yaml:"log_channel"`
+	BotToken           string   `yaml:"bot_token"`
+	URL                string   `yaml:"url"`
 }
 
 type ServiceManage struct {
@@ -42,10 +46,10 @@ type TemplateYaml struct {
 
 // Defines a git integration
 type Git struct {
-	Repo          string   `yaml:"repo"`           // Git repo to clone
-	Ref           string   `yaml:"ref"`            // e.g. refs/heads/priv-serverlist
-	Service       string   `yaml:"service"`        // Service to restart after build
-	BuildCommands []string `yaml:"build_commands"` // Commands to run after cloning
+	Repo          string            `yaml:"repo" validate:"required"`           // Git repo to clone
+	Ref           string            `yaml:"ref" validate:"required"`            // e.g. refs/heads/priv-serverlist
+	BuildCommands []string          `yaml:"build_commands" validate:"required"` // Commands to run after cloning
+	Env           map[string]string `yaml:"env" validate:"required"`            // Environment variables to set
 }
 
 // Defines metadata which is _meta.yaml

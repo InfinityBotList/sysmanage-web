@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from "$lib/components/Button.svelte";
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import DangerButton from "$lib/components/DangerButton.svelte";
 	import Card from "$lib/components/DefaultCard.svelte";
@@ -71,35 +72,6 @@
 
 		success("Service started successfully")
 	}
-
-	let deleteServiceTaskId: string = "";
-	let deleteServiceTaskOutput: string[] = [];
-	const deleteService = async () => {
-		let confirm = window.prompt("Are you sure you want to delete this service? (YES to confirm))")
-
-		if(confirm != "YES") {
-			return
-		}
-
-		let res = await fetch(`/api/deleteService`, {
-			method: "POST",
-			body: JSON.stringify({
-				name: service?.ID,
-			})
-		});
-
-		if(!res.ok) {
-			let errorStr = await res.text()
-			error(errorStr)
-			return
-		}
-
-		deleteServiceTaskId = await res.text()
-
-		newTask(deleteServiceTaskId, (output: string[]) => {
-			deleteServiceTaskOutput = output
-		})
-	}
 </script>
 
 <Card 
@@ -156,18 +128,10 @@
 			<Icon icon="material-symbols:stop" color="white" />
 			<span class="ml-2">Stop</span>
 		</ButtonReact>
-		<DangerButton 
-			onclick={() => deleteService()}
-		>
-			<Icon icon="material-symbols:delete-outline-sharp" color="white" />
-			<span class="ml-2">Delete</span>
-		</DangerButton>
 
-		{#if deleteServiceTaskId != ""}
-			<h2 class="text-red-500">Delete service log ID: {deleteServiceTaskId}</h2>
-			<TaskWindow 
-				output={deleteServiceTaskOutput}
-			/>
-		{/if}
+		<Button link={`/service?id=${service?.ID}`}>
+			<Icon icon="mdi:file-edit" color="white" />
+			Edit
+		</Button>	
 	{/if}
 </Card>
