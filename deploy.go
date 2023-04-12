@@ -190,6 +190,9 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 	logMap.Add(logId, "Deploy finished on: "+time.Now().Format(time.RFC3339), true)
 
+	logMap.Persist(logId)
+	time.Sleep(2 * time.Second)
+
 	// Run systemctl restart deploy.Git.Service
 	cmd := exec.Command("systemctl", "restart", srv.ID)
 	cmd.Env = os.Environ()
