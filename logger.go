@@ -59,6 +59,8 @@ func (l LogEntryMap) Get(id string) LogEntry {
 func (l LogEntryMap) Set(id string, entry LogEntry) {
 	fmt.Println(entry, id)
 	l[id] = entry
+
+	fmt.Println(l[id])
 }
 
 // Persist will persist the current state of the log entry to redis
