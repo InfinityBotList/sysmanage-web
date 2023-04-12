@@ -7,7 +7,6 @@ import (
 	"sysmanage-web/types"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -36,32 +35,9 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	lsOp.Lock()
 	defer lsOp.Unlock()
 
-	_, err := discord.ChannelMessageSendEmbeds(config.LogChannel, []*discordgo.MessageEmbed{
-		{
-			Title: "Deploying to VPS",
-			Fields: []*discordgo.MessageEmbedField{
-				{
-					Name:   "Deploy ID",
-					Value:  logId,
-					Inline: true,
-				},
-				{
-					Name:   "Log URL",
-					Value:  config.URL + "/deploy?id=" + logId,
-					Inline: true,
-				},
-			},
-			Timestamp: time.Now().Format(time.RFC3339),
-		},
-	})
-
-	if err != nil {
-		logMap.Add(logId, "[IGNORED] Error sending message to discord: "+err.Error(), true)
-	}
-
 	deployFolder := "deploys/" + logId
 
-	err = os.MkdirAll(deployFolder, 0755)
+	err := os.MkdirAll(deployFolder, 0755)
 
 	if err != nil {
 		logMap.Add(logId, "Error creating deploy folder: "+err.Error(), true)
@@ -133,29 +109,6 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	os.RemoveAll(srv.Service.Directory + "-old")
 
 	logMap.Add(logId, "Deploy finished on: "+time.Now().Format(time.RFC3339), true)
-
-	_, err = discord.ChannelMessageSendEmbeds(config.LogChannel, []*discordgo.MessageEmbed{
-		{
-			Title: "Deploy finished",
-			Fields: []*discordgo.MessageEmbedField{
-				{
-					Name:   "Deploy ID",
-					Value:  logId,
-					Inline: true,
-				},
-				{
-					Name:   "Log URL",
-					Value:  config.URL + "/deploy?id=" + logId,
-					Inline: true,
-				},
-			},
-			Timestamp: time.Now().Format(time.RFC3339),
-		},
-	})
-
-	if err != nil {
-		logMap.Add(logId, "[IGNORED] Error sending message to discord: "+err.Error(), true)
-	}
 
 	// Run systemctl restart deploy.Git.Service
 	cmd := exec.Command("systemctl", "restart", srv.ID)

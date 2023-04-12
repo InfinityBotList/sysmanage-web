@@ -18,5 +18,3 @@ url: https://sysmanage.infinitybots.gg
 # Only relevant for git
 github_webhook_sig: 
 github_pat: 
-bot_token: 
-log_channel:

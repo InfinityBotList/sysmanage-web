@@ -9,8 +9,6 @@ type Config struct {
 	ServiceOut         string   `yaml:"service_out"`
 	SrvModBypass       []string `yaml:"srvmod_bypass"`
 	GithubPat          string   `yaml:"github_pat"`
-	LogChannel         string   `yaml:"log_channel"`
-	BotToken           string   `yaml:"bot_token"`
 	URL                string   `yaml:"url"`
 }
 
