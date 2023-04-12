@@ -7,6 +7,7 @@ import (
 
 const logPrefix = "smdl:"
 const logTime = 8 * time.Hour
+const logTreshold = 100000
 
 type LogEntry struct {
 	LastUpdate time.Time
@@ -49,6 +50,11 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 	if time.Since(entry.LastUpdate) > logTime {
 		delete(l, id)
+		return LogEntry{}
+	}
+
+	if len(entry.LastLog) > logTreshold {
+		delete(l, id) // Prevent memory leaks
 		return LogEntry{}
 	}
 

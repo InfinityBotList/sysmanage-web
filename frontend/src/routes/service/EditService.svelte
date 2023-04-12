@@ -62,6 +62,25 @@
 		})
 	}
 
+	let getServiceLogTaskId: string = "";
+	let getServiceLogTaskOutput: string[] = [];
+	const getServiceLogs = async () => {
+		let res = await fetch(`/api/getServiceLogs?id=${service?.ID}`, {
+			method: "POST",
+		});
+
+		if(!res.ok) {
+			let errorText = await res.text()
+
+			error(errorText)
+		}
+
+		getServiceLogTaskId = await res.text();
+		newTask(getServiceLogTaskId, (output: string[]) => {
+			getServiceLogTaskOutput = output
+		})
+    }
+
     interface Preset {
         [key: string]: {
             git: string[],
@@ -242,6 +261,20 @@
     <h2 class="text-red-500">Deploy service log ID: {deployTaskId}</h2>
     <TaskWindow 
         output={deployTaskOutput}
+    />
+{/if}
+
+<ButtonReact 
+    onclick={() => getServiceLogs()}
+>
+    <Icon icon="ph:read-cv-logo-bold" color="white" />
+    <span class="ml-2">Get Service Logs</span>
+</ButtonReact>
+
+{#if getServiceLogTaskId != ""}
+    <h2 class="text-red-500">Get service logs log ID: {getServiceLogTaskId}</h2>
+    <TaskWindow 
+        output={getServiceLogTaskOutput}
     />
 {/if}
 

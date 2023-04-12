@@ -41,7 +41,7 @@
     {#await getService()}
         <GreyText>Loading metadata...</GreyText>
     {:then service}
-        <h1 class="text-2xl font-semibold">Editting {service?.ID}</h1>
+        <h1 class="text-2xl font-semibold">Viewing {service?.ID}</h1>
         <EditService service={service} />
     {/await}
 </div>
