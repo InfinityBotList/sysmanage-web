@@ -185,7 +185,7 @@
     />
 {/if}
 
-<h2 class="font-semibold">Git Integration</h2>
+<h2 class="font-semibold text-xl">Git Integration</h2>
 {#if service?.Service?.Git}
     <p>Git Integration is correctly configured</p>
 {:else}
