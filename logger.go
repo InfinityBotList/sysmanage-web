@@ -36,7 +36,7 @@ func (l LogEntryMap) Get(id string) LogEntry {
 		if err != nil {
 			return LogEntry{
 				Valid:   false,
-				LastLog: []string{err.Error()},
+				LastLog: []string{err.Error() + " " + currLog},
 			}
 		}
 
