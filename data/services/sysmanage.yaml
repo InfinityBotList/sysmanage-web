@@ -15,6 +15,6 @@ git:
         - go build -v
     env:
         CGO_ENABLED: "0"
-    allow_dirty: true
+    allow_dirty: false
     config_files:
         - config.yaml
