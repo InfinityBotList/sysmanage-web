@@ -19,16 +19,16 @@ import (
 func loadApi(r *chi.Mux) {
 	// Returns the list of services
 	r.Post("/api/getServiceList", func(w http.ResponseWriter, r *http.Request) {
-		cache, err := cache.GetCache()
+		serviceList, err := getServiceList()
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to get cache."))
+			w.Write([]byte("Failed to get serviceList."))
 			return
 		}
 
 		// JSON encode defines
-		jsonStr, err := json.Marshal(cache.Services)
+		jsonStr, err := json.Marshal(serviceList)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -178,7 +178,6 @@ func loadApi(r *chi.Mux) {
 		}
 
 		// Create file
-		defer cache.Invalidate()
 		f, err = os.Create(config.ServiceDefinitions + "/" + createService.Name + ".yaml")
 
 		if err != nil {
@@ -241,7 +240,6 @@ func loadApi(r *chi.Mux) {
 
 		go func() {
 			defer logMap.MarkDone(logId)
-			defer cache.Invalidate()
 
 			// delete yaml file, ignore if it doesn't exist
 			logMap.Add(logId, "Deleting service file...", true)

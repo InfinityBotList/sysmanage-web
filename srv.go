@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"html/template"
 	"io"
 	"os"
@@ -18,6 +19,67 @@ func getServiceStatus(ids []string) []string {
 	out, _ := cmd.CombinedOutput()
 
 	return strings.Split(string(out), "\n")
+}
+
+func getServiceList() ([]types.ServiceManage, error) {
+	// Get all files in path
+	fsd, err := os.ReadDir(config.ServiceDefinitions)
+
+	if err != nil {
+		return nil, errors.New("Failed to read service definition " + err.Error())
+	}
+
+	services := make([]types.ServiceManage, 0)
+	ids := make([]string, 0)
+
+	for _, file := range fsd {
+		if file.Name() == "_meta.yaml" {
+			continue // Skip _meta.yaml
+		}
+
+		if file.IsDir() {
+			continue // Skip directories
+		}
+
+		if !strings.HasSuffix(file.Name(), ".yaml") {
+			continue // Skip non-yaml files
+		}
+
+		// Read file into TemplateYaml
+		f, err := os.Open(config.ServiceDefinitions + "/" + file.Name())
+
+		if err != nil {
+			return nil, errors.New("Failed to read service definition " + err.Error() + file.Name())
+		}
+
+		// Read file into TemplateYaml
+		var service types.TemplateYaml
+
+		err = yaml.NewDecoder(f).Decode(&service)
+
+		if err != nil {
+			return nil, errors.New("Failed to read service definition " + err.Error() + file.Name())
+		}
+
+		// Service name is the name without .yaml
+		sname := strings.TrimSuffix(file.Name(), ".yaml")
+
+		services = append(services, types.ServiceManage{
+			Service: service,
+			ID:      sname,
+		})
+
+		ids = append(ids, sname)
+	}
+
+	// Get status of services
+	statuses := getServiceStatus(ids)
+
+	for i := range services {
+		services[i].Status = statuses[i]
+	}
+
+	return services, nil
 }
 
 func buildServices(reqId string) {
