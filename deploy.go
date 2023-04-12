@@ -204,41 +204,40 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 	if deployViaClone {
 		// Copy any potential config files to deploy folder
+		logMap.Add(logId, "Copying config files to new deploy", true)
 		for _, file := range srv.Service.Git.ConfigFiles {
-			if _, err := os.Stat(srv.Service.Directory + file); err == nil {
-				logMap.Add(logId, "Copying config file "+file, true)
+			logMap.Add(logId, "Copying config file "+file, true)
 
-				f, err := os.Open(srv.Service.Directory + "/" + file)
+			f, err := os.Open(srv.Service.Directory + "/" + file)
 
-				if err != nil {
-					logMap.Add(logId, "Error opening config file: "+err.Error(), true)
-					return
-				}
+			if err != nil {
+				logMap.Add(logId, "WARNING: Could not open config file "+file, true)
+				continue
+			}
 
-				defer f.Close()
+			defer f.Close()
 
-				newF, err := os.Create(deployFolder + "/" + file)
+			newF, err := os.Create(deployFolder + "/" + file)
 
-				if err != nil {
-					logMap.Add(logId, "Error creating config file: "+err.Error(), true)
-					return
-				}
+			if err != nil {
+				logMap.Add(logId, "Error creating config file: "+err.Error(), true)
+				return
+			}
 
-				defer newF.Close()
+			defer newF.Close()
 
-				_, err = io.Copy(newF, f)
+			_, err = io.Copy(newF, f)
 
-				if err != nil {
-					logMap.Add(logId, "Error copying config file: "+err.Error(), true)
-					return
-				}
+			if err != nil {
+				logMap.Add(logId, "Error copying config file: "+err.Error(), true)
+				return
+			}
 
-				err = newF.Sync()
+			err = newF.Sync()
 
-				if err != nil {
-					logMap.Add(logId, "Error syncing config file: "+err.Error(), true)
-					return
-				}
+			if err != nil {
+				logMap.Add(logId, "Error syncing config file: "+err.Error(), true)
+				return
 			}
 		}
 
