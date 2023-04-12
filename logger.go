@@ -11,7 +11,6 @@ const logTime = 8 * time.Hour
 type LogEntry struct {
 	LastUpdate time.Time
 	LastLog    []string
-	Valid      bool
 	IsDone     bool
 }
 
@@ -26,7 +25,6 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 		if currLog == "" {
 			return LogEntry{
-				Valid:   true,
 				LastLog: []string{},
 			}
 		}
@@ -37,7 +35,6 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 		if err != nil {
 			return LogEntry{
-				Valid:   true,
 				LastLog: []string{err.Error() + " " + currLog},
 			}
 		}
@@ -53,13 +50,6 @@ func (l LogEntryMap) Get(id string) LogEntry {
 	if time.Since(entry.LastUpdate) > logTime {
 		delete(l, id)
 		return LogEntry{}
-	}
-
-	if !entry.Valid {
-		delete(l, id)
-		return LogEntry{
-			LastLog: []string{"Log entry was invalid, please try again."},
-		}
 	}
 
 	return entry
@@ -97,18 +87,6 @@ func (l LogEntryMap) Add(id string, data string, newline bool) {
 	}
 
 	currLog := l.Get(id)
-
-	if !currLog.Valid {
-		currLog = LogEntry{
-			LastUpdate: time.Now(),
-			LastLog: []string{
-				data,
-			},
-		}
-
-		l.Set(id, currLog)
-		return
-	}
 
 	currLog.LastLog = append(currLog.LastLog, data)
 
