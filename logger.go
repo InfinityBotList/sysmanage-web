@@ -57,7 +57,9 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 	if !entry.Valid {
 		delete(l, id)
-		return LogEntry{}
+		return LogEntry{
+			LastLog: []string{"Log entry was invalid, please try again."},
+		}
 	}
 
 	return entry
