@@ -131,29 +131,6 @@ func initDeploy(logId string, srv types.ServiceManage) {
 		}
 	}
 
-	// Remove deploy.Git.Path and move deploys/deployID to deploy.Git.Path
-	err := os.Rename(srv.Service.Directory, srv.Service.Directory+"-old")
-
-	if err != nil {
-		logMap.Add(logId, "Error moving old directory: "+err.Error(), true)
-		return
-	}
-
-	err = os.Rename(deployFolder, srv.Service.Directory)
-
-	if err != nil {
-		logMap.Add(logId, "Error moving new directory: "+err.Error(), true)
-
-		// Move old directory back
-		os.RemoveAll(srv.Service.Directory)
-		os.Rename(srv.Service.Directory+"-old", srv.Service.Directory)
-
-		return
-	}
-
-	// Remove old directory
-	os.RemoveAll(srv.Service.Directory + "-old")
-
 	logMap.Add(logId, "Deploy finished on: "+time.Now().Format(time.RFC3339), true)
 
 	// Run systemctl restart deploy.Git.Service
@@ -162,7 +139,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	cmd.Stdout = autoLogger{id: logId}
 	cmd.Stderr = autoLogger{id: logId, Error: true}
 
-	err = cmd.Run()
+	err := cmd.Run()
 
 	if err != nil {
 		logMap.Add(logId, "Error restarting service: "+err.Error(), true)
