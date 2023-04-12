@@ -92,6 +92,7 @@ func (l LogEntryMap) Add(id string, data string, newline bool) {
 
 	currLog := l.Get(id)
 
+	currLog.LastUpdate = time.Now()
 	currLog.LastLog = append(currLog.LastLog, data)
 
 	l.Set(id, currLog)
