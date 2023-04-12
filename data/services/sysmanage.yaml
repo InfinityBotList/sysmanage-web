@@ -13,6 +13,5 @@ git:
         - npm run build
         - cd ..
         - go build -v
-        - fuck
     env:
         CGO_ENABLED: "0"

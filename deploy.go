@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -71,6 +72,62 @@ func initDeploy(logId string, srv types.ServiceManage) {
 		if err != nil {
 			logMap.Add(logId, "Error getting worktree: "+err.Error(), true)
 			return
+		}
+
+		// If there are unstaged changes, add+commit+push them
+		if status, err := w.Status(); err == nil {
+			if !status.IsClean() {
+				logMap.Add(logId, "Unstaged changes detected, committing them", true)
+
+				_, err = w.Add(".")
+
+				if err != nil {
+					logMap.Add(logId, "Error adding unstaged changes: "+err.Error(), true)
+					return
+				}
+
+				_, err = w.Commit("Auto commit from sysmanage-web", &git.CommitOptions{
+					All:               true,
+					AllowEmptyCommits: true,
+					Author: &object.Signature{
+						Name: "sysmanage-web[auto]",
+						When: time.Now(),
+					},
+				})
+
+				if err != nil {
+					logMap.Add(logId, "Error committing unstaged changes: "+err.Error(), true)
+					return
+				}
+
+				err = repo.Push(&git.PushOptions{
+					Auth: &githttp.BasicAuth{
+						Username: config.GithubPat,
+						Password: config.GithubPat,
+					},
+					Progress: autoLogger{id: logId},
+				})
+
+				// Force push if we get an error
+				if err != nil {
+					logMap.Add(logId, "Error pushing unstaged changes: "+err.Error(), true)
+					logMap.Add(logId, "Force pushing unstaged changes", true)
+
+					err = repo.Push(&git.PushOptions{
+						Force: true,
+						Auth: &githttp.BasicAuth{
+							Username: config.GithubPat,
+							Password: config.GithubPat,
+						},
+						Progress: autoLogger{id: logId},
+					})
+
+					if err != nil {
+						logMap.Add(logId, "Error force pushing unstaged changes: "+err.Error(), true)
+						return
+					}
+				}
+			}
 		}
 
 		err = w.Pull(&git.PullOptions{
