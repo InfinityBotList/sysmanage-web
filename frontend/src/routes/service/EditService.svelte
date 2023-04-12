@@ -8,6 +8,8 @@
 	import { error, success } from "$lib/strings";
 	import { newTask } from "$lib/tasks";
 	import Icon from "@iconify/svelte";
+    import Select from "$lib/components/Select.svelte";
+	import GreyText from "$lib/components/GreyText.svelte";
 
     export let service: any;
 
@@ -63,7 +65,9 @@
     interface Preset {
         [key: string]: {
             git: string[],
-            env: [string, string][]
+            env: [string, string][],
+            allowDirty: boolean,
+            configFiles: string[],
         }
     }
 
@@ -73,7 +77,9 @@
                 "npm install",
                 "npm run build",
             ],
-            env: []
+            env: [],
+            allowDirty: true,
+            configFiles: []
         },
         "Yarn": {
             git: [
@@ -81,7 +87,9 @@
                 "yarn install --dev",
                 "yarn run build"
             ],
-            env: []
+            env: [],
+            allowDirty: true,
+            configFiles: []
         },
         "Go": {
             git: [
@@ -89,6 +97,11 @@
             ],
             env: [
                 ["CGO_ENABLED", "0"],
+            ],
+            allowDirty: false,
+            configFiles: [
+                "config.yaml",
+                "secrets.yaml"
             ]
         }
     }
@@ -116,7 +129,10 @@
     let gitRepo: string = service?.Service?.Git?.Repo || "";
     let gitRef: string = service?.Service?.Git?.Ref || "refs/heads/";
     let gitBuildCommands: string[] = service?.Service?.Git?.BuildCommands || [];
+    let configFiles: string[] = service?.Service?.ConfigFiles || [];
     let gitEnv: [string, string][] = parseMap(service?.Service?.Git?.Env) || [];
+    let allowDirty: string = service?.Service?.Git?.AllowDirty?.toString() || false;
+
 
     const createGit = async () => {
         let res = await fetch(`/api/createGit?id=${service?.ID}`, {
@@ -126,6 +142,8 @@
                 ref: gitRef,
                 build_commands: gitBuildCommands,
                 env: parseMapReverse(gitEnv),
+                allow_dirty: allowDirty == "true",
+                config_files: configFiles,
             })
         });
 
@@ -199,6 +217,12 @@
                 if(preset?.env && preset?.env.length > 0) {
                     gitEnv = preset?.env
                 }
+
+                allowDirty = preset?.allowDirty?.toString()
+
+                if(preset?.configFiles && preset?.configFiles.length > 0) {
+                    configFiles = preset?.configFiles
+                }
             }}
         >
             {name}
@@ -216,6 +240,16 @@
         bind:values={gitBuildCommands}
         minlength={1}
     />
+
+    <MultiInput 
+        id="config-files"
+        label="Config files to preserve"
+        title="Config files"
+        placeholder="npm install"
+        bind:values={configFiles}
+        minlength={1}
+    />
+
     <KvMultiInput
         id="git-env"
         label="Environment Variables"
@@ -225,7 +259,20 @@
         minlength={1}
     />
 
-    <ButtonReact
-        onclick={() => createGit()}
-    >Create/Update</ButtonReact>
+    <Select
+        name="Allow Dirty"
+        placeholder="Allow dirty"
+        bind:value={allowDirty}
+        options={
+            new Map([
+                ["Yes", "true"],
+                ["No", "false"],
+            ])
+        }
+    />
+    <GreyText>
+        Allow dirty is used to specify whether or not we should always pull new, or if fresh clones are acceptable
+    </GreyText>
+
+    <ButtonReact onclick={() => createGit()}>Create/Update</ButtonReact>
 </div>

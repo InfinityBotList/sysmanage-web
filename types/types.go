@@ -48,6 +48,8 @@ type Git struct {
 	Ref           string            `yaml:"ref" validate:"required"`            // e.g. refs/heads/priv-serverlist
 	BuildCommands []string          `yaml:"build_commands" validate:"required"` // Commands to run after cloning
 	Env           map[string]string `yaml:"env" validate:"required"`            // Environment variables to set
+	AllowDirty    bool              `yaml:"allow_dirty"`                        // Allow dirty builds
+	ConfigFiles   []string          `yaml:"config_files"`                       // Config files to copy from repo to service, only needed if AllowDirty is false
 }
 
 // Defines metadata which is _meta.yaml

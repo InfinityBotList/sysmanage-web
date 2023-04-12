@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -39,10 +40,21 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	deployFolder := srv.Service.Directory
 
 	// Check that the deploy folder exists
+	deployViaClone := false
+
 	if _, err := os.Stat(deployFolder); os.IsNotExist(err) {
 		logMap.Add(logId, "Deploy folder does not exist: "+deployFolder+", cloning it", true)
+		deployViaClone = true
+	} else if !srv.Service.Git.AllowDirty {
+		logMap.Add(logId, "Dirty builds not allowed, performing fresh clone", true)
+		deployViaClone = true
+	}
 
-		_, err = git.PlainClone(deployFolder, false, &git.CloneOptions{
+	if deployViaClone {
+		deployFolder := "deploys/" + logId
+
+		logMap.Add(logId, "Cloning "+srv.Service.Git.Repo, true)
+		_, err := git.PlainClone(deployFolder, false, &git.CloneOptions{
 			URL: srv.Service.Git.Repo,
 			Auth: &githttp.BasicAuth{
 				Username: config.GithubPat,
@@ -57,7 +69,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 			return
 		}
 	} else {
-		logMap.Add(logId, "Pulling "+deployFolder, true)
+		logMap.Add(logId, "Pulling into "+deployFolder, true)
 
 		// Pull repo
 		repo, err := git.PlainOpen(deployFolder)
@@ -184,6 +196,79 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 		if err != nil {
 			logMap.Add(logId, "Error running command: "+err.Error(), true)
+			return
+		}
+	}
+
+	if deployViaClone {
+		// Copy any potential config files to deploy folder
+		for _, file := range srv.Service.Git.ConfigFiles {
+			if _, err := os.Stat(srv.Service.Directory + file); err == nil {
+				logMap.Add(logId, "Copying config file "+file, true)
+
+				f, err := os.Open(srv.Service.Directory + "/" + file)
+
+				if err != nil {
+					logMap.Add(logId, "Error opening config file: "+err.Error(), true)
+					return
+				}
+
+				defer f.Close()
+
+				newF, err := os.Create(deployFolder + "/" + file)
+
+				if err != nil {
+					logMap.Add(logId, "Error creating config file: "+err.Error(), true)
+					return
+				}
+
+				defer newF.Close()
+
+				_, err = io.Copy(newF, f)
+
+				if err != nil {
+					logMap.Add(logId, "Error copying config file: "+err.Error(), true)
+					return
+				}
+
+				err = newF.Sync()
+
+				if err != nil {
+					logMap.Add(logId, "Error syncing config file: "+err.Error(), true)
+					return
+				}
+			}
+		}
+
+		// Rename service folder
+		err := os.Rename(srv.Service.Directory, srv.Service.Directory+"-old")
+
+		if err != nil {
+			logMap.Add(logId, "Error renaming service folder: "+err.Error(), true)
+			return
+		}
+
+		// Move deploy folder to service folder
+		err = os.Rename(deployFolder, srv.Service.Directory)
+
+		if err != nil {
+			logMap.Add(logId, "Error moving deploy folder: "+err.Error(), true)
+
+			// Move old service folder back
+			err = os.Rename(srv.Service.Directory+"-old", srv.Service.Directory)
+
+			if err != nil {
+				logMap.Add(logId, "Error moving old service folder back: "+err.Error(), true)
+			}
+
+			return
+		}
+
+		// Remove old service folder
+		err = os.RemoveAll(srv.Service.Directory + "-old")
+
+		if err != nil {
+			logMap.Add(logId, "Error removing old service folder: "+err.Error(), true)
 			return
 		}
 	}
