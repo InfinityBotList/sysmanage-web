@@ -87,7 +87,11 @@ func (l LogEntryMap) Persist(id string) error {
 		return err
 	}
 
-	rdb.Set(ctx, logPrefix+id, newLog, logTime)
+	err = rdb.Set(ctx, logPrefix+id, newLog, logTime).Err()
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
