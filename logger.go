@@ -26,7 +26,7 @@ func (l LogEntryMap) Get(id string) LogEntry {
 		currLog := rdb.Get(ctx, logPrefix+id).Val()
 
 		if currLog == "" {
-			currLog = "[]"
+			return LogEntry{}
 		}
 
 		var logs *LogEntry
