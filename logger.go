@@ -26,7 +26,10 @@ func (l LogEntryMap) Get(id string) LogEntry {
 		currLog := rdb.Get(ctx, logPrefix+id).Val()
 
 		if currLog == "" {
-			return LogEntry{}
+			return LogEntry{
+				Valid:   true,
+				LastLog: []string{},
+			}
 		}
 
 		var logs *LogEntry
@@ -35,7 +38,7 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 		if err != nil {
 			return LogEntry{
-				Valid:   false,
+				Valid:   true,
 				LastLog: []string{err.Error() + " " + currLog},
 			}
 		}
