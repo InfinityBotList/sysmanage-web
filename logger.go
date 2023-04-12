@@ -29,23 +29,23 @@ func (l LogEntryMap) Get(id string) LogEntry {
 			currLog = "[]"
 		}
 
-		var logs []string
+		var logs *LogEntry
 
 		err := json.Unmarshal([]byte(currLog), &logs)
 
 		if err != nil {
-			return LogEntry{}
+			return LogEntry{
+				Valid:   false,
+				LastLog: []string{err.Error()},
+			}
 		}
 
-		entry = LogEntry{
-			LastUpdate: time.Now(),
-			LastLog:    logs,
-			Valid:      true,
-		}
+		// Has to be done as server restarted
+		logs.IsDone = true
 
-		l.Set(id, entry)
+		l.Set(id, *logs)
 
-		return entry
+		return *logs
 	}
 
 	if time.Since(entry.LastUpdate) > logTime {
