@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const logPrefix = "rlogentry:"
+const logPrefix = "smdl:"
 const logTime = 8 * time.Hour
 
 type LogEntry struct {
