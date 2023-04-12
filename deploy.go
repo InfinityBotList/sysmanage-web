@@ -51,7 +51,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	}
 
 	if deployViaClone {
-		deployFolder := "deploys/" + logId
+		deployFolder = "deploys/" + logId
 
 		logMap.Add(logId, "Cloning "+srv.Service.Git.Repo, true)
 		_, err := git.PlainClone(deployFolder, false, &git.CloneOptions{
@@ -156,6 +156,8 @@ func initDeploy(logId string, srv types.ServiceManage) {
 			return
 		}
 	}
+
+	logMap.Add(logId, "Deploy folder: "+deployFolder, true)
 
 	curDir := deployFolder
 
