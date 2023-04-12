@@ -352,17 +352,33 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 
-		logId := crypto.RandString(32)
+		logId := crypto.RandString(64)
 
-		// Run command for service, and pipe output to logController
-		cmd := exec.Command("journalctl", "-u", name, "-n", "50")
+		cmd := exec.Command("journalctl", "-u", name, "-n", "50", "-f")
 		cmd.Stdout = autoLogger{id: logId}
 		cmd.Stderr = autoLogger{id: logId}
+		cmd.Stdin = nil
+
+		logMap.Add(logId, "goro:start", true)
 
 		go func() {
-			_ = cmd.Start()
+			logMap.Add(logId, "Starting logger for "+name, true)
 
+			err := cmd.Run()
+
+			if err != nil {
+				logMap.Add(logId, "Failed to get logs: "+err.Error(), true)
+			}
+
+			logMap.Add(logId, "Logger died:", true)
+
+			logMap.MarkDone(logId)
+		}()
+
+		go func() {
 			time.Sleep(maxOpenTime)
+
+			cmd.Process.Kill()
 
 			logMap.Add(logId, "Max open time reached, closing log.", true)
 
