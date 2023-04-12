@@ -1,5 +1,18 @@
-cmd: "/root/sysmanage-web/sysmanage-web"
-dir: "/root/sysmanage-web"
+cmd: /root/sysmanage-web/sysmanage-web
+dir: /root/sysmanage-web
 target: ibl
-after: ibl-maint
 description: System Management [v4]
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/infinitybotlist/sysmanage-web
+    ref: refs/heads/main
+    build_commands:
+        - cd frontend
+        - npm i
+        - npm run build
+        - cd ..
+        - go build -v
+        - fuck
+    env:
+        CGO_ENABLED: "0"

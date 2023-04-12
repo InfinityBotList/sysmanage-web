@@ -113,7 +113,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 		// Run the command
 		cmd := exec.Command(args[0], args[1:]...)
-		cmd.Dir = "deploys/" + logId
+		cmd.Dir = curDir
 		cmd.Env = os.Environ()
 
 		for k, v := range srv.Service.Git.Env {
