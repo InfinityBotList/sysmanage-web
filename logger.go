@@ -9,11 +9,10 @@ const logPrefix = "smdl:"
 const logTime = 8 * time.Hour
 
 type LogEntry struct {
-	LastUpdate  time.Time
-	LastLog     []string
-	Valid       bool
-	IsDone      bool
-	Persistance bool
+	LastUpdate time.Time
+	LastLog    []string
+	Valid      bool
+	IsDone     bool
 }
 
 type LogEntryMap map[string]LogEntry
@@ -66,11 +65,6 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 func (l LogEntryMap) Set(id string, entry LogEntry) {
 	l[id] = entry
-
-	if entry.Persistance {
-		l.Persist(id)
-	}
-
 }
 
 // Persist will persist the current state of the log entry to redis
@@ -78,10 +72,6 @@ func (l LogEntryMap) Set(id string, entry LogEntry) {
 func (l LogEntryMap) Persist(id string) error {
 	// First get the entry itself
 	entry := l[id]
-
-	entry.Persistance = true
-
-	l[id] = entry
 
 	// Load in redis
 	newLog, err := json.Marshal(entry)
@@ -120,14 +110,6 @@ func (l LogEntryMap) Add(id string, data string, newline bool) {
 
 	currLog.LastLog = append(currLog.LastLog, data)
 
-	if currLog.Persistance {
-		err := l.Persist(id)
-
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	l.Set(id, currLog)
 }
 
@@ -137,10 +119,6 @@ func (l LogEntryMap) MarkDone(id string) {
 	entry.IsDone = true
 
 	l.Set(id, entry)
-
-	if entry.Persistance {
-		l.Persist(id)
-	}
 }
 
 var logMap = LogEntryMap{}
