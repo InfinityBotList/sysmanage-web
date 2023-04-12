@@ -12,3 +12,5 @@ git:
         - yarn install --dev
         - yarn run build
     env: {}
+    allow_dirty: false
+    config_files: []
