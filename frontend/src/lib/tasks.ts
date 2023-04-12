@@ -3,6 +3,7 @@ import { error } from "./strings";
 const timeout = 500;
 
 export const newTask = (logId: string, callback: (outp: string[]) => void) => {
+    let hasStarted = false;
     let c = setInterval(async () => {
         let res = await fetch(`/api/getLogEntry?id=${logId}`, {
             method: "POST",
@@ -17,6 +18,19 @@ export const newTask = (logId: string, callback: (outp: string[]) => void) => {
         console.log(xIsDone)
 
         let out = await res.json();
+
+        if(out?.length == 0) {
+            if(!hasStarted) {
+                console.log("No output yet...")
+                return
+            } else {
+                console.log("Task is done.")
+                console.log("Cancelling polling...")
+                clearInterval(c);
+                return    
+            }
+        }
+
         callback(out)
 
         if(res.headers.get("X-Is-Done")) {
