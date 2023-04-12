@@ -1,8 +1,7 @@
 allowed_users:
   - 728871946456137770
   - 510065483693817867
-service_definitions: 
-  - data/services
+service_definitions: data/services
 service_out: /etc/systemd/system
 dp_secret: 
 redis_url: redis://localhost:6379/15

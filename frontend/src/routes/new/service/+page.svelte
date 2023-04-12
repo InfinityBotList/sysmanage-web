@@ -13,9 +13,6 @@
     let description: string;
     let after: string = "ibl-maint"; // Usually what you want
     let brokenValue: string = "0";
-    let folder: string;
-
-    let folderList: string[] = [];
 
     interface Meta {
         Targets?: MetaTarget[]
@@ -26,22 +23,9 @@
         Description: string
     }
 
-    let meta: Record<string, Meta> = {};
+    let meta: Meta = {};
 
-    const getDefinitionFolders = async () => {
-        let definitionFolders = await fetch(`/api/getDefinitionFolders`, {
-            method: "POST",
-        });
-
-        if(!definitionFolders.ok) {
-            let error = await definitionFolders.text()
-
-            throw new Error(error)
-        }
-
-        folderList = await definitionFolders.json();
-        folder = folderList[0];
-
+    const getMeta = async () => {
         let metaRes = await fetch(`/api/getMeta`, {
             method: "POST",
         });
@@ -54,14 +38,13 @@
 
         meta = await metaRes.json();
 
-        return folderList;
+        return null;
     }
 
     const createService = async () => {
         let createService = await fetch(`/api/createService`, {
             method: "POST",
             body: JSON.stringify({
-                definition_folder: folder,
                 name,
                 service: {
                     cmd: command,
@@ -93,16 +76,10 @@
 <GreyText>If you want to add a build integration or a git deploy hook, you can do so later after creating the service!</GreyText>
 
 <div>
-    {#await getDefinitionFolders()}
-        <GreyText>Loading folder list...</GreyText>
+    {#await getMeta()}
+        <GreyText>Loading metadata...</GreyText>
     {:then fl}
         <div id={JSON.stringify(fl)}></div>
-        <Select
-            name="folder"
-            placeholder="Folder"
-            bind:value={folder}
-            options={new Map(folderList?.map(folder => [folder, folder]))}
-        />
         <InputSm 
             id="name"
             label="Service Name"
@@ -129,7 +106,7 @@
             placeholder="Choose Target"
             bind:value={target}
             options={
-                new Map(meta[folder]?.Targets?.map(target => [
+                new Map(meta?.Targets?.map(target => [
                     target?.Name + " - " + target?.Description, 
                     target?.Name
                 ]))

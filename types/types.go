@@ -2,7 +2,7 @@ package types
 
 type Config struct {
 	AllowedUsers       []string `yaml:"allowed_users"`
-	ServiceDefinitions []string `yaml:"service_definitions"` // List of folders where definitions can be found
+	ServiceDefinitions string   `yaml:"service_definitions"` // List of folders where definitions can be found
 	DPSecret           string   `yaml:"dp_secret"`
 	RedisURL           string   `yaml:"redis_url"`
 	DPDisable          bool     `yaml:"dp_disable"`
@@ -11,26 +11,21 @@ type Config struct {
 }
 
 type ServiceManage struct {
-	Service          TemplateYaml
-	Status           string
-	ID               string
-	DefinitionFolder string // Folder where the service is located
+	Service TemplateYaml
+	Status  string
+	ID      string
 }
 
 // Struct used to create a service
 type CreateTemplate struct {
-	DefinitionFolder string       `yaml:"definition_folder" validate:"required"`
-	Name             string       `yaml:"name" validate:"required"`
-	Service          TemplateYaml `yaml:"service" validate:"required"`
+	Name    string       `yaml:"name" validate:"required"`
+	Service TemplateYaml `yaml:"service" validate:"required"`
 }
 
 // Struct used to delete a service
 type DeleteTemplate struct {
-	DefinitionFolder string `yaml:"definition_folder" validate:"required"`
-	Name             string `yaml:"name" validate:"required"`
+	Name string `yaml:"name" validate:"required"`
 }
-
-/* From service-gen:/main.go */
 
 // Defines a template which is any FILENAME.yaml where FILENAME != _meta
 type TemplateYaml struct {
@@ -40,6 +35,17 @@ type TemplateYaml struct {
 	Description string `yaml:"description" validate:"required"` // Description in systemd
 	After       string `yaml:"after" validate:"required"`       // After in systemd
 	Broken      bool   `yaml:"broken"`                          // Does the service even work?
+
+	// Only used by sysmanage
+	Git *Git `yaml:"git,omitempty" json:"Git,omitempty"`
+}
+
+// Defines a git integration
+type Git struct {
+	Repo          string   `yaml:"repo"`           // Git repo to clone
+	Ref           string   `yaml:"ref"`            // e.g. refs/heads/priv-serverlist
+	Service       string   `yaml:"service"`        // Service to restart after build
+	BuildCommands []string `yaml:"build_commands"` // Commands to run after cloning
 }
 
 // Defines metadata which is _meta.yaml

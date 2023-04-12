@@ -16,85 +16,19 @@ import (
 	"sysmanage-web/types"
 )
 
-func getServiceStatus(ids []string) []string {
-	ids = append([]string{"check"}, ids...)
-	cmd := exec.Command("systemctl", ids...)
-	out, _ := cmd.CombinedOutput()
-
-	return strings.Split(string(out), "\n")
-}
-
 func loadApi(r *chi.Mux) {
 	// Returns the list of services
 	r.Post("/api/getServiceList", func(w http.ResponseWriter, r *http.Request) {
-		defines := []types.ServiceManage{}
+		cache, err := cache.GetCache()
 
-		ids := []string{}
-		for _, path := range config.ServiceDefinitions {
-			// Get all files in path
-			fsd, err := os.ReadDir(path)
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to read service definition " + err.Error()))
-				return
-			}
-
-			for _, file := range fsd {
-				if file.Name() == "_meta.yaml" {
-					continue // Skip _meta.yaml
-				}
-
-				if file.IsDir() {
-					continue // Skip directories
-				}
-
-				if !strings.HasSuffix(file.Name(), ".yaml") {
-					continue // Skip non-yaml files
-				}
-
-				// Read file into TemplateYaml
-				f, err := os.Open(path + "/" + file.Name())
-
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte("Failed to read service definition." + err.Error() + file.Name()))
-					return
-				}
-
-				// Read file into TemplateYaml
-				var service types.TemplateYaml
-
-				err = yaml.NewDecoder(f).Decode(&service)
-
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte("Failed to read service definition" + err.Error() + file.Name()))
-					return
-				}
-
-				// Service name is the name without .yaml
-				sname := strings.TrimSuffix(file.Name(), ".yaml")
-
-				ids = append(ids, sname)
-
-				defines = append(defines, types.ServiceManage{
-					DefinitionFolder: path,
-					Service:          service,
-					ID:               sname,
-				})
-			}
-		}
-
-		// Get status of services
-		statuses := getServiceStatus(ids)
-
-		for i := range defines {
-			defines[i].Status = statuses[i]
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to get cache."))
+			return
 		}
 
 		// JSON encode defines
-		jsonStr, err := json.Marshal(defines)
+		jsonStr, err := json.Marshal(cache.Services)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -120,34 +54,28 @@ func loadApi(r *chi.Mux) {
 	})
 
 	r.Post("/api/getMeta", func(w http.ResponseWriter, r *http.Request) {
-		var meta = map[string]types.MetaYAML{}
+		// Open _meta.yaml
+		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
 
-		for _, path := range config.ServiceDefinitions {
-			// Open _meta.yaml
-			f, err := os.Open(path + "/_meta.yaml")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read service definition." + err.Error()))
+			return
+		}
 
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to read service definition." + err.Error()))
-				return
-			}
+		// Read file into TemplateYaml
+		var metaYaml types.MetaYAML
 
-			// Read file into TemplateYaml
-			var metaYaml types.MetaYAML
+		err = yaml.NewDecoder(f).Decode(&metaYaml)
 
-			err = yaml.NewDecoder(f).Decode(&metaYaml)
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to read service definition" + err.Error()))
-				return
-			}
-
-			meta[path] = metaYaml
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read service definition" + err.Error()))
+			return
 		}
 
 		// JSON encode defines
-		jsonStr, err := json.Marshal(meta)
+		jsonStr, err := json.Marshal(metaYaml)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -179,13 +107,6 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 
-		// ensure definition folder is in config
-		if !slices.Contains(config.ServiceDefinitions, createService.DefinitionFolder) {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Definition folder is not in config."))
-			return
-		}
-
 		// ensure command starts with /usr/bin
 		if !strings.HasPrefix(createService.Service.Command, "/usr/bin/") {
 			w.WriteHeader(http.StatusBadRequest)
@@ -194,7 +115,7 @@ func loadApi(r *chi.Mux) {
 		}
 
 		// Open _meta.yaml
-		f, err := os.Open(createService.DefinitionFolder + "/_meta.yaml")
+		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -246,7 +167,7 @@ func loadApi(r *chi.Mux) {
 		}
 
 		// Check if service already exists
-		if _, err := os.Stat(createService.DefinitionFolder + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
+		if _, err := os.Stat(config.ServiceDefinitions + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Service already exists:" + err.Error()))
 			return
@@ -257,7 +178,8 @@ func loadApi(r *chi.Mux) {
 		}
 
 		// Create file
-		f, err = os.Create(createService.DefinitionFolder + "/" + createService.Name + ".yaml")
+		defer cache.Invalidate()
+		f, err = os.Create(config.ServiceDefinitions + "/" + createService.Name + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -315,61 +237,57 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 
-		// ensure definition folder is in config
-		if !slices.Contains(config.ServiceDefinitions, deleteService.DefinitionFolder) {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Definition folder is not in config."))
-			return
-		}
-
 		logId := crypto.RandString(32)
 
 		go func() {
-			// delete yaml file, ignore if it doesn't exist
-			addToLog(logId, "Deleting service file...", true)
+			defer logMap.MarkDone(logId)
+			defer cache.Invalidate()
 
-			err = os.Remove(deleteService.DefinitionFolder + "/" + deleteService.Name + ".yaml")
+			// delete yaml file, ignore if it doesn't exist
+			logMap.Add(logId, "Deleting service file...", true)
+
+			err = os.Remove(config.ServiceDefinitions + "/" + deleteService.Name + ".yaml")
 
 			if err != nil {
-				addToLog(logId, "Failed to delete service file: "+err.Error(), true)
+				logMap.Add(logId, "Failed to delete service file: "+err.Error(), true)
 			} else {
-				addToLog(logId, "Deleted service file successfully.", true)
+				logMap.Add(logId, "Deleted service file successfully.", true)
 			}
 
 			// disable service, ignore if it doesn't exist
 			err = exec.Command("systemctl", "disable", deleteService.Name).Run()
 
 			if err != nil {
-				addToLog(logId, "Failed to disable service: "+err.Error(), true)
+				logMap.Add(logId, "Failed to disable service: "+err.Error(), true)
 			} else {
-				addToLog(logId, "Disabled service successfully.", true)
+				logMap.Add(logId, "Disabled service successfully.", true)
 			}
 
 			// stop service, ignore if it doesn't exist
 			err = exec.Command("systemctl", "stop", deleteService.Name).Run()
 
 			if err != nil {
-				addToLog(logId, "Failed to stop service: "+err.Error(), true)
+				logMap.Add(logId, "Failed to stop service: "+err.Error(), true)
 			} else {
-				addToLog(logId, "Stopped service successfully.", true)
+				logMap.Add(logId, "Stopped service successfully.", true)
 			}
 
 			// delete service file, ignore if it doesn't exist
 			err = os.Remove("/etc/systemd/system/" + deleteService.Name + ".service")
 
 			if err != nil {
-				addToLog(logId, "Failed to delete service file: "+err.Error(), true)
+				logMap.Add(logId, "Failed to delete service file: "+err.Error(), true)
 			} else {
-				addToLog(logId, "Deleted service file successfully.", true)
+				logMap.Add(logId, "Deleted service file successfully.", true)
 			}
 
 			// reload systemd
 			err = exec.Command("systemctl", "daemon-reload").Run()
 
 			if err != nil {
-				addToLog(logId, "Failed to reload systemd: "+err.Error(), true)
+				logMap.Add(logId, "Failed to reload systemd: "+err.Error(), true)
 			} else {
-				addToLog(logId, "Reloaded systemd successfully.", true)
+				logMap.Add(logId, "Reloaded systemd successfully.", true)
 			}
 		}()
 
@@ -409,16 +327,22 @@ func loadApi(r *chi.Mux) {
 	})
 
 	r.Post("/api/getLogEntry", func(w http.ResponseWriter, r *http.Request) {
-		// Fetch from redis
-		console := rdb.Get(ctx, logPrefix+r.URL.Query().Get("id")).Val()
+		// Fetch from logmap
+		console := logMap.Get(r.URL.Query().Get("id"))
 
-		isDone := rdb.Get(ctx, logPrefix+r.URL.Query().Get("id")+markerDoneSuffix).Val()
-
-		if isDone == "1" {
+		if console.IsDone {
 			w.Header().Set("X-Is-Done", "1")
 		}
 
-		w.Write([]byte(console))
+		bytes, err := json.Marshal(console.LastLog)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to marshal log entry."))
+			return
+		}
+
+		w.Write([]byte(bytes))
 	})
 
 	r.Post("/api/buildServices", func(w http.ResponseWriter, r *http.Request) {
@@ -436,39 +360,37 @@ func loadApi(r *chi.Mux) {
 		case "killall":
 			// List all services and kill them
 			services := []string{"stop"}
-			for _, path := range config.ServiceDefinitions {
-				fsd, err := os.ReadDir(path)
+			fsd, err := os.ReadDir(config.ServiceDefinitions)
 
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte("Failed to read service definition " + err.Error()))
-					return
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition " + err.Error()))
+				return
+			}
+
+			for _, file := range fsd {
+				if file.Name() == "_meta.yaml" {
+					continue // Skip _meta.yaml
 				}
 
-				for _, file := range fsd {
-					if file.Name() == "_meta.yaml" {
-						continue // Skip _meta.yaml
-					}
-
-					if file.IsDir() {
-						continue // Skip directories
-					}
-
-					var sname = strings.TrimSuffix(file.Name(), ".yaml") + ".service"
-					if !strings.HasSuffix(file.Name(), ".yaml") {
-						sname = file.Name()
-					}
-
-					if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
-						continue
-					}
-
-					services = append(services, sname)
+				if file.IsDir() {
+					continue // Skip directories
 				}
+
+				var sname = strings.TrimSuffix(file.Name(), ".yaml") + ".service"
+				if !strings.HasSuffix(file.Name(), ".yaml") {
+					sname = file.Name()
+				}
+
+				if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+					continue
+				}
+
+				services = append(services, sname)
 			}
 
 			cmd := exec.Command("systemctl", services...)
-			err := cmd.Run()
+			err = cmd.Run()
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -478,62 +400,60 @@ func loadApi(r *chi.Mux) {
 		case "startall":
 			// List all services and start them
 			services := []string{"start"}
-			for _, path := range config.ServiceDefinitions {
-				fsd, err := os.ReadDir(path)
+			fsd, err := os.ReadDir(config.ServiceDefinitions)
 
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte("Failed to read service definition " + err.Error()))
-					return
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition " + err.Error()))
+				return
+			}
+
+			for _, file := range fsd {
+				if file.Name() == "_meta.yaml" {
+					continue // Skip _meta.yaml
 				}
 
-				for _, file := range fsd {
-					if file.Name() == "_meta.yaml" {
-						continue // Skip _meta.yaml
+				if file.IsDir() {
+					continue // Skip directories
+				}
+
+				var sname = strings.TrimSuffix(file.Name(), ".yaml") + ".service"
+				if !strings.HasSuffix(file.Name(), ".yaml") {
+					sname = file.Name()
+				} else {
+					var service types.TemplateYaml
+
+					f, err := os.Open(config.ServiceDefinitions + "/" + file.Name())
+
+					if err != nil {
+						w.WriteHeader(http.StatusInternalServerError)
+						w.Write([]byte("Failed to read service definition." + err.Error() + file.Name()))
+						return
 					}
 
-					if file.IsDir() {
-						continue // Skip directories
+					err = yaml.NewDecoder(f).Decode(&service)
+
+					if err != nil {
+						w.WriteHeader(http.StatusInternalServerError)
+						w.Write([]byte("Failed to read service definition" + err.Error() + file.Name()))
+						return
 					}
 
-					var sname = strings.TrimSuffix(file.Name(), ".yaml") + ".service"
-					if !strings.HasSuffix(file.Name(), ".yaml") {
-						sname = file.Name()
-					} else {
-						var service types.TemplateYaml
-
-						f, err := os.Open(path + "/" + file.Name())
-
-						if err != nil {
-							w.WriteHeader(http.StatusInternalServerError)
-							w.Write([]byte("Failed to read service definition." + err.Error() + file.Name()))
-							return
-						}
-
-						err = yaml.NewDecoder(f).Decode(&service)
-
-						if err != nil {
-							w.WriteHeader(http.StatusInternalServerError)
-							w.Write([]byte("Failed to read service definition" + err.Error() + file.Name()))
-							return
-						}
-
-						if service.Broken {
-							continue
-						}
-					}
-
-					if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+					if service.Broken {
 						continue
 					}
-
-					services = append(services, sname)
 				}
+
+				if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+					continue
+				}
+
+				services = append(services, sname)
 			}
 
 			cmd := exec.Command("systemctl", services...)
 
-			err := cmd.Run()
+			err = cmd.Run()
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)

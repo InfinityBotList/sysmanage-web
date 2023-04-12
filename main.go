@@ -34,7 +34,6 @@ var (
 
 	// Subbed frontend embed
 	serverRootSubbed fs.FS
-	serverRootCache  = map[string]bool{}
 
 	//go:embed data/servicegen/service.tmpl
 	serviceTemplate string
@@ -119,13 +118,6 @@ func ensureDpAuth(next http.Handler) http.Handler {
 
 func routeStatic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/showCache" {
-			w.Header().Set("Content-Type", "text/plain")
-			for k, v := range serverRootCache {
-				w.Write([]byte(fmt.Sprintf("%s: %t", k, v)))
-			}
-		}
-
 		if !strings.HasPrefix(r.URL.Path, "/api") {
 			serverRoot := http.FS(serverRootSubbed)
 
@@ -150,29 +142,15 @@ func routeStatic(next http.Handler) http.Handler {
 			}
 
 			// Check if file exists
-			found, ok := serverRootCache[checkPath]
+			f, err := serverRoot.Open(checkPath)
 
-			if !ok {
-				f, err := serverRoot.Open(checkPath)
-
-				if err != nil {
-					serverRootCache[checkPath] = false
-					w.Header().Set("Location", "/404?from="+r.URL.Path)
-					w.WriteHeader(http.StatusFound)
-					return
-				}
-
-				f.Close()
-
-				serverRootCache[checkPath] = true
-				found = true
-			}
-
-			if !found {
-				w.Header().Set("Location", "/404?from="+r.URL.Path+"&cached=true")
+			if err != nil {
+				w.Header().Set("Location", "/404?from="+r.URL.Path)
 				w.WriteHeader(http.StatusFound)
 				return
 			}
+
+			f.Close()
 
 			fserve := http.FileServer(serverRoot)
 			fserve.ServeHTTP(w, r)

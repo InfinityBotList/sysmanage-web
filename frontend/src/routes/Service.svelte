@@ -85,7 +85,6 @@
 			method: "POST",
 			body: JSON.stringify({
 				name: service?.ID,
-				definition_folder: service?.DefinitionFolder
 			})
 		});
 
