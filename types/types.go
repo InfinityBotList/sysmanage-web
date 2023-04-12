@@ -19,9 +19,9 @@ type ServiceManage struct {
 
 // Struct used to create a service
 type CreateTemplate struct {
-	DefinitionFolder string
-	Name             string
-	Service          TemplateYaml
+	DefinitionFolder string       `yaml:"definition_folder" validate:"required"`
+	Name             string       `yaml:"name" validate:"required"`
+	Service          TemplateYaml `yaml:"service" validate:"required"`
 }
 
 /* From service-gen:/main.go */

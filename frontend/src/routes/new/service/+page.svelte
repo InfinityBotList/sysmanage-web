@@ -1,7 +1,10 @@
 <script lang="ts">
-	import GreyText from "$lib/components/GreyText.svelte";
+	import { goto } from "$app/navigation";
+	import ButtonReact from "$lib/components/ButtonReact.svelte";
+import GreyText from "$lib/components/GreyText.svelte";
 	import InputSm from "$lib/components/InputSm.svelte";
 	import Select from "$lib/components/Select.svelte";
+	import { error, success } from "$lib/strings"
 
     let name: string;
     let command: string = "/usr/bin/";
@@ -10,9 +13,20 @@
     let description: string;
     let after: string = "ibl-maint"; // Usually what you want
     let brokenValue: string = "0";
-    let folder: string
+    let folder: string;
 
     let folderList: string[] = [];
+
+    interface Meta {
+        Targets?: MetaTarget[]
+    }
+
+    interface MetaTarget {
+        Name: string
+        Description: string
+    }
+
+    let meta: Record<string, Meta> = {};
 
     const getDefinitionFolders = async () => {
         let definitionFolders = await fetch(`/api/getDefinitionFolders`, {
@@ -27,6 +41,49 @@
 
         folderList = await definitionFolders.json();
         folder = folderList[0];
+
+        let metaRes = await fetch(`/api/getMeta`, {
+            method: "POST",
+        });
+
+        if(!metaRes.ok) {
+            let error = await metaRes.text()
+
+            throw new Error(error)
+        }
+
+        meta = await metaRes.json();
+
+        return folderList;
+    }
+
+    const createService = async () => {
+        let createService = await fetch(`/api/createService`, {
+            method: "POST",
+            body: JSON.stringify({
+                definition_folder: folder,
+                name,
+                service: {
+                    command,
+                    directory,
+                    target,
+                    description,
+                    after,
+                    broken: brokenValue === "0" ? true : false,
+                }
+            }),
+        });
+
+        if(!createService.ok) {
+            let errorText = await createService.text()
+            error(errorText)
+        }
+
+        success("Service created successfully!")
+
+        setTimeout(() => {
+            goto("/")
+        }, 1000)
     }
 </script>
 
@@ -45,57 +102,65 @@
             bind:value={folder}
             options={new Map(folderList?.map(folder => [folder, folder]))}
         />
-        <div class="mb-5"></div>
+        <InputSm 
+            id="name"
+            label="Service Name"
+            placeholder="arcadia, ibl-backup etc."
+            bind:value={name}
+            minlength={1}
+        />
+        <InputSm 
+            id="command"
+            label="Command (must start with /usr/bin/)"
+            placeholder="E.g. /usr/bin/arcadia"
+            bind:value={command}
+            minlength={3}
+        />
+        <InputSm 
+            id="directory"
+            label="Directory"
+            placeholder="E.g. /root/arcadia"
+            bind:value={directory}
+            minlength={3}
+        />
+        <Select
+            name="target"
+            placeholder="Choose Target"
+            bind:value={target}
+            options={
+                new Map(meta[folder]?.Targets?.map(target => [
+                    target?.Name + " - " + target?.Description, 
+                    target?.Name
+                ]))
+            }
+        />
+        <InputSm
+            id="description"
+            label="Description"
+            placeholder="E.g. Arcadia"
+            bind:value={description}
+            minlength={5}
+        />
+        <InputSm
+            id="after"
+            label="After"
+            placeholder="E.g. ibl-maint"
+            bind:value={after}
+            minlength={1}
+        />
+        <Select
+            name="broken"
+            placeholder="Is the service broken/disabled?"
+            bind:value={brokenValue}
+            options={new Map([
+                ["Yes, it is", "0"],
+                ["No, its not", "1"],
+            ])}
+        />
+        <ButtonReact
+                onclick={() => createService()}
+        >
+            Create Service
+        </ButtonReact>
     {/await}
-    <InputSm 
-        id="name"
-        label="Service Name"
-        placeholder="arcadia, ibl-backup etc."
-        bind:value={name}
-        minlength={1}
-    />
-    <InputSm 
-        id="command"
-        label="Command (must start with /usr/bin/)"
-        placeholder="E.g. /usr/bin/arcadia"
-        bind:value={command}
-        minlength={3}
-    />
-    <InputSm 
-        id="directory"
-        label="Directory"
-        placeholder="E.g. /root/arcadia"
-        bind:value={directory}
-        minlength={3}
-    />
-    <InputSm 
-        id="target"
-        label="Target"
-        placeholder="E.g. ibl"
-        bind:value={target}
-        minlength={1}
-    />
-    <InputSm
-        id="description"
-        label="Description"
-        placeholder="E.g. Arcadia"
-        bind:value={description}
-        minlength={5}
-    />
-    <InputSm
-        id="after"
-        label="After"
-        placeholder="E.g. ibl-maint"
-        bind:value={after}
-        minlength={1}
-    />
-    <Select
-        name="broken"
-        placeholder="Is the service broken/disabled?"
-        bind:value={brokenValue}
-        options={new Map([
-            ["Yes, it is", "0"],
-            ["No, its not", "1"],
-        ])}
-    />
 </div>

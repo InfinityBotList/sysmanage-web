@@ -118,6 +118,46 @@ func loadApi(r *chi.Mux) {
 		w.Write(jsonStr)
 	})
 
+	r.Post("/api/getMeta", func(w http.ResponseWriter, r *http.Request) {
+		var meta = map[string]types.MetaYAML{}
+
+		for _, path := range config.ServiceDefinitions {
+			// Open _meta.yaml
+			f, err := os.Open(path + "/_meta.yaml")
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition." + err.Error()))
+				return
+			}
+
+			// Read file into TemplateYaml
+			var metaYaml types.MetaYAML
+
+			err = yaml.NewDecoder(f).Decode(&metaYaml)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition" + err.Error()))
+				return
+			}
+
+			meta[path] = metaYaml
+		}
+
+		// JSON encode defines
+		jsonStr, err := json.Marshal(meta)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode service definitions."))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonStr)
+	})
+
 	r.Post("/api/systemctl", func(w http.ResponseWriter, r *http.Request) {
 		tgt := r.URL.Query().Get("tgt")
 		act := r.URL.Query().Get("act")
