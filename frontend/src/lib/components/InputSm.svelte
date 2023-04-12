@@ -2,16 +2,17 @@
     export let id: string;
     export let label: string;
     export let placeholder: string;
-
     export let minlength: number;
-
     export let value: string = "";
+    export let showErrors: boolean = true;
 
     let success: boolean | null = null;
 
     let errorMsg = ""
 
     function checkLength() {
+        if(!showErrors) return
+
         console.log(value)
         if(!value) {
             success = null;
