@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
-import GreyText from "$lib/components/GreyText.svelte";
+    import GreyText from "$lib/components/GreyText.svelte";
 	import InputSm from "$lib/components/InputSm.svelte";
 	import Select from "$lib/components/Select.svelte";
 	import { error, success } from "$lib/strings"
@@ -64,8 +64,8 @@ import GreyText from "$lib/components/GreyText.svelte";
                 definition_folder: folder,
                 name,
                 service: {
-                    command,
-                    directory,
+                    cmd: command,
+                    dir: directory,
                     target,
                     description,
                     after,
@@ -77,6 +77,7 @@ import GreyText from "$lib/components/GreyText.svelte";
         if(!createService.ok) {
             let errorText = await createService.text()
             error(errorText)
+            return
         }
 
         success("Service created successfully!")

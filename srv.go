@@ -224,7 +224,7 @@ func buildServices(reqId string) {
 	addToLog(reqId, "Finished reloading systemd.", true)
 
 	// Now we need to enable the services
-	addToLog(reqId, "Enabling services...", true)
+	addToLog(reqId, "Enabling services...: "+strings.Join(servicesToEnable, ","), true)
 
 	// Prepend "enable" to the list of
 	servicesToEnable = append([]string{"enable"}, servicesToEnable...)

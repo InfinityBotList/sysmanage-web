@@ -24,6 +24,12 @@ type CreateTemplate struct {
 	Service          TemplateYaml `yaml:"service" validate:"required"`
 }
 
+// Struct used to delete a service
+type DeleteTemplate struct {
+	DefinitionFolder string `yaml:"definition_folder" validate:"required"`
+	Name             string `yaml:"name" validate:"required"`
+}
+
 /* From service-gen:/main.go */
 
 // Defines a template which is any FILENAME.yaml where FILENAME != _meta

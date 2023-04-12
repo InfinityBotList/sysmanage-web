@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"os/exec"
@@ -156,6 +157,224 @@ func loadApi(r *chi.Mux) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonStr)
+	})
+
+	r.Post("/api/createService", func(w http.ResponseWriter, r *http.Request) {
+		var createService types.CreateTemplate
+
+		err := yaml.NewDecoder(r.Body).Decode(&createService)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to decode create service request."))
+			return
+		}
+
+		// validate createService
+		err = v.Struct(createService)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		// ensure definition folder is in config
+		if !slices.Contains(config.ServiceDefinitions, createService.DefinitionFolder) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Definition folder is not in config."))
+			return
+		}
+
+		// ensure command starts with /usr/bin
+		if !strings.HasPrefix(createService.Service.Command, "/usr/bin/") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Command must start with /usr/bin/"))
+			return
+		}
+
+		// Open _meta.yaml
+		f, err := os.Open(createService.DefinitionFolder + "/_meta.yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read service definition." + err.Error()))
+			return
+		}
+
+		// Read file into TemplateYaml
+		var metaYaml types.MetaYAML
+
+		err = yaml.NewDecoder(f).Decode(&metaYaml)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read service definition" + err.Error()))
+			return
+		}
+
+		// ensure service target is in _meta.yaml
+		flag := false
+		for _, target := range metaYaml.Targets {
+			if target.Name == createService.Service.Target {
+				flag = true
+			}
+		}
+
+		if !flag {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service target is not in _meta.yaml."))
+			return
+		}
+
+		if strings.Contains(createService.Name, " ") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service name cannot contain spaces."))
+			return
+		}
+
+		if strings.Contains(createService.Name, "/") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service name cannot contain slashes."))
+			return
+		}
+
+		if strings.Contains(createService.Name, ".") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service name cannot contain dots."))
+			return
+		}
+
+		// Check if service already exists
+		if _, err := os.Stat(createService.DefinitionFolder + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service already exists:" + err.Error()))
+			return
+		} else if !errors.Is(err, os.ErrNotExist) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to check if service exists:" + err.Error()))
+			return
+		}
+
+		// Create file
+		f, err = os.Create(createService.DefinitionFolder + "/" + createService.Name + ".yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to create service file."))
+			return
+		}
+
+		// Create service
+		err = yaml.NewEncoder(f).Encode(createService.Service)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode service."))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	r.Post("/api/deleteService", func(w http.ResponseWriter, r *http.Request) {
+		var deleteService types.DeleteTemplate
+
+		err := yaml.NewDecoder(r.Body).Decode(&deleteService)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to decode delete service request."))
+			return
+		}
+
+		// validate deleteService
+		err = v.Struct(deleteService)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		if strings.Contains(deleteService.Name, " ") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service name cannot contain spaces."))
+			return
+		}
+
+		if strings.Contains(deleteService.Name, "/") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service name cannot contain slashes."))
+			return
+		}
+
+		if strings.Contains(deleteService.Name, ".") {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service name cannot contain dots."))
+			return
+		}
+
+		// ensure definition folder is in config
+		if !slices.Contains(config.ServiceDefinitions, deleteService.DefinitionFolder) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Definition folder is not in config."))
+			return
+		}
+
+		logId := crypto.RandString(32)
+
+		go func() {
+			// delete yaml file, ignore if it doesn't exist
+			addToLog(logId, "Deleting service file...", true)
+
+			err = os.Remove(deleteService.DefinitionFolder + "/" + deleteService.Name + ".yaml")
+
+			if err != nil {
+				addToLog(logId, "Failed to delete service file: "+err.Error(), true)
+			} else {
+				addToLog(logId, "Deleted service file successfully.", true)
+			}
+
+			// disable service, ignore if it doesn't exist
+			err = exec.Command("systemctl", "disable", deleteService.Name).Run()
+
+			if err != nil {
+				addToLog(logId, "Failed to disable service: "+err.Error(), true)
+			} else {
+				addToLog(logId, "Disabled service successfully.", true)
+			}
+
+			// stop service, ignore if it doesn't exist
+			err = exec.Command("systemctl", "stop", deleteService.Name).Run()
+
+			if err != nil {
+				addToLog(logId, "Failed to stop service: "+err.Error(), true)
+			} else {
+				addToLog(logId, "Stopped service successfully.", true)
+			}
+
+			// delete service file, ignore if it doesn't exist
+			err = os.Remove("/etc/systemd/system/" + deleteService.Name + ".service")
+
+			if err != nil {
+				addToLog(logId, "Failed to delete service file: "+err.Error(), true)
+			} else {
+				addToLog(logId, "Deleted service file successfully.", true)
+			}
+
+			// reload systemd
+			err = exec.Command("systemctl", "daemon-reload").Run()
+
+			if err != nil {
+				addToLog(logId, "Failed to reload systemd: "+err.Error(), true)
+			} else {
+				addToLog(logId, "Reloaded systemd successfully.", true)
+			}
+		}()
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(logId))
 	})
 
 	r.Post("/api/systemctl", func(w http.ResponseWriter, r *http.Request) {
