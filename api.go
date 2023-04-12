@@ -167,14 +167,38 @@ func loadApi(r *chi.Mux) {
 		}
 
 		// Check if service already exists
-		if _, err := os.Stat(config.ServiceDefinitions + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Service already exists:" + err.Error()))
-			return
-		} else if !errors.Is(err, os.ErrNotExist) {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to check if service exists:" + err.Error()))
-			return
+		if r.URL.Query().Get("update") != "true" {
+			if _, err := os.Stat(config.ServiceDefinitions + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Service already exists:" + err.Error()))
+				return
+			} else if !errors.Is(err, os.ErrNotExist) {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to check if service exists:" + err.Error()))
+				return
+			}
+		} else {
+			// Open file and copy git integration into it
+			f, err := os.Open(config.ServiceDefinitions + "/" + createService.Name + ".yaml")
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition." + err.Error()))
+				return
+			}
+
+			// Read file into TemplateYaml
+			var serviceYaml types.TemplateYaml
+
+			err = yaml.NewDecoder(f).Decode(&serviceYaml)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition" + err.Error()))
+				return
+			}
+
+			createService.Service.Git = serviceYaml.Git
 		}
 
 		// Create file

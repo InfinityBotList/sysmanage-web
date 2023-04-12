@@ -155,6 +155,66 @@
 
         success("Git integration created")
     }
+
+    let name: string = service?.ID || "";
+    let command: string = service?.Service?.Command || "";
+    let directory: string = service?.Service?.Directory || "";
+    let target: string = service?.Service?.Target || "ibl-maint";
+    let description: string = service?.Service?.Description || "";
+    let after: string = service?.Service?.After;
+    let brokenValue: string = service?.Service?.Broken ? "0" : "1";
+
+    interface Meta {
+        Targets?: MetaTarget[]
+    }
+
+    interface MetaTarget {
+        Name: string
+        Description: string
+    }
+
+    let meta: Meta = {};
+
+    const getMeta = async () => {
+        let metaRes = await fetch(`/api/getMeta`, {
+            method: "POST",
+        });
+
+        if(!metaRes.ok) {
+            let error = await metaRes.text()
+
+            throw new Error(error)
+        }
+
+        meta = await metaRes.json();
+
+        return null;
+    }
+
+    const editService = async () => {
+        let editService = await fetch(`/api/createService?update=true`, {
+            method: "POST",
+            body: JSON.stringify({
+                name,
+                service: {
+                    cmd: command,
+                    dir: directory,
+                    target,
+                    description,
+                    after,
+                    broken: brokenValue === "0" ? true : false,
+                }
+            }),
+        });
+
+        if(!editService.ok) {
+            let errorText = await editService.text()
+            error(errorText)
+            return
+        }
+
+        success("Service editted successfully!")
+    }
 </script>
 
 <DangerButton 
@@ -184,6 +244,76 @@
         output={deployTaskOutput}
     />
 {/if}
+
+<h2 class="font-semibold text-xl">Service Info</h2>
+
+<div>
+    {#await getMeta()}
+        <GreyText>Loading metadata...</GreyText>
+    {:then fl}
+        <div id={JSON.stringify(fl)}></div>
+        <InputSm 
+            id="name"
+            label="Service Name"
+            placeholder="arcadia, ibl-backup etc."
+            bind:value={name}
+            minlength={1}
+        />
+        <InputSm 
+            id="command"
+            label="Command (must start with /usr/bin/)"
+            placeholder="E.g. /usr/bin/arcadia"
+            bind:value={command}
+            minlength={3}
+        />
+        <InputSm 
+            id="directory"
+            label="Directory"
+            placeholder="E.g. /root/arcadia"
+            bind:value={directory}
+            minlength={3}
+        />
+        <Select
+            name="target"
+            placeholder="Choose Target"
+            bind:value={target}
+            options={
+                new Map(meta?.Targets?.map(target => [
+                    target?.Name + " - " + target?.Description, 
+                    target?.Name
+                ]))
+            }
+        />
+        <InputSm
+            id="description"
+            label="Description"
+            placeholder="E.g. Arcadia"
+            bind:value={description}
+            minlength={5}
+        />
+        <InputSm
+            id="after"
+            label="After"
+            placeholder="E.g. ibl-maint"
+            bind:value={after}
+            minlength={1}
+        />
+        <Select
+            name="broken"
+            placeholder="Is the service broken/disabled?"
+            bind:value={brokenValue}
+            options={new Map([
+                ["Yes, it is", "0"],
+                ["No, its not", "1"],
+            ])}
+        />
+        <ButtonReact
+                onclick={() => editService()}
+        >
+            Create Service
+        </ButtonReact>
+    {/await}
+</div>
 
 <h2 class="font-semibold text-xl">Git Integration</h2>
 {#if service?.Service?.Git}
