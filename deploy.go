@@ -35,35 +35,81 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	lsOp.Lock()
 	defer lsOp.Unlock()
 
-	deployFolder := "deploys/" + logId
+	deployFolder := srv.Service.Directory
 
-	err := os.MkdirAll(deployFolder, 0755)
+	// Check that the deploy folder exists
+	if _, err := os.Stat(deployFolder); os.IsNotExist(err) {
+		logMap.Add(logId, "Deploy folder does not exist: "+deployFolder+", cloning it", true)
 
-	if err != nil {
-		logMap.Add(logId, "Error creating deploy folder: "+err.Error(), true)
-		return
+		_, err = git.PlainClone(deployFolder, false, &git.CloneOptions{
+			URL: srv.Service.Git.Repo,
+			Auth: &githttp.BasicAuth{
+				Username: config.GithubPat,
+				Password: config.GithubPat,
+			},
+			Progress:      autoLogger{id: logId},
+			ReferenceName: plumbing.ReferenceName(srv.Service.Git.Ref),
+		})
+
+		if err != nil {
+			logMap.Add(logId, "Error cloning repo: "+err.Error(), true)
+			return
+		}
+	} else {
+		logMap.Add(logId, "Pulling "+deployFolder, true)
+
+		// Pull repo
+		repo, err := git.PlainOpen(deployFolder)
+
+		if err != nil {
+			logMap.Add(logId, "Error opening repo: "+err.Error(), true)
+			return
+		}
+
+		w, err := repo.Worktree()
+
+		if err != nil {
+			logMap.Add(logId, "Error getting worktree: "+err.Error(), true)
+			return
+		}
+
+		err = w.Pull(&git.PullOptions{
+			ReferenceName: plumbing.ReferenceName(srv.Service.Git.Ref),
+			Auth: &githttp.BasicAuth{
+				Username: config.GithubPat,
+				Password: config.GithubPat,
+			},
+			Progress: autoLogger{id: logId},
+		})
+
+		if err != nil && err != git.NoErrAlreadyUpToDate {
+			logMap.Add(logId, "Error pulling repo: "+err.Error(), true)
+			return
+		}
 	}
 
-	logMap.Add(logId, "Cloning repo to "+deployFolder, true)
-
-	_, err = git.PlainClone(deployFolder, false, &git.CloneOptions{
-		URL: srv.Service.Git.Repo,
-		Auth: &githttp.BasicAuth{
-			Username: config.GithubPat,
-			Password: config.GithubPat,
-		},
-		Progress:      autoLogger{id: logId},
-		ReferenceName: plumbing.ReferenceName(srv.Service.Git.Ref),
-	})
-
-	if err != nil {
-		logMap.Add(logId, "Error cloning repo: "+err.Error(), true)
-		return
-	}
+	curDir := deployFolder
 
 	for _, command := range srv.Service.Git.BuildCommands {
 		// Split cmd into args
 		args := strings.Split(command, " ")
+
+		if args[0] == "cd" && len(args) > 1 {
+			if args[1] == ".." {
+				split := strings.Split(curDir, "/")
+
+				if len(split) > 1 {
+					curDir = strings.Join(split[:len(split)-1], "/")
+				} else {
+					logMap.Add(logId, "WARN: ", true)
+				}
+			} else {
+				curDir = curDir + "/" + args[1]
+			}
+
+			logMap.Add(logId, "Changed directory to "+curDir, true)
+			continue // Ignore rest of command
+		}
 
 		// Run the command
 		cmd := exec.Command(args[0], args[1:]...)
@@ -77,7 +123,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 		cmd.Stdout = autoLogger{id: logId}
 		cmd.Stderr = autoLogger{id: logId, Error: true}
 
-		err = cmd.Run()
+		err := cmd.Run()
 
 		if err != nil {
 			logMap.Add(logId, "Error running command: "+err.Error(), true)
@@ -86,7 +132,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 	}
 
 	// Remove deploy.Git.Path and move deploys/deployID to deploy.Git.Path
-	err = os.Rename(srv.Service.Directory, srv.Service.Directory+"-old")
+	err := os.Rename(srv.Service.Directory, srv.Service.Directory+"-old")
 
 	if err != nil {
 		logMap.Add(logId, "Error moving old directory: "+err.Error(), true)
