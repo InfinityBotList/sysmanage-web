@@ -310,7 +310,7 @@
         <ButtonReact
                 onclick={() => editService()}
         >
-            Create Service
+            Edit Service
         </ButtonReact>
     {/await}
 </div>
