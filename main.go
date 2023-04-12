@@ -32,6 +32,9 @@ var (
 	ctx    = context.Background()
 	v      *validator.Validate
 
+	// Subbed frontend embed
+	serverRootSubbed fs.FS
+
 	//go:embed data/servicegen/service.tmpl
 	serviceTemplate string
 
@@ -116,11 +119,7 @@ func ensureDpAuth(next http.Handler) http.Handler {
 func routeStatic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.URL.Path, "/api") {
-			// Serve frontend
-			serverRoot, err := fs.Sub(frontend, "frontend/build")
-			if err != nil {
-				log.Fatal(err)
-			}
+			serverRoot := http.FS(serverRootSubbed)
 
 			// Get file extension
 			fileExt := ""
@@ -132,7 +131,28 @@ func routeStatic(next http.Handler) http.Handler {
 				r.URL.Path += ".html"
 			}
 
-			http.FileServer(http.FS(serverRoot)).ServeHTTP(w, r)
+			if r.URL.Path != "/" {
+				r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
+			}
+
+			var checkPath = r.URL.Path
+
+			if r.URL.Path == "/" {
+				checkPath = "/index.html"
+			}
+
+			// Check if file exists
+			f, err := serverRoot.Open(checkPath)
+
+			if err != nil {
+				w.Header().Set("Location", "/404?from="+r.URL.Path)
+				w.WriteHeader(http.StatusFound)
+			}
+
+			f.Close()
+
+			fserve := http.FileServer(serverRoot)
+			fserve.ServeHTTP(w, r)
 		} else {
 			// Serve API
 			next.ServeHTTP(w, r)
@@ -167,7 +187,15 @@ func main() {
 
 	rdb = redis.NewClient(rOptions)
 
+	// Create validator
 	v = validator.New()
+
+	// Create subbed frontend embed
+	// Serve frontend
+	serverRootSubbed, err = fs.Sub(frontend, "frontend/build")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create wildcard route
 	r := chi.NewRouter()
