@@ -78,7 +78,7 @@ func (l LogEntryMap) Persist(id string) error {
 
 	entry.Persistance = true
 
-	l.Set(id, entry)
+	l[id] = entry
 
 	// Load in redis
 	newLog, err := json.Marshal(entry)
