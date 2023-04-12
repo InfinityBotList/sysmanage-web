@@ -31,6 +31,8 @@ export const newTask = (logId: string, callback: (outp: string[]) => void) => {
             }
         }
 
+        hasStarted = true;
+
         callback(out)
 
         if(res.headers.get("X-Is-Done")) {
