@@ -196,7 +196,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 		logMap.Add(logId, "Error persisting log: "+err.Error(), true)
 	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	// Run systemctl restart deploy.Git.Service
 	cmd := exec.Command("systemctl", "restart", srv.ID)
