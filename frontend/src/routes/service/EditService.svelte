@@ -129,7 +129,7 @@
     let gitRepo: string = service?.Service?.Git?.Repo || "";
     let gitRef: string = service?.Service?.Git?.Ref || "refs/heads/";
     let gitBuildCommands: string[] = service?.Service?.Git?.BuildCommands || [];
-    let configFiles: string[] = service?.Service?.ConfigFiles || [];
+    let configFiles: string[] = service?.Service?.Git?.ConfigFiles || [];
     let gitEnv: [string, string][] = parseMap(service?.Service?.Git?.Env) || [];
     let allowDirty: string = service?.Service?.Git?.AllowDirty?.toString() || false;
 
