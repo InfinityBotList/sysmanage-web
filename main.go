@@ -60,12 +60,6 @@ func ensureDpAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		if strings.HasPrefix(r.URL.Path, "/__external__/") || config.DPDisable {
-			// External route or under DPDisable, skip auth
-			next.ServeHTTP(w, r)
-			return
-		}
-
 		if r.Header.Get("X-DP-UserID") != "" {
 			// Check if user is allowed
 			for _, user := range config.AllowedUsers {
