@@ -9,3 +9,24 @@ Allows management of our systemd services, as well as creating/deleting them, qu
 1. Build ``frontend`` first using its README.md
 2. Run ``make`` to build the backend after creating the ``config.yaml`` file.  
  
+# Rust
+
+```yaml
+git:
+    repo: https://github.com/infinitybotlist/persepolis
+    ref: refs/heads/main
+    build_commands:
+        - /root/.cargo/bin/cargo build --release
+        - systemctl stop persepolis
+        - rm -vf persepolis
+        - mv -vf target/release/persepolis .
+        - systemctl start persepolis
+    env:
+        DATABASE_URL: postgres:///infinity
+        RUSTFLAGS: -C target-cpu=native -C link-arg=-fuse-ld=lld
+    allow_dirty: true
+    config_files:
+        - config.yaml
+```
+
+Use ^ for the git integration for rust
