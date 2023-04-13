@@ -1,5 +1,18 @@
-cmd: "/root/persepolis/persepolis"
-dir: "/root/persepolis"
+cmd: /root/persepolis/persepolis
+dir: /root/persepolis
 target: ibl
-after: ibl-maint
 description: Onboarding bot [v4]
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/infinitybotlist/persepolis
+    ref: refs/heads/main
+    build_commands:
+        - cargo build --release
+        - mv target/release/bin .
+    env:
+        DATABASE_URL: postgres:///infinity
+        RUSTFLAGS: -C target-cpu=native -C link-arg=-fuse-ld=lld
+    allow_dirty: false
+    config_files:
+        - config.yaml
