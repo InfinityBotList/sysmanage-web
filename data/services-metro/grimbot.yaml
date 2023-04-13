@@ -1,0 +1,6 @@
+cmd: /usr/bin/npm start
+dir: /root/GrimBot
+target: helpers-ibl
+description: Grim Bot
+after: network
+broken: false
