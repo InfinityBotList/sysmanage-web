@@ -4,3 +4,13 @@ target: helpers-ibl
 description: Sneeky Onboarding Bot
 after: network
 broken: false
+git:
+    repo: https://github.com/infinitybotlist/Sneeky
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+        - npm run build
+    env: {}
+    allow_dirty: false
+    config_files:
+        - .env
