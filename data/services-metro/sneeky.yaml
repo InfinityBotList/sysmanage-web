@@ -11,6 +11,6 @@ git:
         - npm install
         - npm run build
     env: {}
-    allow_dirty: false
+    allow_dirty: true
     config_files:
         - .env
