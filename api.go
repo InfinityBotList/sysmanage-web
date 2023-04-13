@@ -220,6 +220,8 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 
+		go persistToGit("")
+
 		w.WriteHeader(http.StatusNoContent)
 	})
 
@@ -311,6 +313,12 @@ func loadApi(r *chi.Mux) {
 				logMap.Add(logId, "Failed to reload systemd: "+err.Error(), true)
 			} else {
 				logMap.Add(logId, "Reloaded systemd successfully.", true)
+			}
+
+			err := persistToGit(logId)
+
+			if err != nil {
+				logMap.Add(logId, "Failed to persist to git: "+err.Error(), true)
 			}
 		}()
 
@@ -565,6 +573,7 @@ func loadApi(r *chi.Mux) {
 		logId := crypto.RandString(64)
 
 		go initDeploy(logId, *gotService)
+		go persistToGit("")
 
 		w.Write([]byte(logId))
 	})
@@ -687,4 +696,6 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 	})
+
+	go persistToGit("")
 }

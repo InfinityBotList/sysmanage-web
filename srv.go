@@ -331,5 +331,12 @@ func buildServices(reqId string) {
 
 	logMap.Add(reqId, "Finished disabling broken services.", true)
 
+	err = persistToGit(reqId)
+
+	if err != nil {
+		logMap.Add(reqId, "ERROR: Failed to persist to git: "+err.Error(), true)
+		return
+	}
+
 	logMap.Add(reqId, "Finished building services.", true)
 }
