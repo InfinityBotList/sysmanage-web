@@ -8,7 +8,7 @@ git:
     repo: https://github.com/infinitybotlist/persepolis
     ref: refs/heads/main
     build_commands:
-        - cargo build --release
+        - /usr/local/bin/cargo build --release
         - mv target/release/bin .
     env:
         DATABASE_URL: postgres:///infinity
