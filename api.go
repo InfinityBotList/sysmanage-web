@@ -108,13 +108,6 @@ func loadApi(r *chi.Mux) {
 			return
 		}
 
-		// ensure command starts with /usr/bin
-		if !strings.HasPrefix(createService.Service.Command, "/usr/bin/") {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Command must start with /usr/bin/"))
-			return
-		}
-
 		// Open _meta.yaml
 		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
 
