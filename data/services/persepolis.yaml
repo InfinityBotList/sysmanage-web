@@ -10,7 +10,7 @@ git:
     build_commands:
         - /root/.cargo/bin/cargo build --release
         - systemctl stop persepolis
-        - mv target/release/persepolis .
+        - mv -f target/release/persepolis .
         - systemctl start persepolis
     env:
         DATABASE_URL: postgres:///infinity
