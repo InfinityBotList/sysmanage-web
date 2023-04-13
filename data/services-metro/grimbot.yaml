@@ -4,3 +4,12 @@ target: helpers-ibl
 description: Grim Bot
 after: network
 broken: false
+git:
+    repo: https://github.com/TheRealToxicDev/GrimBot
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+        - npm run build
+    env: {}
+    allow_dirty: false
+    config_files: []
