@@ -9,7 +9,9 @@ git:
     ref: refs/heads/main
     build_commands:
         - /root/.cargo/bin/cargo build --release
+        - systemctl stop persepolis
         - mv target/release/persepolis .
+        - systemctl start persepolis
     env:
         DATABASE_URL: postgres:///infinity
         RUSTFLAGS: -C target-cpu=native -C link-arg=-fuse-ld=lld
