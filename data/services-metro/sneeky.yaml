@@ -1,0 +1,6 @@
+cmd: /usr/bin/npm start
+dir: /root/Sneeky
+target: helpers-ibl
+description: Sneeky Onboarding Bot
+after: network
+broken: false
