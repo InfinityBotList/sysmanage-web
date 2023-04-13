@@ -1,6 +1,0 @@
-cmd: /usr/bin/npm start
-dir: /root/GrimReaper
-target: ibl
-description: Grim Reaper discord bot (Public/Bug Free clone of Sneeky)
-after: ibl-maint
-broken: false
