@@ -1,0 +1,6 @@
+cmd: /root/sysmanage-web/sysmanage-web
+dir: /root/sysmanage-web
+target: helpers-ibl
+description: System Management
+after: network
+broken: false
