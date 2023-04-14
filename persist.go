@@ -63,6 +63,10 @@ func persistToGit(logId string) error {
 			fmt.Println(err)
 			return errors.New("FATAL: " + err.Error())
 		}
+	} else {
+		if logId != "" {
+			logMap.Add(logId, "Pulled changes", true)
+		}
 	}
 
 	if status, err := w.Status(); err == nil {
