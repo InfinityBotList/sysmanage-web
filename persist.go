@@ -46,6 +46,25 @@ func persistToGit(logId string) error {
 		logMap.Add(logId, "Loaded working directory", true)
 	}
 
+	// First try pulling
+	err = w.Pull(&git.PullOptions{
+		Auth: &githttp.BasicAuth{
+			Username: config.GithubPat,
+			Password: config.GithubPat,
+		},
+	})
+
+	if err != nil {
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			if logId != "" {
+				logMap.Add(logId, "PASS: No changes to pull", true)
+			}
+		} else {
+			fmt.Println(err)
+			return errors.New("FATAL: " + err.Error())
+		}
+	}
+
 	// Add all changes to the staging area
 	_, err = w.Add(".")
 
