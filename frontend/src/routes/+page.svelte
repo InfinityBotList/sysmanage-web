@@ -178,7 +178,6 @@
 	<h2 class="text-xl font-semibold">Services</h2>
 
 	{#if buildServicesTaskId != ""}
-		<h2 class="text-red-500">Build services ID: {buildServicesTaskId}</h2>
 		<TaskWindow 
 			output={buildServicesTaskOutput}
 		/>

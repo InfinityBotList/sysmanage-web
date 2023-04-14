@@ -244,7 +244,6 @@
 </DangerButton>
 
 {#if deleteServiceTaskId != ""}
-    <h2 class="text-red-500">Delete service log ID: {deleteServiceTaskId}</h2>
     <TaskWindow 
         output={deleteServiceTaskOutput}
     />
@@ -258,7 +257,6 @@
 </ButtonReact>
 
 {#if deployTaskId != ""}
-    <h2 class="text-red-500">Deploy service log ID: {deployTaskId}</h2>
     <TaskWindow 
         output={deployTaskOutput}
     />
@@ -272,7 +270,6 @@
 </ButtonReact>
 
 {#if getServiceLogTaskId != ""}
-    <h2 class="text-red-500">Get service logs log ID: {getServiceLogTaskId}</h2>
     <TaskWindow 
         output={getServiceLogTaskOutput}
     />

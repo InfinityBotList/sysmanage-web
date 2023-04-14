@@ -1,12 +1,9 @@
 <script lang="ts">
 	import Button from "$lib/components/Button.svelte";
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
-	import DangerButton from "$lib/components/DangerButton.svelte";
 	import Card from "$lib/components/DefaultCard.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
-	import TaskWindow from "$lib/components/TaskWindow.svelte";
 	import { title, error, warning, success } from "$lib/strings";
-	import { newTask } from "$lib/tasks";
 	import Icon from "@iconify/svelte"
 
 	export let service: any;

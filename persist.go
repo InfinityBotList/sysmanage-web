@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -55,8 +56,7 @@ func persistToGit(logId string) error {
 
 	// Commit the changes
 	_, err = w.Commit("Persist changes to git", &git.CommitOptions{
-		All:               true,
-		AllowEmptyCommits: true,
+		All: true,
 		Author: &object.Signature{
 			Name: "sysmanage-web[auto]",
 			When: time.Now(),
@@ -64,6 +64,20 @@ func persistToGit(logId string) error {
 	})
 
 	if err != nil {
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			if logId != "" {
+				logMap.Add(logId, "No changes to commit", true)
+			}
+
+			return nil
+		} else if errors.Is(err, git.ErrEmptyCommit) {
+			if logId != "" {
+				logMap.Add(logId, "No changes to commit [doing so would create a empty commit]", true)
+			}
+
+			return nil
+		}
+
 		fmt.Println(err)
 		return err
 	}
