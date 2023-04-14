@@ -46,6 +46,18 @@ func persistToGit(logId string) error {
 		logMap.Add(logId, "Loaded working directory", true)
 	}
 
+	if status, err := w.Status(); err == nil {
+		if status.IsClean() {
+			if logId != "" {
+				logMap.Add(logId, "No changes to persist", true)
+			}
+
+			return nil
+		}
+	} else {
+		logMap.Add(logId, "FATAL: Error getting git status - "+err.Error(), true)
+	}
+
 	// First try pulling
 	err = w.Pull(&git.PullOptions{
 		Auth: &githttp.BasicAuth{
