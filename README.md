@@ -29,4 +29,4 @@ git:
         - config.yaml
 ```
 
-Use ^ for the git integration for rust
+Use the above template for the git integration for rust
