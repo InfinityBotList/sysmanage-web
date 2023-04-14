@@ -1,6 +1,0 @@
-cmd: '/usr/bin/fuckyou '
-dir: /root/djdjd
-target: skynet
-description: Djdjdjjdd
-after: ibl-maint
-broken: true
