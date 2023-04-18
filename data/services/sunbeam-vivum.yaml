@@ -11,4 +11,5 @@ git:
         - echo "Done"
     env: {}
     allow_dirty: false
-    config_files: []
+    config_files:
+        - config.yaml
