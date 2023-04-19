@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -94,8 +93,6 @@ func (l LogEntryMap) Add(id string, data string, newline bool) {
 	}
 
 	currLog := l.Get(id)
-
-	fmt.Println("Adding to log: " + data)
 
 	currLog.LastUpdate = time.Now()
 	currLog.LastLog = append(currLog.LastLog, data)
