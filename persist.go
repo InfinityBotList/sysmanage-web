@@ -90,7 +90,7 @@ func persistToGit(logId string) error {
 	}
 
 	// Commit the changes
-	_, err = w.Commit("Persist changes to git", &git.CommitOptions{
+	_, err = w.Commit("ci(update): persist changes to git", &git.CommitOptions{
 		All: true,
 		Author: &object.Signature{
 			Name: "sysmanage-web[auto]",

@@ -98,7 +98,7 @@ func initDeploy(logId string, srv types.ServiceManage) {
 					return
 				}
 
-				_, err = w.Commit("Auto commit from sysmanage-web", &git.CommitOptions{
+				_, err = w.Commit("ci(update): Auto commit from sysmanage-web", &git.CommitOptions{
 					All:               true,
 					AllowEmptyCommits: true,
 					Author: &object.Signature{
