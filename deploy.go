@@ -44,6 +44,14 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 	if _, err := os.Stat(deployFolder); os.IsNotExist(err) {
 		logMap.Add(logId, "Deploy folder does not exist: "+deployFolder+", cloning it", true)
+
+		err := os.MkdirAll(deployFolder, 0755)
+
+		if err != nil {
+			logMap.Add(logId, "Error creating deploy folder: "+err.Error(), true)
+			return
+		}
+
 		deployViaClone = true
 	} else if !srv.Service.Git.AllowDirty {
 		logMap.Add(logId, "Dirty builds not allowed, performing fresh clone", true)
@@ -87,7 +95,11 @@ func initDeploy(logId string, srv types.ServiceManage) {
 		}
 
 		// If there are unstaged changes, add+commit+push them
-		if status, err := w.Status(); err == nil {
+		status, err := w.Status()
+
+		if err != nil {
+			logMap.Add(logId, "WARNING: Error getting status: "+err.Error(), true)
+		} else if err == nil {
 			if !status.IsClean() {
 				logMap.Add(logId, "Unstaged changes detected, committing them", true)
 
@@ -298,9 +310,3 @@ func initDeploy(logId string, srv types.ServiceManage) {
 
 	logMap.Add(logId, "Service restarted on: "+time.Now().Format(time.RFC3339), false)
 }
-
-/*
-func loadDeployRoutes(r *chi.Mux) {
-	r.Post("/__external__/github", func(w http.ResponseWriter, r *http.Request) {})
-}
-*/

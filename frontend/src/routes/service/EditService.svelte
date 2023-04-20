@@ -10,6 +10,7 @@
 	import Icon from "@iconify/svelte";
     import Select from "$lib/components/Select.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
+    import Service from './Service.svelte';
 
     export let service: any;
 
@@ -83,7 +84,7 @@
 
     interface Preset {
         [key: string]: {
-            git: string[],
+            buildCmds: string[],
             env: [string, string][],
             allowDirty: boolean,
             configFiles: string[],
@@ -92,7 +93,7 @@
 
     const gitPresets: Preset = {
         "NPM": {
-            git: [
+            buildCmds: [
                 "npm install",
                 "npm run build",
             ],
@@ -101,7 +102,7 @@
             configFiles: []
         },
         "Yarn": {
-            git: [
+            buildCmds: [
                 "yarn install",
                 "yarn install --dev",
                 "yarn run build"
@@ -111,7 +112,7 @@
             configFiles: []
         },
         "Go": {
-            git: [
+            buildCmds: [
                 "go build -v"
             ],
             env: [
@@ -121,6 +122,22 @@
             configFiles: [
                 "config.yaml",
                 "secrets.yaml"
+            ]
+        },
+        "Rust": {
+            buildCmds: [
+                "/root/.cargo/bin/cargo build --release",
+                "systemctl stop $NAME",
+                "rm -vf $NAME",
+                "mv -vf target/release/$NAME .",
+                "systemctl start $NAME",
+            ],
+            env: [
+                ["RUSTFLAGS", "-C target-cpu=native -C link-arg=-fuse-ld=lld"]
+            ],
+            allowDirty: true,
+            configFiles: [
+                "config.yaml"
             ]
         }
     }
@@ -192,8 +209,6 @@
         Description: string
     }
 
-    let meta: Meta = {};
-
     const getMeta = async () => {
         let metaRes = await fetch(`/api/getMeta`, {
             method: "POST",
@@ -205,9 +220,9 @@
             throw new Error(error)
         }
 
-        meta = await metaRes.json();
+        let meta: Meta = await metaRes.json();
 
-        return null;
+        return meta;
     }
 
     const editService = async () => {
@@ -280,8 +295,9 @@
 <div>
     {#await getMeta()}
         <GreyText>Loading metadata...</GreyText>
-    {:then fl}
-        <div id={JSON.stringify(fl)}></div>
+    {:then meta}
+        <Service service={service} />
+        
         <InputSm 
             id="name"
             label="Service Name"
@@ -372,7 +388,7 @@
     {#each Object.entries(gitPresets) as [name, preset]}
         <ButtonReact 
             onclick={() => {
-                gitBuildCommands = preset?.git
+                gitBuildCommands = preset?.buildCmds.map(cmd => cmd.replaceAll("$NAME", service?.ID))
                 
                 if(preset?.env && preset?.env.length > 0) {
                     gitEnv = preset?.env

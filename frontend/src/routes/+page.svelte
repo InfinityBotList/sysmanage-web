@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Service from './Service.svelte';
+	import Service from './service/Service.svelte';
 	import InputSm from '$lib/components/InputSm.svelte';
 	import ButtonReact from '$lib/components/ButtonReact.svelte';
 	import { error, success } from '$lib/strings';
