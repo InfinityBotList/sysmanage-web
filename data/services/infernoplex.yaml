@@ -3,4 +3,4 @@ dir: /root/infernoplex
 target: ibl
 description: Server Listing Service
 after: ibl-maint
-broken: true
+broken: false
