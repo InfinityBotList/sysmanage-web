@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"html/template"
+	"io"
 	"os"
 	"strings"
 	"sysmanage-web/types"
@@ -165,13 +166,14 @@ func buildNginx(reqId string) {
 
 		logMap.Add(reqId, "Created nginx file "+outFile, true)
 
-		// DEBUG: Move to .debug folder
-		os.MkdirAll(".debug", 0755)
-		err = os.Rename(ngxDir+"/"+outFile, ".debug/"+outFile)
+		// DEBUG: Read file
+		bytes, err := io.ReadAll(out)
 
 		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to move nginx file to debug folder "+outFile+": "+err.Error(), true)
+			logMap.Add(reqId, "ERROR: Failed to read nginx file "+outFile+": "+err.Error(), true)
 			return
 		}
+
+		logMap.Add(reqId, "DEBUG: Nginx file "+outFile+" contents: "+string(bytes), true)
 	}
 }
