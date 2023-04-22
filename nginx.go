@@ -75,7 +75,7 @@ func buildNginx(reqId string) {
 		return
 	}
 
-	//defer os.RemoveAll(ngxDir)
+	defer os.RemoveAll(ngxDir)
 
 	logMap.Add(reqId, "Created temp folder for nginx: "+ngxDir, true)
 
@@ -164,5 +164,13 @@ func buildNginx(reqId string) {
 		}
 
 		logMap.Add(reqId, "Created nginx file "+outFile, true)
+
+		// DEBUG: Move to .debug folder
+		err = os.Rename(ngxDir+"/"+outFile, ".debug/"+outFile)
+
+		if err != nil {
+			logMap.Add(reqId, "ERROR: Failed to move nginx file to debug folder "+outFile+": "+err.Error(), true)
+			return
+		}
 	}
 }
