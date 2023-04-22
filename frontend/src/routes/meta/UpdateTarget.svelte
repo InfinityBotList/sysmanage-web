@@ -1,3 +1,8 @@
 <script lang="ts">
-    export let target: any;
+    interface Target {
+        name: string;
+        description: string;
+    }
+
+    export let target: Target;
 </script>
