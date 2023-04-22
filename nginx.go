@@ -166,6 +166,7 @@ func buildNginx(reqId string) {
 		logMap.Add(reqId, "Created nginx file "+outFile, true)
 
 		// DEBUG: Move to .debug folder
+		os.MkdirAll(".debug", 0755)
 		err = os.Rename(ngxDir+"/"+outFile, ".debug/"+outFile)
 
 		if err != nil {
