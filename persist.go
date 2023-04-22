@@ -27,6 +27,13 @@ func persistToGit(logId string) error {
 		logMap.Add(logId, "Persisting changes to git", true)
 	}
 
+	if config.GithubPat == "" {
+		if logId != "" {
+			logMap.Add(logId, "WARNING: Github PAT not set. Git operations are disabled", true)
+		}
+		return nil
+	}
+
 	repo, err := git.PlainOpen(".")
 
 	if err != nil {

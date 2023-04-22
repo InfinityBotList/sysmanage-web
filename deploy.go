@@ -25,6 +25,11 @@ func initDeploy(logId string, srv types.ServiceManage) {
 		return
 	}
 
+	if config.GithubPat == "" {
+		logMap.Add(logId, "FATAL: Github PAT not set. Git operations are disabled", true)
+		return
+	}
+
 	defer logMap.Persist(logId) // Persist log on exit
 	defer logMap.MarkDone(logId)
 
