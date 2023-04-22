@@ -4,7 +4,6 @@ server {
     listen 443 ssl http2;
     ssl_certificate {{$.CertFile}};
     ssl_certificate_key {{$.KeyFile}};
-
     {{if $.Meta.OriginCertPath -}} 
     ssl_client_certificate {{$.Meta.OriginCertPath}}; 
     ssl_verify_client on;
@@ -15,8 +14,8 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     {{if $.Meta.Common -}}
-        {{$.Meta.Common}}
-    {{end}}
+        {{$.Meta.Common -}}
+    {{end -}}
 
     server_name {{ConcatNames $.Domain $server.Names}};
 
