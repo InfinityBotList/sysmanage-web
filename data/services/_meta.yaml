@@ -24,4 +24,4 @@ targets:
     - name: migizi
       description: Migizi Bot
     - name: rootpersonal
-      description: Rootspring's personal stuff
+      description: Rootspring's personal stuff (vivum bots)
