@@ -1,6 +1,6 @@
 # Unlike service-gen, there is NO reason for sysmanage to need to edit this, so 
 # you can freely edit this file.
-nginx_cert_path: /certs/
+nginx_cert_path: /certs
 origin_cert_path: /certs/origin-pull-ca.pem # Path to the origin CA cert if any
 common: |
     # Maint code
