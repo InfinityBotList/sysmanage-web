@@ -25,3 +25,5 @@ targets:
       description: Migizi Bot
     - name: rootpersonal
       description: Rootspring's personal stuff (vivum bots)
+    - name: test-whoa
+      description: meme
