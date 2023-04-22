@@ -27,7 +27,8 @@ server {
         proxy_redirect off;
         client_max_body_size 100M;
         proxy_pass {{$loc.Proxy}};
-        {{end -}}{{ParseOpts $loc.Opts }}
+        {{- end -}}
+        {{ParseOpts $loc.Opts }}
     }
     {{end}}
 }
