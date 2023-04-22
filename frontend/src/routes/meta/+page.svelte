@@ -86,7 +86,7 @@ import InputSm from "$lib/components/InputSm.svelte";
         {:then meta}
             {#each (meta?.Targets || []) as target}
                 <div class="flex flex-row items-center">
-                    <div class="flex flex-col">
+                    <div class="flex flex-col w-32">
                         <span class="text-lg font-semibold">{target?.Name}</span>
                         <span class="text-sm">{target?.Description}</span>
                     </div>
