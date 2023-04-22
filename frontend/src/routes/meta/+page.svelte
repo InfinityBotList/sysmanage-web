@@ -52,7 +52,7 @@ import InputSm from "$lib/components/InputSm.svelte";
     </ButtonReact>
 </div>
 
-<h3 class="text-xl font-semibold">Edit Target</h3>
+<h3 class="text-xl font-semibold">Update Target</h3>
 
 <div>
     <InputSm 
