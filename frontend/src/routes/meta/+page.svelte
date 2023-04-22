@@ -51,3 +51,32 @@ import InputSm from "$lib/components/InputSm.svelte";
         Create Target
     </ButtonReact>
 </div>
+
+<h3 class="text-xl font-semibold">Edit Target</h3>
+
+<div>
+    <InputSm 
+        id="addName"
+        label="Target Name"
+        placeholder="ibl, artie etc."
+        bind:value={addName}
+        minlength={1}
+    />
+    <InputSm 
+        id="addDescription"
+        label="Target Description"
+        placeholder="Whoa"
+        bind:value={addDescription}
+        minlength={1}
+    />
+    <ButtonReact
+        onclick={() => {
+            updateMeta("create", {
+                name: addName,
+                description: addDescription
+            })
+        }}
+    >
+        Create Target
+    </ButtonReact>
+</div>

@@ -4,3 +4,12 @@ target: artie
 description: Artie API
 after: ibl-maint
 broken: false
+git:
+    repo: https://github.com/Artie-AI/API
+    ref: refs/heads/
+    build_commands:
+        - npm install
+        - npm start
+    env: {}
+    allow_dirty: true
+    config_files: []
