@@ -157,6 +157,9 @@ func buildNginx(reqId string) {
 			Domain:   strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
 			CertFile: certFile,
 			KeyFile:  keyFile,
+			MetaCommon: func() string {
+				return strings.Join(strings.Split(meta.Common, "\n"), "\n\t")
+			}(),
 		})
 
 		if err != nil {

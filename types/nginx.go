@@ -25,11 +25,12 @@ type NginxMeta struct {
 }
 
 type NginxTemplate struct {
-	Servers  []NginxServer
-	Meta     NginxMeta
-	Domain   string
-	CertFile string
-	KeyFile  string
+	Servers    []NginxServer
+	Meta       NginxMeta
+	Domain     string
+	CertFile   string
+	KeyFile    string
+	MetaCommon string
 }
 
 type NginxYaml struct {
