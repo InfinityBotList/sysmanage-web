@@ -3,8 +3,9 @@
 	import GreyText from "$lib/components/GreyText.svelte";
 import InputSm from "$lib/components/InputSm.svelte";
 	import { error } from "$lib/strings";
+	import UpdateTarget from "./UpdateTarget.svelte";
 
-    const updateMeta = async (action: string, target: any) => {
+    const updateMeta = async (action: string, target: MetaTarget) => {
         let response = await fetch(`/api/updateMeta?action=${action}`, {
             method: "POST",
             body: JSON.stringify(target)
@@ -18,37 +19,34 @@ import InputSm from "$lib/components/InputSm.svelte";
         return await response.json();
     }
 
+    interface Meta {
+        Targets?: MetaTarget[]
+    }
+
+    interface MetaTarget {
+        Name: string
+        Description: string
+    }
+
+    const getMeta = async () => {
+        let metaRes = await fetch(`/api/getMeta`, {
+            method: "POST",
+        });
+
+        if(!metaRes.ok) {
+            let error = await metaRes.text()
+
+            throw new Error(error)
+        }
+
+        let meta: Meta = await metaRes.json();
+
+        return meta;
+    }
+
     let addName: string;
     let addDescription: string;
 </script>
-
-<h2 class="text-2xl font-semibold">Meta Editor</h2>
-
-<h3 class="text-xl font-semibold">Target Names</h3>
-
-<div>
-    <div>
-        {#await getMeta()}
-            <GreyText>Loading metadata...</GreyText>
-        {:then meta}
-            {#each meta?.Targets as target}
-                <div class="flex flex-row items-center">
-                    <div class="flex flex-col">
-                        <span class="text-lg font-semibold">{target?.Name}</span>
-                        <span class="text-sm">{target?.Description}</span>
-                    </div>
-                    <ButtonReact
-                        onclick={() => {
-                            updateMeta("delete", target)
-                        }}
-                    >
-                        Delete
-                    </ButtonReact>
-                </div>
-            {/each}
-        {/await}
-    </div>    
-</div>
 
 <h3 class="text-xl font-semibold">Add Target</h3>
 
@@ -70,8 +68,8 @@ import InputSm from "$lib/components/InputSm.svelte";
     <ButtonReact
         onclick={() => {
             updateMeta("create", {
-                name: addName,
-                description: addDescription
+                Name: addName,
+                Description: addDescription
             })
         }}
     >
@@ -79,4 +77,29 @@ import InputSm from "$lib/components/InputSm.svelte";
     </ButtonReact>
 </div>
 
-<h3 class="text-xl font-semibold">Update Target</h3>
+<h2 class="text-2xl font-semibold">Meta Editor</h2>
+
+<div>
+    <div>
+        {#await getMeta()}
+            <GreyText>Loading metadata...</GreyText>
+        {:then meta}
+            {#each (meta?.Targets || []) as target}
+                <div class="flex flex-row items-center">
+                    <div class="flex flex-col">
+                        <span class="text-lg font-semibold">{target?.Name}</span>
+                        <span class="text-sm">{target?.Description}</span>
+                    </div>
+                    <ButtonReact
+                        onclick={() => {
+                            updateMeta("delete", target)
+                        }}
+                    >
+                        Delete
+                    </ButtonReact>
+                    <UpdateTarget target={target} />
+                </div>
+            {/each}
+        {/await}
+    </div>    
+</div>

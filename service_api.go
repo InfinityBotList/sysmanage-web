@@ -695,7 +695,7 @@ func loadServiceApi(r *chi.Mux) {
 	r.Post("/api/updateMeta", func(w http.ResponseWriter, r *http.Request) {
 		var target types.MetaTarget
 
-		err := yaml.NewDecoder(r.Body).Decode(&target)
+		err := json.NewDecoder(r.Body).Decode(&target)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
