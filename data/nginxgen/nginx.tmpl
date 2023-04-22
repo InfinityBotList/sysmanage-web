@@ -14,7 +14,7 @@ server {
     ssl_prefer_server_ciphers on;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    {{if $.Meta.Common}}{{$.Meta.Common}}{{end}}
+    {{if $.Meta.Common -}}{{$.Meta.Common}}{{end}}
 
     server_name {{ConcatNames $.Domain $server.Names}};
 
