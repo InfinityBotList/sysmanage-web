@@ -28,7 +28,7 @@ server {
         client_max_body_size 100M;
         proxy_pass {{$loc.Proxy}};
         {{end -}}
-        {{ParseOpts $loc.Opts}}
+        {{- ParseOpts $loc.Opts}}
     }
     {{end}}
 }
