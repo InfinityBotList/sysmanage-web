@@ -53,19 +53,19 @@ func buildNginx(reqId string) {
 		return
 	}
 
-	var nginxTemplate = template.Must(template.New("nginx").Parse(nginxTemplate))
+	var nginxTemplate = template.Must(
+		template.New("nginx").Funcs(template.FuncMap{
+			"ConcatNames": func(domain string, s []string) string {
+				var parsedSlice []string
 
-	nginxTemplate.Funcs(template.FuncMap{
-		"ConcatNames": func(domain string, s []string) string {
-			var parsedSlice []string
+				for _, v := range s {
+					parsedSlice = append(parsedSlice, v+"."+domain)
+				}
 
-			for _, v := range s {
-				parsedSlice = append(parsedSlice, v+"."+domain)
-			}
-
-			return strings.Join(parsedSlice, ", ")
-		},
-	})
+				return strings.Join(parsedSlice, ", ")
+			},
+		}).Parse(nginxTemplate),
+	)
 
 	// Create a temp folder for nginx to use
 	ngxDir, err := os.MkdirTemp("", ".ngx-temp")
