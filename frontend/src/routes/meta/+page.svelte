@@ -87,18 +87,20 @@ import InputSm from "$lib/components/InputSm.svelte";
             {#each (meta?.Targets || []) as target}
                 <div>
                     <div class="inline-block w-32">
-                        <span class="text-lg font-semibold">{target?.Name}</span>
-                        <span class="text-sm">{target?.Description}</span>
+                        <p class="text-lg font-semibold">{target?.Name}</p>
+                        <p class="text-sm">{target?.Description}</p>
                     </div>
-                    <ButtonReact
-                        onclick={() => {
-                            updateMeta("delete", target)
-                        }}
-                    >
-                        Delete
-                    </ButtonReact>
-                    <span class="ml-2"></span>
-                    <UpdateTarget target={target} />
+                    <div>
+                        <ButtonReact
+                            onclick={() => {
+                                updateMeta("delete", target)
+                            }}
+                        >
+                            Delete
+                        </ButtonReact>
+                        <span class="ml-2"></span>
+                        <UpdateTarget target={target} />
+                    </div>
                 </div>
             {/each}
         {/await}
