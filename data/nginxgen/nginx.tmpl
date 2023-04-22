@@ -29,7 +29,9 @@ server {
         proxy_pass {{$loc.Proxy}};
         {{end -}}
 
-        {{if $loc.Opts}}# Options {{ParseOpts $loc.Opts }}{{end}}
+        {{if $loc.Opts}}# Options 
+        {{ParseOpts $loc.Opts }}
+        {{end}}
     }
     {{end}}
 }
