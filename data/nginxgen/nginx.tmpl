@@ -29,7 +29,7 @@ server {
         proxy_pass {{$loc.Proxy}};
         {{end -}}
         {{range $opt := $loc.Opts -}}
-        {{$opt.Name}} {{$opt.Value}};
+        {{$opt.Name}} {{$opt.Value -}};
         {{end}}
     }
     {{end}}
