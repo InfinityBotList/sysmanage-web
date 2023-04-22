@@ -1,0 +1,6 @@
+cmd: /usr/bin/npm start
+dir: /root/ArtieAPI
+target: artie
+description: Artie API
+after: ibl-maint
+broken: false

@@ -222,7 +222,7 @@ func main() {
 		middleware.Timeout(30*time.Second),
 	)
 
-	loadApi(r)
+	loadServiceApi(r)
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnavailableForLegalReasons)
@@ -234,6 +234,9 @@ func main() {
 		Addr:    ":30010",
 		Handler: r,
 	}
+
+	// Always persist to git during initial startup
+	go persistToGit("")
 
 	// Start server
 	fmt.Println("Starting server on port 30010")

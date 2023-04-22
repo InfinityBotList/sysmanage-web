@@ -17,7 +17,7 @@ import (
 	"sysmanage-web/types"
 )
 
-func loadApi(r *chi.Mux) {
+func loadServiceApi(r *chi.Mux) {
 	// Returns the list of services
 	r.Post("/api/getServiceList", func(w http.ResponseWriter, r *http.Request) {
 		serviceList, err := getServiceList(true)
@@ -688,7 +688,176 @@ func loadApi(r *chi.Mux) {
 
 			return
 		}
+
+		go persistToGit("")
 	})
 
-	go persistToGit("")
+	r.Post("/api/updateMeta", func(w http.ResponseWriter, r *http.Request) {
+		var target types.MetaTarget
+
+		err := yaml.NewDecoder(r.Body).Decode(&target)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to decode target data."))
+			return
+		}
+
+		err = v.Struct(target)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		// Open _meta.yaml
+		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read service definition." + err.Error()))
+			return
+		}
+
+		// Read file into TemplateYaml
+		var metaYaml types.MetaYAML
+
+		err = yaml.NewDecoder(f).Decode(&metaYaml)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to read service definition" + err.Error()))
+			return
+		}
+
+		f.Close()
+
+		switch r.URL.Query().Get("action") {
+		case "create":
+			flag := false
+
+			for _, t := range metaYaml.Targets {
+				if t.Name == target.Name {
+					flag = true
+					break
+				}
+			}
+
+			if flag {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Target with this name already exists."))
+				return
+			}
+
+			metaYaml.Targets = append(metaYaml.Targets, target)
+		case "update":
+			flag := false
+
+			for i, t := range metaYaml.Targets {
+				if t.Name == target.Name {
+					metaYaml.Targets[i] = target
+					flag = true
+					break
+				}
+			}
+
+			if !flag {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Target with this name does not exist."))
+				return
+			}
+
+		case "delete":
+			flag := false
+
+			// Ensure no services are using this target
+			serviceList, err := getServiceList(false)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service list:" + err.Error()))
+			}
+
+			for _, s := range serviceList {
+				if s.Service.Target == target.Name {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte("Target is in use by service " + s.ID + "."))
+					return
+				}
+			}
+
+			// Then delete the target
+			for i, t := range metaYaml.Targets {
+				if t.Name == target.Name {
+					metaYaml.Targets = append(metaYaml.Targets[:i], metaYaml.Targets[i+1:]...)
+					flag = true
+					break
+				}
+			}
+
+			if !flag {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Target with this name does not exist."))
+				return
+			}
+		}
+
+		// Save service
+		f, err = os.Create(config.ServiceDefinitions + "/_meta.yaml-1")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+
+			return
+		}
+
+		err = yaml.NewEncoder(f).Encode(metaYaml)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+
+			return
+		}
+
+		err = f.Close()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+
+			return
+		}
+
+		err = os.Rename(config.ServiceDefinitions+"/_meta.yaml-1", config.ServiceDefinitions+"/_meta.yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to save service."))
+
+			// Close file and delete it
+			f.Close()
+			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+
+			return
+		}
+
+		go persistToGit("")
+
+		w.WriteHeader(http.StatusOK)
+	})
 }
