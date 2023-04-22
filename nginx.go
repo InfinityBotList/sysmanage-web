@@ -63,10 +63,16 @@ func buildNginx(reqId string) {
 					parsedSlice = append(parsedSlice, v+"."+domain)
 				}
 
-				return strings.Join(parsedSlice, ", ")
+				return strings.Join(parsedSlice, " ")
 			},
 			"ParseOpts": func(opts []types.NginxKV) string {
-				return ""
+				var parsedSlice []string
+
+				for _, v := range opts {
+					parsedSlice = append(parsedSlice, v.Name+" "+v.Value+";")
+				}
+
+				return strings.Join(parsedSlice, "\n")
 			},
 		}).Parse(nginxTemplate),
 	)
