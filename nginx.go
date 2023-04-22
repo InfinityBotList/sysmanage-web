@@ -72,7 +72,7 @@ func buildNginx(reqId string) {
 					parsedSlice = append(parsedSlice, v.Name+" "+v.Value+";")
 				}
 
-				return strings.Join(parsedSlice, "\n")
+				return strings.Join(parsedSlice, "\n\t\t")
 			},
 		}).Parse(nginxTemplate),
 	)
