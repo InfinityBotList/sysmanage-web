@@ -30,7 +30,7 @@
     }
 </script>
 
-<ButtonReact on:click={() => open = !open}>{open ? "Close Editor" : "Edit Target"}</ButtonReact>
+<ButtonReact onclick={() => open = !open}>{open ? "Close Editor" : "Edit Target"}</ButtonReact>
 
 {#if open}
     <div class="mt-2">
@@ -51,7 +51,7 @@
         />
 
         <div class="flex justify-end mt-2">
-            <ButtonReact on:click={() => update(target)}>Save</ButtonReact>
+            <ButtonReact onclick={() => update(target)}>Save</ButtonReact>
         </div>
     </div>
 {/if}

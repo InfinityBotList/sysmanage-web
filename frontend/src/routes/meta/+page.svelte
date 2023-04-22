@@ -97,6 +97,7 @@ import InputSm from "$lib/components/InputSm.svelte";
                     >
                         Delete
                     </ButtonReact>
+                    <span class="ml-2"></span>
                     <UpdateTarget target={target} />
                 </div>
             {/each}
