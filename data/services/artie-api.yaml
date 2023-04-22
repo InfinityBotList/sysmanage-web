@@ -6,7 +6,7 @@ after: ibl-maint
 broken: false
 git:
     repo: https://github.com/Artie-AI/API
-    ref: refs/heads/
+    ref: refs/heads/master
     build_commands:
         - npm install
         - npm start
