@@ -75,7 +75,7 @@ func buildNginx(reqId string) {
 		return
 	}
 
-	defer os.RemoveAll(ngxDir)
+	//defer os.RemoveAll(ngxDir)
 
 	logMap.Add(reqId, "Created temp folder for nginx: "+ngxDir, true)
 
