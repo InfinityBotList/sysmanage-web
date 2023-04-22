@@ -66,6 +66,10 @@ func buildNginx(reqId string) {
 				return strings.Join(parsedSlice, " ")
 			},
 			"ParseOpts": func(opts []types.NginxKV) string {
+				if len(opts) == 0 {
+					return ""
+				}
+
 				var parsedSlice []string
 
 				for _, v := range opts {
