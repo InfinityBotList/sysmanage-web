@@ -2,7 +2,7 @@
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
 import InputSm from "$lib/components/InputSm.svelte";
-	import { error } from "$lib/strings";
+	import { error, success } from "$lib/strings";
 	import UpdateTarget from "./UpdateTarget.svelte";
 
     const updateMeta = async (action: string, target: MetaTarget) => {
@@ -16,7 +16,7 @@ import InputSm from "$lib/components/InputSm.svelte";
             error(resp)
         }
 
-        return await response.json();
+        success("Target updated successfully")
     }
 
     interface Meta {

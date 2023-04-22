@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import InputSm from "$lib/components/InputSm.svelte";
-	import { error } from "$lib/strings";
+	import { error, success } from "$lib/strings";
 
     interface MetaTarget {
         Name: string;
@@ -26,7 +26,7 @@
             error(resp)
         }
 
-        return await response.json();
+        success("Target updated successfully")
     }
 </script>
 
