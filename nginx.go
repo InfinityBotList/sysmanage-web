@@ -167,6 +167,7 @@ func buildNginx(reqId string) {
 		logMap.Add(reqId, "Created nginx file "+outFile, true)
 
 		// DEBUG: Read file
+		out.Seek(0, 0)
 		bytes, err := io.ReadAll(out)
 
 		if err != nil {
