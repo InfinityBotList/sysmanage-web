@@ -42,6 +42,9 @@ var (
 	//go:embed data/servicegen/service.tmpl
 	serviceTemplate string
 
+	//go:embed data/nginxgen/nginx.tmpl
+	nginxTemplate string
+
 	//go:embed data/servicegen/target.tmpl
 	targetTemplate string
 )
@@ -223,6 +226,7 @@ func main() {
 	)
 
 	loadServiceApi(r)
+	loadNginxApi(r)
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnavailableForLegalReasons)
@@ -237,6 +241,19 @@ func main() {
 
 	// Always persist to git during initial startup
 	go persistToGit("")
+
+	// Also, remove any old stale deploys here too
+	go func() {
+		if _, err := os.Stat("deploys"); err == nil {
+			fmt.Println("Removing old deploys")
+
+			err = os.RemoveAll("deploys")
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}()
 
 	// Start server
 	fmt.Println("Starting server on port 30010")

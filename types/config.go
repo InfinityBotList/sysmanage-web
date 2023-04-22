@@ -2,6 +2,7 @@ package types
 
 type Config struct {
 	AllowedUsers       []string `yaml:"allowed_users"`
+	NginxDefinition    string   `yaml:"nginx_definition"`    // Folder where nginx definitions can be found
 	ServiceDefinitions string   `yaml:"service_definitions"` // List of folders where definitions can be found
 	DPSecret           string   `yaml:"dp_secret"`
 	RedisURL           string   `yaml:"redis_url"`
