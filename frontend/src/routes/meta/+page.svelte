@@ -47,5 +47,7 @@ import InputSm from "$lib/components/InputSm.svelte";
                 description: addDescription
             })
         }}
-    >Create Target</ButtonReact>
+    >
+        Create Target
+    </ButtonReact>
 </div>
