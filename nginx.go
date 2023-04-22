@@ -21,10 +21,10 @@ func buildNginx(reqId string) {
 	logMap.Add(reqId, "Starting build process to convert nginx templates to nginx config files...", true)
 
 	// First load in the _meta.yaml file from the folder
-	open, err := os.Open(config.NginxDefinition + "/_meta.yaml")
+	open, err := os.Open(config.NginxDefinitions + "/_meta.yaml")
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to open _meta.yaml file in "+config.NginxDefinition, true)
+		logMap.Add(reqId, "ERROR: Failed to open _meta.yaml file in "+config.NginxDefinitions, true)
 		return
 	}
 
@@ -33,7 +33,7 @@ func buildNginx(reqId string) {
 	err = yaml.NewDecoder(open).Decode(&meta)
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to decode _meta.yaml file in "+config.NginxDefinition+": "+err.Error(), true)
+		logMap.Add(reqId, "ERROR: Failed to decode _meta.yaml file in "+config.NginxDefinitions+": "+err.Error(), true)
 		return
 	}
 
@@ -41,12 +41,12 @@ func buildNginx(reqId string) {
 	err = v.Struct(meta)
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to validate _meta.yaml file in "+config.NginxDefinition+": "+err.Error(), true)
+		logMap.Add(reqId, "ERROR: Failed to validate _meta.yaml file in "+config.NginxDefinitions+": "+err.Error(), true)
 		return
 	}
 
 	// Next load every nginx definition in the folder
-	fsd, err := os.ReadDir(config.NginxDefinition)
+	fsd, err := os.ReadDir(config.NginxDefinitions)
 
 	if err != nil {
 		logMap.Add(reqId, "ERROR: Failed to read nginx definition "+err.Error(), true)
@@ -113,7 +113,7 @@ func buildNginx(reqId string) {
 			return
 		}
 
-		open, err := os.Open(config.NginxDefinition + "/" + file.Name())
+		open, err := os.Open(config.NginxDefinitions + "/" + file.Name())
 
 		if err != nil {
 			logMap.Add(reqId, "ERROR: Failed to open nginx definition "+file.Name()+": "+err.Error(), true)
