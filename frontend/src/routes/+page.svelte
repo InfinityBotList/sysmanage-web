@@ -75,6 +75,28 @@
 		})
 	}
 
+	let buildNginxTaskId: string = "";
+	let buildNginxTaskOutput: string[] = [];
+	const buildNginx = async () => {
+		let taskId = await fetch(`/api/nginx/buildNginx`, {
+			method: "POST"
+		});
+
+		if(!taskId.ok) {
+			let errorStr = await taskId.text()
+
+			error(errorStr)
+
+			return
+		}
+
+		buildNginxTaskId = await taskId.text()
+
+		newTask(buildNginxTaskId, (output: string[]) => {
+			buildNginxTaskOutput = output
+		})
+	}
+
 	const restartServer = async () => {
 		let confirm = window.prompt("Are you sure you want to restart the server? (YES to confirm))")
 
@@ -134,6 +156,11 @@
 	>
 		Build Services
 	</ButtonReact>
+	<ButtonReact 
+		onclick={() => buildNginx()}
+	>
+		Build Nginx
+	</ButtonReact>
 	<Button 
 		link="/new/service"
 	>
@@ -180,6 +207,12 @@
 	{#if buildServicesTaskId != ""}
 		<TaskWindow 
 			output={buildServicesTaskOutput}
+		/>
+	{/if}
+
+	{#if buildNginxTaskId != ""}
+		<TaskWindow 
+			output={buildNginxTaskOutput}
 		/>
 	{/if}
 
