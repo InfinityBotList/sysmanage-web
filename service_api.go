@@ -752,10 +752,18 @@ func loadServiceApi(r *chi.Mux) {
 
 			metaYaml.Targets = append(metaYaml.Targets, target)
 		case "update":
+			name := r.URL.Query().Get("name")
+
+			if name == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("No target name specified."))
+				return
+			}
+
 			flag := false
 
 			for i, t := range metaYaml.Targets {
-				if t.Name == target.Name {
+				if t.Name == name {
 					metaYaml.Targets[i] = target
 					flag = true
 					break
