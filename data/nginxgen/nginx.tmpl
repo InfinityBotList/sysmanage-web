@@ -5,7 +5,7 @@
         ssl_certificate {{.CertFile}};
         ssl_certificate_key {{.KeyFile}};
 
-        {{if .Meta.OriginCert}} 
+        {{if .Meta.OriginCertPath}} 
             ssl_client_certificate {{.Meta.OriginCertPath}}; 
             ssl_verify_client on;
         {{end}}
