@@ -51,7 +51,10 @@
         />
 
         <div class="flex justify-end mt-2">
-            <ButtonReact onclick={() => update(target)}>Save</ButtonReact>
+            <ButtonReact onclick={() => update({
+                Name: editName,
+                Description: editDescription
+            })}>Save</ButtonReact>
         </div>
     </div>
 {/if}
