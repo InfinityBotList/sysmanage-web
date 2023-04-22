@@ -1,28 +1,27 @@
-# Targets for the systemd services
 targets:
-  - name: ibl
-    description: Infinity Bot List
-  - name: github
-    description: GitHub Bots
-  - name: diswidgets
-    description: DisWidgets
-  - name: artie
-    description: Artie
-  - name: toxmod
-    description: ToxMods
-  - name: reviewbots
-    description: Review Bots
-  - name: skynet
-    description: Skynet Bot
-  - name: chillcord
-    description: ChillCord
-  - name: tweeter
-    description: Tweeter Bot
-  - name: cordx
-    description: CordX Service
-  - name: dscjobs
-    description: Discord Jobs Services (DSCJobs/JobCord)
-  - name: migizi
-    description: Migizi Bot
-  - name: rootpersonal
-    description: Rootspring's personal stuff
+    - name: ibl
+      description: Infinity Bot List
+    - name: github
+      description: GitHub Bots
+    - name: diswidgets
+      description: DisWidgets
+    - name: artie
+      description: Artie
+    - name: toxmod
+      description: ToxMods
+    - name: reviewbots
+      description: Review Bots
+    - name: skynet
+      description: Skynet Bot
+    - name: chillcord
+      description: ChillCord
+    - name: tweeter
+      description: Tweeter Bot
+    - name: cordx
+      description: CordX Service
+    - name: dscjobs
+      description: Discord Jobs Services (DSCJobs/JobCord)
+    - name: migizi
+      description: Migizi Bot
+    - name: rootpersonal
+      description: Rootspring's personal stuff
