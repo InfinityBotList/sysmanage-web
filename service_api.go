@@ -809,6 +809,10 @@ func loadServiceApi(r *chi.Mux) {
 				w.Write([]byte("Target with this name does not exist."))
 				return
 			}
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid action"))
+			return
 		}
 
 		// Save service
