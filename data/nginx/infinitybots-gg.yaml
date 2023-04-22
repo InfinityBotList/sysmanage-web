@@ -6,8 +6,8 @@ servers:
     locations:
       - path: / # Path of the location
         proxy: "http://127.0.0.1:8081"
-        #opts: # Options for the location
-        #  - name: FOO
-        #    value: "BAR"
-        #  - name: "BAZ"
-        #    value: "QUX"
+        opts: # Options for the location
+          - name: FOO
+            value: "BAR"
+          - name: "BAZ"
+            value: "QUX"
