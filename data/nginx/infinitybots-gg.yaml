@@ -9,5 +9,3 @@ servers:
         opts: # Options for the location
           - name: FOO
             value: "BAR"
-          - name: "BAZ"
-            value: "QUX"
