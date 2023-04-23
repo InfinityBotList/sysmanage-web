@@ -2,7 +2,7 @@ package types
 
 type NginxServerManage struct {
 	Domain string
-	Server NginxYaml
+	Server []NginxServer
 }
 
 type NginxServer struct {

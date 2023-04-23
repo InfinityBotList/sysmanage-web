@@ -53,7 +53,7 @@ func getNginxDomainList() ([]types.NginxServerManage, error) {
 
 		servers = append(servers, types.NginxServerManage{
 			Domain: strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
-			Server: server,
+			Server: server.Servers,
 		})
 	}
 
