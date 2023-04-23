@@ -1,6 +1,7 @@
 <script lang="ts">
     import LinkCard from '$lib/components/LinkCard.svelte';
     import GreyText from '$lib/components/GreyText.svelte';
+	import ObjectRender from '$lib/components/ObjectRender.svelte';
 
     export let domain: any;
 
@@ -17,12 +18,8 @@
 
     {#if showDomainInfo}
         {#each domain?.Server?.Servers as server}
-            {#each Object.entries(server) as [key, value]}
-                <p>
-                    <span class="font-semibold">{key}:</span> {value}
-                </p>
-            {/each}
-            <div class="mt-3"></div>
+            <ObjectRender object={server} />
+            <div class="mt-7"></div>
         {/each}
     {/if}
 </LinkCard>
