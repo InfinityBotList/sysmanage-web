@@ -41,3 +41,9 @@ type NginxTemplate struct {
 type NginxYaml struct {
 	Servers []NginxServer `yaml:"servers" validate:"required"`
 }
+
+type NginxAPIPublishCert struct {
+	Domain string `json:"domain" validate:"required"`
+	Cert   string `json:"cert" validate:"required"`
+	Key    string `json:"key" validate:"required"`
+}

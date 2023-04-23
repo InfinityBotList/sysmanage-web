@@ -12,6 +12,31 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func loadNginxMeta() (types.NginxMeta, error) {
+	open, err := os.Open(config.NginxDefinitions + "/_meta.yaml")
+
+	if err != nil {
+		return types.NginxMeta{}, errors.New("Failed to open _meta.yaml file in " + config.NginxDefinitions + ": " + err.Error())
+	}
+
+	var meta types.NginxMeta
+
+	err = yaml.NewDecoder(open).Decode(&meta)
+
+	if err != nil {
+		return types.NginxMeta{}, errors.New("Failed to decode _meta.yaml file in " + config.NginxDefinitions + ": " + err.Error())
+	}
+
+	// Validate meta
+	err = v.Struct(meta)
+
+	if err != nil {
+		return types.NginxMeta{}, errors.New("Failed to validate _meta.yaml file in " + config.NginxDefinitions + ": " + err.Error())
+	}
+
+	return meta, nil
+}
+
 func getNginxDomainList() ([]types.NginxServerManage, error) {
 	// Get all files in path
 	fsd, err := os.ReadDir(config.NginxDefinitions)

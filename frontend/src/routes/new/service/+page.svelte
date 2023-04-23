@@ -66,7 +66,7 @@
         success("Service created successfully!")
 
         setTimeout(() => {
-            goto("/")
+            goto(`/service?id=${name}`)
         }, 1000)
     }
 </script>
