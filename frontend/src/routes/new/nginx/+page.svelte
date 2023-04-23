@@ -58,7 +58,7 @@
     <li>This will yield two files, a certificate and a private key. Copy the contents of these files and paste them into the fields below</li>
 </ol>
 
-<div>
+<div class="mt-3">
     <InputSm 
         id="publish-domain"
         label="Domain (without any www or http/https)"

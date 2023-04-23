@@ -106,7 +106,7 @@ func loadNginxApi(r *chi.Mux) {
 			exists := true
 
 			for _, f := range []string{certFile, keyFile} {
-				if _, err := os.Stat(f); err == nil || errors.Is(err, fs.ErrNotExist) {
+				if _, err := os.Stat(f); errors.Is(err, fs.ErrNotExist) {
 					exists = false
 					break
 				}
