@@ -4,6 +4,8 @@
 	import { error, success } from '$lib/strings';
 	import TaskWindow from '../../lib/components/TaskWindow.svelte';
 	import { newTask } from '$lib/tasks';
+	import LinkCard from '$lib/components/LinkCard.svelte';
+	import GreyText from '$lib/components/GreyText.svelte';
 
 	let buildNginxTaskId: string = "";
 	let buildNginxTaskOutput: string[] = [];
@@ -27,7 +29,34 @@
 		})
 	}
 
-    let domain: string;
+	const getNginxDomainList = async () => {
+		let domList = await fetch(`/api/nginx/getDomainList`, {
+			method: "POST",
+		});
+
+		if(!domList.ok) {
+			let error = await domList.text()
+
+			throw new Error(error)
+		} 
+
+		return await domList.json();
+	}
+
+	const showDomain = (
+		service: any, 
+		domain: string,
+	): boolean => {
+		let flag = true
+
+		if(domain != "" && !service?.ID?.toLowerCase().includes(domain.toLowerCase())) {
+			flag = false
+		}
+
+		return flag
+	}
+
+    let domainQuery: string;
 </script>
 
 <svelte:head>
@@ -56,9 +85,29 @@
 	<InputSm
 		id="domain"
 		label="Filter by domain"
-		bind:value={domain}
+		bind:value={domainQuery}
 		placeholder="E.g. arcadia"
 		showErrors={false}
 		minlength={0}
 	/>
+
+	{#await getNginxDomainList()}
+		<h2 class="text-xl">Loading domain list</h2>
+	{:then data}
+		<div class="flex flex-wrap justify-center items-center justify-evenly">
+			{#each data as domain}
+				{#if showDomain(domain, domainQuery)}
+                    <LinkCard 
+                        title={domain?.Domain}
+                        link={`/nginx/domain?domain=${domain?.Domain}`}
+                        linkText="Edit Service"
+                    >
+                        <GreyText>Click "Edit" to edit this domain</GreyText>
+                    </LinkCard>
+				{/if}
+			{/each}
+		</div>
+	{:catch err}
+		<h2 class="text-red-500">{err}</h2>
+	{/await}
 </section>
