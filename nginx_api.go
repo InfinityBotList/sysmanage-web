@@ -81,23 +81,22 @@ func loadNginxApi(r *chi.Mux) {
 			return
 		}
 
-		domain := strings.ReplaceAll(req.Domain, ".", "-")
-
 		// Remove any http/https prefix
-		if strings.Contains(domain, "/") {
+		if strings.Contains(req.Domain, "/") {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Domain cannot contain http/https prefix or slashes"))
 			return
 		}
 
-		// Ensure not subdomain
-		domainSplit := strings.Split(domain, ".")
+		domainSplit := strings.Split(req.Domain, ".")
 
 		if len(domainSplit) != 2 {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Domain must contain a dot and must not be a subdomain"))
 			return
 		}
+
+		domain := strings.ReplaceAll(req.Domain, ".", "-")
 
 		certFile := meta.NginxCertPath + "/cert-" + domain + ".pem"
 		keyFile := meta.NginxCertPath + "/key-" + domain + ".pem"
