@@ -51,7 +51,7 @@
 <h2 class="text-xl font-semibold">Domain Setup</h2>
 <GreyText>Follow these steps first to add your domain to Cloudflare</GreyText>
 <p class="font-semibold">Note that this is NOT needed if the domain is already previously setup on Nginx</p>
-<ol>
+<ol class="list-decimal list-inside">
     <li>Add your domain to Cloudflare normally</li>
     <li>Click SSL/TLS > Overview. Then ensure SSL/TLS encryption mode is set to Full or Full (strict)</li>
     <li>Go to SSL/TLS > Origin Server. Ensure "Authenticated Origin Pulls" is enabled. Then create a new origin certificate</li>
