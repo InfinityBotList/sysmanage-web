@@ -1,5 +1,10 @@
 package types
 
+type NginxServerManage struct {
+	Domain string
+	Server NginxServer
+}
+
 type NginxServer struct {
 	Names     []string        `yaml:"names" validate:"required"`
 	Comment   string          `yaml:"comment" validate:"required"`

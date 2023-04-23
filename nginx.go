@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"html/template"
 	"io"
 	"os"
@@ -10,6 +11,54 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+func getNginxDomainList() ([]types.NginxServerManage, error) {
+	// Get all files in path
+	fsd, err := os.ReadDir(config.NginxDefinitions)
+
+	if err != nil {
+		return nil, errors.New("Failed to read nginx definition " + err.Error())
+	}
+
+	servers := make([]types.NginxServerManage, 0)
+
+	for _, file := range fsd {
+		if file.Name() == "_meta.yaml" {
+			continue // Skip _meta.yaml
+		}
+
+		if file.IsDir() {
+			continue // Skip directories
+		}
+
+		if !strings.HasSuffix(file.Name(), ".yaml") {
+			continue // Skip non-yaml files
+		}
+
+		// Read file into NginxServer
+		f, err := os.Open(config.NginxDefinitions + "/" + file.Name())
+
+		if err != nil {
+			return nil, errors.New("Failed to read nginx definition " + err.Error() + file.Name())
+		}
+
+		// Read file into NginxServer
+		var server types.NginxServer
+
+		err = yaml.NewDecoder(f).Decode(&server)
+
+		if err != nil {
+			return nil, errors.New("Failed to decode nginx definition " + err.Error() + file.Name())
+		}
+
+		servers = append(servers, types.NginxServerManage{
+			Domain: strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
+			Server: server,
+		})
+	}
+
+	return servers, nil
+}
 
 func buildNginx(reqId string) {
 	defer logMap.MarkDone(reqId)
