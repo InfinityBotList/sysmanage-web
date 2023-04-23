@@ -4,8 +4,7 @@
 	import { error, success } from '$lib/strings';
 	import TaskWindow from '../../lib/components/TaskWindow.svelte';
 	import { newTask } from '$lib/tasks';
-	import LinkCard from '$lib/components/LinkCard.svelte';
-	import GreyText from '$lib/components/GreyText.svelte';
+    import Domain from './Domain.svelte';
 
 	let buildNginxTaskId: string = "";
 	let buildNginxTaskOutput: string[] = [];
@@ -97,13 +96,7 @@
 		<div class="flex flex-wrap justify-center items-center justify-evenly">
 			{#each data as domain}
 				{#if showDomain(domain, domainQuery)}
-                    <LinkCard 
-                        title={domain?.Domain}
-                        link={`/nginx/domain?domain=${domain?.Domain}`}
-                        linkText="Edit Service"
-                    >
-                        <GreyText>Click "Edit" to edit this domain</GreyText>
-                    </LinkCard>
+                    <Domain domain={domain} />
 				{/if}
 			{/each}
 		</div>
