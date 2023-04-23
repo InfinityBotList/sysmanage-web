@@ -4,6 +4,7 @@
 
 {#each Object.entries(object) as [key, value]}
     {#if typeof value === "object" && value !== null}
+        <span class="font-semibold">{key}:</span>
         <div class="ml-4">
             <svelte:self object={value} />
         </div>
