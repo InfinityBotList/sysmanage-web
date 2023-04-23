@@ -43,7 +43,7 @@ func getNginxDomainList() ([]types.NginxServerManage, error) {
 		}
 
 		// Read file into NginxServer
-		var server types.NginxServer
+		var server types.NginxYaml
 
 		err = yaml.NewDecoder(f).Decode(&server)
 

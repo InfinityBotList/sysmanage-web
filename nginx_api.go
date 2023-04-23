@@ -17,7 +17,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.Write([]byte(reqId))
 	})
 
-	r.Get("/api/nginx/getDomainList", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/api/nginx/getDomainList", func(w http.ResponseWriter, r *http.Request) {
 		domList, err := getNginxDomainList()
 
 		if err != nil {
