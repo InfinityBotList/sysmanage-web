@@ -22,6 +22,7 @@
                     <span class="font-semibold">{key}:</span> {value}
                 </p>
             {/each}
+            <div class="mt-3"></div>
         {/each}
     {/if}
 </LinkCard>
