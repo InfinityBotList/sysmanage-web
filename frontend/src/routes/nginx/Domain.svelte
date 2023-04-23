@@ -4,7 +4,7 @@
 
     export let domain: any;
 
-    export let showDomainInfo: boolean = true;
+    export let showDomainInfo: boolean = false;
 </script>
 
 <LinkCard 
