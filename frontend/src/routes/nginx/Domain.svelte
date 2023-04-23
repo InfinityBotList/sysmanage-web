@@ -17,9 +17,12 @@
     <GreyText>Click the domain title to view more information. Click "Edit" to edit this domain</GreyText>
 
     {#if showDomainInfo}
-        {#each domain?.Server?.Servers as server}
-            <ObjectRender object={server} />
-            <div class="mt-7"></div>
-        {/each}
+        <p class="font-semibold text-lg">More information</p>
+        <div class="text-sm">
+            {#each domain?.Server?.Servers as server}
+                <ObjectRender object={server} />
+                <div class="mt-7"></div>
+            {/each}
+        </div>
     {/if}
 </LinkCard>

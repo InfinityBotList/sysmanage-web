@@ -3,6 +3,7 @@
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import Card from "$lib/components/DefaultCard.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
+	import ObjectRender from "$lib/components/ObjectRender.svelte";
 	import { title, error, warning, success } from "$lib/strings";
 	import Icon from "@iconify/svelte"
 
@@ -98,13 +99,7 @@
 	{#if showServiceInfo}
 		<p class="font-semibold text-lg">More information</p>
 		<div class="text-sm">
-			{#each Object.entries(service?.Service) as [key, value]}
-				{#if key != "Description"}
-					<p>
-						<span class="font-semibold">{key}:</span> {value}
-					</p>
-				{/if}
-			{/each}
+			<ObjectRender object={service?.Service} />
 		</div>
 
 		<ButtonReact 
