@@ -69,14 +69,14 @@
     <Input
         id="publish-cert"
         label="Certificate (Public Cert)"
-        placeholder="-----BEGIN CERTIFICATE-----\nMIIEq..."
+        placeholder="-----BEGIN CERTIFICATE-----"
         bind:value={publishCert}
         minlength={256}
     />
     <Input
         id="publish-key"
         label="Certificate (Private Key)"
-        placeholder="-----BEGIN PRIVATE KEY-----\nMIIEq..."
+        placeholder="-----BEGIN PRIVATE KEY-----"
         bind:value={publishKey}
         minlength={256}
     />
