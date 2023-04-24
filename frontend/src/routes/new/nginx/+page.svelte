@@ -5,6 +5,7 @@
 	import { error, success } from "$lib/strings";
 	import DangerButton from "$lib/components/DangerButton.svelte";
     import ButtonReact from "$lib/components/ButtonReact.svelte";
+    import Section from "$lib/components/Section.svelte";
     
     let publishDomain: string;
     let publishCert: string;
@@ -48,48 +49,49 @@
 
 <h1 class="text-2xl font-semibold">Add NGINX domain</h1>
 
-<h2 class="text-xl font-semibold">Domain Setup</h2>
-<GreyText>Follow these steps first to add your domain to Cloudflare</GreyText>
-<p class="font-semibold">Note that this is NOT needed if the domain is already previously setup on Nginx</p>
-<ol class="list-decimal list-inside">
-    <li>Add your domain to Cloudflare normally</li>
-    <li>Click SSL/TLS > Overview. Then ensure SSL/TLS encryption mode is set to Full or Full (strict)</li>
-    <li>Go to SSL/TLS > Origin Server. Ensure "Authenticated Origin Pulls" is enabled. Then create a new origin certificate</li>
-    <li>This will yield two files, a certificate and a private key. Copy the contents of these files and paste them into the fields below</li>
-</ol>
+<Section title="Step 1: Domain Setup">
+    <GreyText>Follow these steps first to add your domain to Cloudflare</GreyText>
+    <p class="font-semibold">Note that this is NOT needed if the domain is already previously setup on Nginx</p>
+    <ol class="list-decimal list-inside">
+        <li>Add your domain to Cloudflare normally</li>
+        <li>Click SSL/TLS > Overview. Then ensure SSL/TLS encryption mode is set to Full or Full (strict)</li>
+        <li>Go to SSL/TLS > Origin Server. Ensure "Authenticated Origin Pulls" is enabled. Then create a new origin certificate</li>
+        <li>This will yield two files, a certificate and a private key. Copy the contents of these files and paste them into the fields below</li>
+    </ol>
 
-<div class="mt-3">
-    <InputSm 
-        id="publish-domain"
-        label="Domain (without any www or http/https)"
-        placeholder="infinitybots.gg, botlist.app, narc.live etc."
-        bind:value={publishDomain}
-        minlength={3}
-    />
-    <Input
-        id="publish-cert"
-        label="Certificate (Public Cert)"
-        placeholder="-----BEGIN CERTIFICATE-----"
-        bind:value={publishCert}
-        minlength={256}
-    />
-    <Input
-        id="publish-key"
-        label="Certificate (Private Key)"
-        placeholder="-----BEGIN PRIVATE KEY-----"
-        bind:value={publishKey}
-        minlength={256}
-    />
-    <ButtonReact 
-        onclick={() => publishCerts(false)}
-    >Publish</ButtonReact>
+    <div class="mt-3">
+        <InputSm 
+            id="publish-domain"
+            label="Domain (without any www or http/https)"
+            placeholder="infinitybots.gg, botlist.app, narc.live etc."
+            bind:value={publishDomain}
+            minlength={3}
+        />
+        <Input
+            id="publish-cert"
+            label="Certificate (Public Cert)"
+            placeholder="-----BEGIN CERTIFICATE-----"
+            bind:value={publishCert}
+            minlength={256}
+        />
+        <Input
+            id="publish-key"
+            label="Certificate (Private Key)"
+            placeholder="-----BEGIN PRIVATE KEY-----"
+            bind:value={publishKey}
+            minlength={256}
+        />
+        <ButtonReact 
+            onclick={() => publishCerts(false)}
+        >Publish</ButtonReact>
 
-    {#if warningNeedsForce}
-        <h3 class="text-xl font-semibold text-red-400">Force Push</h3>
-        <GreyText>Clicking this button will overwrite the existing domain. This is not recommended unless you know what you're doing</GreyText>
+        {#if warningNeedsForce}
+            <h3 class="text-xl font-semibold text-red-400">Force Push</h3>
+            <GreyText>Clicking this button will overwrite the existing domain. This is not recommended unless you know what you're doing</GreyText>
 
-        <DangerButton 
-            onclick={() => publishCerts(true)}
-        >Yes, I'm sure!</DangerButton>
-    {/if}
-</div>
+            <DangerButton 
+                onclick={() => publishCerts(true)}
+            >Yes, I'm sure!</DangerButton>
+        {/if}
+    </div>
+</Section>
