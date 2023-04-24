@@ -1,6 +1,7 @@
 <script lang="ts">
 	import NgServer from "./NGServer.svelte";
     import ObjectRender from "$lib/components/ObjectRender.svelte";
+    import Section from "$lib/components/Section.svelte";
 
     export let domain: any;
 </script>
@@ -14,7 +15,6 @@
         <NgServer bind:server={server} i={i} />
     {/each}
 </div>
-<small>
-    <p class="font-semibold mt-5">Tree View</p>
+<Section title="Tree View">
     <ObjectRender object={domain} />
-</small>
+</Section>
