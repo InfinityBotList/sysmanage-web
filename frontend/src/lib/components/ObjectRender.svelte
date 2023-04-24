@@ -16,5 +16,5 @@
         {/if}
     {/each}
 {:else}
-    <p class="text-red-500">No information can be provided about this object</p>
+    <p class="text-red-500">No information can be provided about this entity</p>
 {/if}
