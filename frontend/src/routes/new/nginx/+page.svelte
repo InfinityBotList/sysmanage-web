@@ -6,6 +6,7 @@
 	import DangerButton from "$lib/components/DangerButton.svelte";
     import ButtonReact from "$lib/components/ButtonReact.svelte";
     import Section from "$lib/components/Section.svelte";
+	import Select from "$lib/components/Select.svelte";
     
     let publishDomain: string;
     let publishCert: string;
@@ -99,6 +100,8 @@
             Claimed: claimedDomains
         };
     }
+
+    let addDomain: string;
 </script>
 
 <h1 class="text-2xl font-semibold">Add NGINX domain</h1>
@@ -170,6 +173,13 @@
                 <li>{domain}</li>
             {/each}
         </ul>
+        <h2 class="text-xl font-semibold">Select A Domain</h2>
+        <Select 
+            name="domain"
+            placeholder="Select a domain"
+            bind:value={addDomain}
+            options={new Map(availableDomains?.Available?.map(a => [a, a]))}
+        />
     {:catch error}
         <h2 class="text-red-400">{error}</h2>
     {/await}
