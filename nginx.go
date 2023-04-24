@@ -76,6 +76,10 @@ func getNginxDomainList() ([]types.NginxServerManage, error) {
 			return nil, errors.New("Failed to decode nginx definition " + err.Error() + file.Name())
 		}
 
+		if len(server.Servers) == 0 {
+			server.Servers = []types.NginxServer{}
+		}
+
 		servers = append(servers, types.NginxServerManage{
 			Domain: strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
 			Server: server,
