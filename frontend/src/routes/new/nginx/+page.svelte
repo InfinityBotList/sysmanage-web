@@ -51,7 +51,12 @@
         Domain: string
     }
 
-    const getAvailableDomains = async () => {
+    interface GetAvailableDomainsResponse {
+        Available: string[]
+        Claimed: string[]
+    }
+
+    const getAvailableDomains = async (): Promise<GetAvailableDomainsResponse> => {
         let domainListRes = await fetch(`/api/nginx/getDomainList`, {
             method: "POST"
         });
@@ -76,6 +81,7 @@
         let certList: string[] = await certListRes.json();
 
         let availableDomains = []
+        let claimedDomains = []
 
         // Loop over certList, ensure domain isnt already in domainList, then add it to availableDomains
         for(let cert of certList) {
@@ -83,10 +89,15 @@
 
             if(!domainList.includes(certDomain)) {
                 availableDomains.push(certDomain);
+            } else {
+                claimedDomains.push(certDomain);
             }
         }
 
-        return availableDomains;
+        return {
+            Available: availableDomains,
+            Claimed: claimedDomains
+        };
     }
 </script>
 
