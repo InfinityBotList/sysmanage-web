@@ -45,6 +45,49 @@
             error(err);
         }
     }
+
+    // Derived from types.NginxServerManage but with only the needed field Domain
+    interface AvailableDomainListData {
+        Domain: string
+    }
+
+    const getAvailableDomains = async () => {
+        let domainListRes = await fetch(`/api/nginx/getDomainList`, {
+            method: "POST"
+        });
+
+        if(!domainListRes.ok) {
+            let err = await domainListRes.text();
+            error(err);
+        }
+
+        let domainListRaw: AvailableDomainListData[] = await domainListRes.json();
+        let domainList: string[] = domainListRaw.map((domainObj) => domainObj.Domain);
+
+        let certListRes = await fetch(`/api/nginx/getCertList`, {
+            method: "POST"
+        });
+
+        if(!certListRes.ok) {
+            let err = await certListRes.text();
+            error(err);
+        }
+
+        let certList: string[] = await certListRes.json();
+
+        let availableDomains = []
+
+        // Loop over certList, ensure domain isnt already in domainList, then add it to availableDomains
+        for(let cert of certList) {
+            let certDomain = cert.replace("cert-", "").replace(".pem", "").replaceAll("-", ".")
+
+            if(!domainList.includes(certDomain)) {
+                availableDomains.push(certDomain);
+            }
+        }
+
+        return availableDomains;
+    }
 </script>
 
 <h1 class="text-2xl font-semibold">Add NGINX domain</h1>
@@ -94,4 +137,18 @@
             >Yes, I'm sure!</DangerButton>
         {/if}
     </div>
+</Section>
+<Section title="Step 2: Add Domain">
+    {#await getAvailableDomains()}
+        <p class="font-semibold">Loading...</p>
+    {:then availableDomains}
+        <GreyText>
+            These are the domains that are available to be added to Nginx. Select one from the dropdown below.
+
+            If you do not see your domain here, ensure that you have followed "Domain Setup" correctly and added the certificate.
+        </GreyText>
+        <p>{availableDomains}</p>
+    {:catch error}
+        <h2 class="text-red-400">{error}</h2>
+    {/await}
 </Section>

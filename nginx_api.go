@@ -138,4 +138,41 @@ func loadNginxApi(r *chi.Mux) {
 
 		w.WriteHeader(http.StatusNoContent)
 	})
+
+	r.Post("/api/nginx/getCertList", func(w http.ResponseWriter, r *http.Request) {
+		// Load meta
+		meta, err := loadNginxMeta()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		fsd, err := os.ReadDir(meta.NginxCertPath)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		var certList []string
+
+		for _, f := range fsd {
+			if strings.Contains(f.Name(), "cert-") {
+				certList = append(certList, f.Name())
+			}
+		}
+
+		bytes, err := json.Marshal(certList)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.Write(bytes)
+	})
 }
