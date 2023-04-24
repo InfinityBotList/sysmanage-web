@@ -102,6 +102,20 @@
     }
 
     let addDomain: string;
+
+    const addNginxDomain = async () => {
+        let res = await fetch(`/api/nginx/addDomain?domain=${addDomain}`, {
+            method: "POST",
+        });
+
+        if(res.ok) {
+            success("Successfully added domain");
+            window.location.reload();
+        } else {
+            let err = await res.text();
+            error(err);
+        }
+    }
 </script>
 
 <h1 class="text-2xl font-semibold">Add NGINX domain</h1>
@@ -180,6 +194,9 @@
             bind:value={addDomain}
             options={new Map(availableDomains?.Available?.map(a => [a, a]))}
         />
+        <ButtonReact 
+            onclick={addNginxDomain}
+        >Add Domain</ButtonReact>
     {:catch error}
         <h2 class="text-red-400">{error}</h2>
     {/await}

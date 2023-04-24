@@ -175,4 +175,74 @@ func loadNginxApi(r *chi.Mux) {
 
 		w.Write(bytes)
 	})
+
+	r.Post("/api/nginx/addDomain", func(w http.ResponseWriter, r *http.Request) {
+		domainName := r.URL.Query().Get("domain")
+
+		if domainName == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Domain name cannot be empty"))
+			return
+		}
+
+		// Load meta
+		meta, err := loadNginxMeta()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		// Check that cert and key exists
+		domainFileName := strings.ReplaceAll(domainName, ".", "-")
+		certFile := meta.NginxCertPath + "/cert-" + domainFileName + ".pem"
+		keyFile := meta.NginxCertPath + "/key-" + domainFileName + ".pem"
+
+		_, err = tls.LoadX509KeyPair(certFile, keyFile)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		// Check that the domain does not already exists
+		domList, err := getNginxDomainList()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		for _, d := range domList {
+			if d.Domain == domainName {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Domain already exists"))
+				return
+			}
+		}
+
+		// Add domain
+		f, err := os.Create(config.NginxDefinitions + "/" + domainFileName + ".yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		defer f.Close()
+
+		_, err = f.WriteString("servers:")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
 }
