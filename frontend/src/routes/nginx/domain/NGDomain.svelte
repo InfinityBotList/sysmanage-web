@@ -16,7 +16,7 @@
             <NgServer bind:server={server} i={i} />
         </Section>
     {/each}
+    <Section title="Tree View">
+        <ObjectRender object={domain} />
+    </Section>
 </div>
-<Section title="Tree View">
-    <ObjectRender object={domain} />
-</Section>
