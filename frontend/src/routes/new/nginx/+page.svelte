@@ -164,6 +164,12 @@
                 <li>{domain}</li>
             {/each}
         </ul>
+        <h2 class="text-xl font-semibold">Available Domains</h2>
+        <ul class="list-disc list-inside">
+            {#each availableDomains?.Available as domain}
+                <li>{domain}</li>
+            {/each}
+        </ul>
     {:catch error}
         <h2 class="text-red-400">{error}</h2>
     {/await}
