@@ -13,6 +13,9 @@
 <div class="flex flex-col space-y-2">
     {#each domain?.Server?.Servers as server, i}
         <NgServer bind:server={server} i={i} />
+        <div class="mt-3"></div>
+        <hr />
+        <div class="mb-3"></div>
     {/each}
 </div>
 <Section title="Tree View">

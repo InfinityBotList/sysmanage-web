@@ -1,5 +1,6 @@
 <script lang="ts">
-	import MultiInput from "$lib/components/MultiInput.svelte";
+	import InputSm from "$lib/components/InputSm.svelte";
+import MultiInput from "$lib/components/MultiInput.svelte";
 
     interface NGServer {
         Names: string[],
@@ -30,5 +31,13 @@
         bind:values={server.Names} 
         placeholder="example.com, www.example.com etc."
         minlength={3}
+    />
+
+    <InputSm
+        id={`s-comment-${i}`}
+        label="Comment"
+        placeholder="E.g. Popplio Web API"
+        minlength={1}
+        bind:value={server.Comment}
     />
 </div>
