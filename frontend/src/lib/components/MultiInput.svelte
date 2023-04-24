@@ -12,6 +12,7 @@
     export let minlength: number;
     export let small: boolean = true;
     export let showErrors: boolean = false;
+    export let showLabel: boolean = true;
 
     const deleteValue = (i: number) => {
         values = values.filter((_, index) => index !== i);
@@ -22,7 +23,11 @@
     }
 </script>
 
-<label for={id} class="block mb-1 font-medium text-gray-900 dark:text-gray-300">{label}</label>
+{#if showLabel}
+    <label for={id} class="block mb-1 font-medium text-gray-900 dark:text-gray-300">{label}</label>
+{:else}
+    <label for={id} class="sr-only">{label}</label>
+{/if}
 <div id={id}>
     {#each values as value, i}
         {#if small}

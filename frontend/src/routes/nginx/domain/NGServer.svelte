@@ -30,7 +30,8 @@ import MultiInput from "$lib/components/MultiInput.svelte";
 
     <MultiInput 
         id={`s-names-${i}`} 
-        title="Subdomains" 
+        title="Subdomain"
+        showLabel={false}  
         bind:values={server.Names} 
         placeholder="example.com, www.example.com etc."
         minlength={3}
