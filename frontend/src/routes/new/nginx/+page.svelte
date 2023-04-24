@@ -158,7 +158,12 @@
 
             If you do not see your domain here, ensure that you have followed "Domain Setup" correctly and added the certificate.
         </GreyText>
-        <p>{availableDomains}</p>
+        <h2 class="text-xl font-semibold">Claimed Domains</h2>
+        <ul class="list-disc list-inside">
+            {#each availableDomains?.Claimed as domain}
+                <li>{domain}</li>
+            {/each}
+        </ul>
     {:catch error}
         <h2 class="text-red-400">{error}</h2>
     {/await}
