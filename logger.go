@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"time"
 )
 
-const logPrefix = "smdl:"
 const logTime = 8 * time.Hour
 const logTreshold = 100000
 
@@ -21,31 +19,9 @@ func (l LogEntryMap) Get(id string) LogEntry {
 	entry, ok := l[id]
 
 	if !ok {
-		// Check redis
-		currLog := rdb.Get(ctx, logPrefix+id).Val()
-
-		if currLog == "" {
-			return LogEntry{
-				LastLog: []string{},
-			}
+		return LogEntry{
+			LastLog: []string{},
 		}
-
-		var logs *LogEntry
-
-		err := json.Unmarshal([]byte(currLog), &logs)
-
-		if err != nil {
-			return LogEntry{
-				LastLog: []string{err.Error() + " " + currLog},
-			}
-		}
-
-		// Has to be done as server restarted
-		logs.IsDone = true
-
-		l.Set(id, *logs)
-
-		return *logs
 	}
 
 	if time.Since(entry.LastUpdate) > logTime {
@@ -63,28 +39,6 @@ func (l LogEntryMap) Get(id string) LogEntry {
 
 func (l LogEntryMap) Set(id string, entry LogEntry) {
 	l[id] = entry
-}
-
-// Persist will persist the current state of the log entry to redis
-// overwriting the old one
-func (l LogEntryMap) Persist(id string) error {
-	// First get the entry itself
-	entry := l[id]
-
-	// Load in redis
-	newLog, err := json.Marshal(entry)
-
-	if err != nil {
-		return err
-	}
-
-	err = rdb.Set(ctx, logPrefix+id, newLog, logTime).Err()
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (l LogEntryMap) Add(id string, data string, newline bool) {

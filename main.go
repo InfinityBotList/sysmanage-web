@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/hmac"
 	"crypto/sha512"
 	"embed"
@@ -20,7 +19,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
-	"github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,8 +27,6 @@ var frontend embed.FS
 
 var (
 	config *types.Config
-	rdb    *redis.Client
-	ctx    = context.Background()
 	v      *validator.Validate
 
 	// Subbed frontend embed
@@ -191,15 +187,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	// Connect to redis
-	rOptions, err := redis.ParseURL(config.RedisURL)
-
-	if err != nil {
-		panic(err)
-	}
-
-	rdb = redis.NewClient(rOptions)
 
 	// Create validator
 	v = validator.New()

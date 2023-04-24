@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/redis/go-redis/v9 v9.0.3
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -19,7 +18,6 @@ require (
 	github.com/go-git/go-billy/v5 v5.4.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
@@ -36,8 +34,6 @@ require (
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-git/go-git/v5 v5.6.1
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/infinitybotlist/eureka v0.0.0-20230123041109-426207f20916

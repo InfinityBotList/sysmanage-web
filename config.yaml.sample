@@ -5,7 +5,6 @@ service_definitions: data/services
 nginx_definitions: data/nginx
 service_out: /etc/systemd/system
 dp_secret: 
-redis_url: redis://localhost:6379/15
 dp_disable: false # Only enable when bootstrapping
 
 # Protected from killall 
