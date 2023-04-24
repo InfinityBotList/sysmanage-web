@@ -12,7 +12,7 @@
 
 <div class="flex flex-col space-y-2">
     {#each domain?.Server?.Servers as server, i}
-        <h2 class="text-md font-semibold mb-1">{server?.ID}</h2>
+        <h2 class="text-md font-semibold">{server?.ID}</h2>
         <NgServer bind:server={server} i={i} />
         <hr class="mt-3 mb-3"/>
     {/each}

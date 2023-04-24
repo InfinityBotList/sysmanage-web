@@ -28,11 +28,13 @@ import MultiInput from "$lib/components/MultiInput.svelte";
 <div>
     <MultiInput 
         id={`s-names-${i}`} 
-        title="Names" 
+        title="Subdomains" 
         bind:values={server.Names} 
         placeholder="example.com, www.example.com etc."
         minlength={3}
     />
+
+    <div class="mb-2"></div>
 
     <InputSm
         id={`s-comment-${i}`}
