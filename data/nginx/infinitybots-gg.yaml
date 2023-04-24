@@ -1,7 +1,8 @@
 servers:
-  - names: 
-    - api
-    - spider
+  - id: "popplio"
+    names: 
+      - api
+      - spider
     comment: "Popplio"
     locations:
       - path: / # Path of the location
@@ -11,8 +12,9 @@ servers:
         #    value: "BAR"
         #  - name: "BAZ"
         #    value: "QUX"
-  - names: 
-    - rpc
+  - id: "arcadia-rpc"
+    names: 
+      - rpc
     comment: "Arcadia RPC"
     locations:
       - path: / # Path of the location

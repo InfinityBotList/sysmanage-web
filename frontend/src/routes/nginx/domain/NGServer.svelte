@@ -3,6 +3,7 @@
 import MultiInput from "$lib/components/MultiInput.svelte";
 
     interface NGServer {
+        ID: string,
         Names: string[],
         Comment: string,
         Broken: boolean,

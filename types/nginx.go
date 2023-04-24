@@ -6,6 +6,7 @@ type NginxServerManage struct {
 }
 
 type NginxServer struct {
+	ID        string          `yaml:"id" validate:"required"`
 	Names     []string        `yaml:"names" validate:"required"`
 	Comment   string          `yaml:"comment" validate:"required"`
 	Broken    bool            `yaml:"broken"`
