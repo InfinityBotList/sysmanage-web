@@ -1,5 +1,7 @@
 <script lang="ts">
 	import GreyText from "$lib/components/GreyText.svelte";
+	import ObjectRender from "$lib/components/ObjectRender.svelte";
+	import NgServer from "./NGServer.svelte";
 
     const getDomainId = (): string => {
         let searchParams = new URLSearchParams(window.location.search);
@@ -39,6 +41,17 @@
         <GreyText>Loading metadata...</GreyText>
     {:then domain}
         <h1 class="text-2xl font-semibold">Viewing {domain?.Domain}</h1>
+
+        <h2 class="text-xl font-semibold">Server List</h2>
+
+        <div class="flex flex-col space-y-2">
+            {#each domain?.Server?.Servers as server, i}
+                <NgServer bind:server={server} i={i} />
+            {/each}
+        </div>
+        <small>
+            <ObjectRender object={domain} />
+        </small>
     {:catch err}
         <p class="text-red-500">{err}</p>
     {/await}
