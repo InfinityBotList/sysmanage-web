@@ -26,7 +26,7 @@ import MultiInput from "$lib/components/MultiInput.svelte";
 </script>
 
 <div>
-    <p class="font-semibold">{server.ID}</p>
+    <h3 class="text-xl font-semibold">Editting {server.ID}</h3>
 
     <MultiInput 
         id={`s-names-${i}`} 
