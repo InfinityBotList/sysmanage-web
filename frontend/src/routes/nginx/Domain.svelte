@@ -19,10 +19,14 @@
     {#if showDomainInfo}
         <p class="font-semibold text-lg">More information</p>
         <div class="text-sm">
-            {#each domain?.Server?.Servers as server}
-                <ObjectRender object={server} />
-                <div class="mt-7"></div>
-            {/each}
+            {#if domain?.Server?.Servers.length == 0}
+                <p class="text-red-500">This is a brand new domain with no servers attached to it</p>
+            {:else}
+                {#each domain?.Server?.Servers as server}
+                    <ObjectRender object={server} />
+                    <div class="mt-7"></div>
+                {/each}
+            {/if}
         </div>
     {/if}
 </LinkCard>
