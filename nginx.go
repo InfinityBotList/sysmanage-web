@@ -223,6 +223,11 @@ func buildNginx(reqId string) {
 			return
 		}
 
+		if len(nginxCfg.Servers) == 0 {
+			logMap.Add(reqId, "ERROR: Failed to find servers in nginx definition "+file.Name()+", skipping...", true)
+			continue
+		}
+
 		// Validate nginx definition
 		err = v.Struct(nginxCfg)
 
