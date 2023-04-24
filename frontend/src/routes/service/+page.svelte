@@ -2,8 +2,6 @@
     import GreyText from "$lib/components/GreyText.svelte";
 	import EditService from "./EditService.svelte";
 
-    let service: any;
-
     const getServiceId = (): string => {
         let searchParams = new URLSearchParams(window.location.search);
 
@@ -27,7 +25,7 @@
 
 		let list = await serviceList.json();
 
-        service = list.find((service: any) => service?.ID == getServiceId());
+        let service = list.find((service: any) => service?.ID == getServiceId());
 
         if(!service) {
             throw new Error("Service not found");
@@ -43,5 +41,7 @@
     {:then service}
         <h1 class="text-2xl font-semibold">Viewing {service?.ID}</h1>
         <EditService service={service} />
+    {:catch err}
+        <p class="text-red-500">{err}</p>
     {/await}
 </div>

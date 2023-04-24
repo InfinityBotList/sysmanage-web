@@ -5,6 +5,7 @@
 	import TaskWindow from '../../lib/components/TaskWindow.svelte';
 	import { newTask } from '$lib/tasks';
     import Domain from './Domain.svelte';
+	import Button from '$lib/components/Button.svelte';
 
 	let buildNginxTaskId: string = "";
 	let buildNginxTaskOutput: string[] = [];
@@ -70,6 +71,11 @@
 	>
 		Build Nginx
 	</ButtonReact>
+	<Button 
+		link="/new/nginx"
+	>
+		Add Domain
+	</Button>
 
 	<div class="mb-3"></div>
 	
