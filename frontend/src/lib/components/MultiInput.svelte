@@ -23,7 +23,7 @@
     }
 </script>
 
-{#if showLabel}
+{#if showLabel || values.length == 0}
     <label for={id} class="block mb-1 font-medium text-gray-900 dark:text-gray-300">{label}</label>
 {:else}
     <label for={id} class="sr-only">{label}</label>
