@@ -16,6 +16,7 @@
             <NgServer bind:server={server} i={i} />
         </Section>
     {/each}
+    <hr class="mt-2 mb-2" />
     <Section title="Tree View">
         <ObjectRender object={domain} />
     </Section>
