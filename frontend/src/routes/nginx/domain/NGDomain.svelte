@@ -15,5 +15,6 @@
     {/each}
 </div>
 <small>
+    <p class="font-semibold mt-5">Tree View</p>
     <ObjectRender object={domain} />
 </small>
