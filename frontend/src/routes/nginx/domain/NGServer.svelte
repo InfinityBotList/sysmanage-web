@@ -26,6 +26,8 @@ import MultiInput from "$lib/components/MultiInput.svelte";
 </script>
 
 <div>
+    <p class="font-semibold">{server.ID}</p>
+
     <MultiInput 
         id={`s-names-${i}`} 
         title="Subdomains" 
