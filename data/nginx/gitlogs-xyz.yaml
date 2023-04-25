@@ -1,1 +1,10 @@
 servers:
+    - id: api
+      names:
+        - v2
+      comment: Git Logs API
+      broken: false
+      locations:
+        - path: /
+          proxy: http://localhost:19318
+          opts: []

@@ -277,7 +277,7 @@ func loadNginxApi(r *chi.Mux) {
 
 			if len(srv.Names) > 0 {
 				for i := range srv.Names {
-					srv.Names[i] = strings.Replace(srv.Names[i], req.Domain, "", 1)
+					srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
 					if strings.Contains(srv.Names[i], ".") {
 						w.WriteHeader(http.StatusBadRequest)
