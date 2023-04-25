@@ -2,12 +2,12 @@ package types
 
 type NginxServerManage struct {
 	Domain string    `validate:"required"`
-	Server NginxYaml `validate:"required"`
+	Server NginxYaml `validate:"required,dive"`
 }
 
 type NginxServer struct {
 	ID        string          `yaml:"id" validate:"required"`
-	Names     []string        `yaml:"names" validate:"required"`
+	Names     []string        `yaml:"names" validate:"required,min=1"`
 	Comment   string          `yaml:"comment" validate:"required"`
 	Broken    bool            `yaml:"broken"`
 	Locations []NginxLocation `yaml:"locations" validate:"required"`
