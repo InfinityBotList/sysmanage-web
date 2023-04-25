@@ -77,9 +77,6 @@
                 <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>    
             </Input>
         {/if}
-
-        <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
-        <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>
     {/each}
 
     {#if values.length == 0}
