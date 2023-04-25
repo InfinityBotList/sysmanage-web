@@ -29,42 +29,42 @@
     <label for={id} class="sr-only">{label}</label>
 {/if}
 <div id={id} class="mt-2 mb-2">
-    {#each values as value, i}
-        {#if small}
-            <InputSm
-                id={i.toString()}
-                inpClass="mb-1"
-                label={title + " " + (i + 1)}
-                placeholder={placeholder}
-                bind:value={value} 
-                minlength={minlength}
-                showErrors={showErrors}
-            >
-                <span class="mb-1">
-                    <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
-                    <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
-                </span>
-            </InputSm>
-        {:else}
-            <Input 
-                id={i.toString()}
-                inpClass="mb-1"
-                label={title + " " + (i + 1)}
-                placeholder={placeholder}
-                bind:value={value} 
-                minlength={minlength}
-            >
-                <span class="mb-1">
-                    <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
-                    <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
-                </span>
-            </Input>
-        {/if}
-    {/each}
+    <span class="ml-4">
+        {#each values as value, i}
+            {#if small}
+                <InputSm
+                    id={i.toString()}
+                    inpClass="mb-1"
+                    label={title + " " + (i + 1)}
+                    placeholder={placeholder}
+                    bind:value={value} 
+                    minlength={minlength}
+                    showErrors={showErrors}
+                >
+                    <span class="mb-1">
+                        <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
+                        <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
+                    </span>
+                </InputSm>
+            {:else}
+                <Input 
+                    id={i.toString()}
+                    inpClass="mb-1"
+                    label={title + " " + (i + 1)}
+                    placeholder={placeholder}
+                    bind:value={value} 
+                    minlength={minlength}
+                >
+                    <span class="mb-1">
+                        <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
+                        <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
+                    </span>
+                </Input>
+            {/if}
+        {/each}
+    </span>
 
     {#if values.length == 0}
         <ButtonReact onclick={() => addValue(-1)}>New {title}</ButtonReact>
     {/if}
-
-    <div class="mb-3"></div>
 </div>
