@@ -77,3 +77,6 @@ servers:
             - autoindex on;
             - add_header Access-Control-Allow-Origin *;
             - alias /iblcdn/public/;
+        - path: /json
+          proxy: ""
+          opts: []
