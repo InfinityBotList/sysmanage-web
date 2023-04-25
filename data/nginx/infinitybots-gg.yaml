@@ -54,3 +54,26 @@ servers:
         - path: /
           proxy: http://127.0.0.1:3011
           opts: []
+    - id: htmlsanitize
+      names:
+        - hs
+      comment: HTML Sanitization Service
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:5810
+          opts: []
+    - id: cdn
+      names: []
+      comment: IBL CDN
+      broken: false
+      locations:
+        - path: /
+          proxy: ""
+          opts:
+            - sendfile on;
+            - sendfile_max_chunk 1m;
+            - etag on;
+            - autoindex on;
+            - add_header Access-Control-Allow-Origin *;
+            - alias /iblcdn/public/;
