@@ -28,7 +28,6 @@
 
     $: if (bulkAddValues.length > 0) {
         values = [...values, ...bulkAddValues.split("\n")];
-        bulkAddValues = "";
     }
 </script>
 
@@ -51,6 +50,8 @@
             />
         {/if}
     {/if}
+
+    <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
 
     {#each values as value, i}
         {#if small}
@@ -84,6 +85,4 @@
     {/if}
 
     <div class="mb-3"></div>
-
-    <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
 </div>
