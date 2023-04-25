@@ -16,7 +16,7 @@ servers:
       broken: false
       locations:
         - path: /
-          proxy: http://127.0.0.1:3010
+          proxy: http://localhost:3010
           opts: []
     - id: widgets
       names:
