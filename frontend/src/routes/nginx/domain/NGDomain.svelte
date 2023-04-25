@@ -4,6 +4,7 @@
     import Section from "$lib/components/Section.svelte";
 	import DangerButton from "$lib/components/DangerButton.svelte";
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
+	import { error, success } from "$lib/strings";
 
     interface NgDomain {
         Domain: string,
@@ -29,6 +30,21 @@
     }
 
     export let domain: NgDomain;
+
+    const saveChanges = async () => {
+        let res = await fetch(`/api/nginx/updateDomain`, {
+            method: "POST",
+            body: JSON.stringify(domain)
+        });
+
+        if (!res.ok) {
+            let err = await res.text();
+            error(err);
+            return;
+        }
+
+        success("Successfully updated domain!");
+    }
 </script>
 
 <h1 class="text-2xl font-semibold">Viewing {domain?.Domain}</h1>
@@ -114,3 +130,7 @@
         <ObjectRender object={domain} />
     </Section>
 </div>
+
+<ButtonReact
+    onclick={saveChanges}
+>Save changes</ButtonReact>

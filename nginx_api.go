@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/infinitybotlist/eureka/crypto"
+	"gopkg.in/yaml.v3"
 )
 
 func loadNginxApi(r *chi.Mux) {
@@ -236,6 +237,82 @@ func loadNginxApi(r *chi.Mux) {
 		defer f.Close()
 
 		_, err = f.WriteString("servers:")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	r.Post("/api/nginx/updateDomain", func(w http.ResponseWriter, r *http.Request) {
+		var req types.NginxServerManage
+
+		err := json.NewDecoder(r.Body).Decode(&req)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		err = v.Struct(req)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		for _, srv := range req.Server.Servers {
+			if strings.Contains(srv.ID, " ") {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Server ID cannot contain spaces"))
+				return
+			}
+
+			if len(srv.Locations) > 0 {
+				for _, loc := range srv.Locations {
+					if loc.Path == "Not specified" {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte("Location Path must be specified"))
+						return
+					}
+				}
+			}
+		}
+
+		// Check that the domain exists
+		domainFileName := strings.ReplaceAll(req.Domain, ".", "-")
+
+		_, err = os.Stat(config.NginxDefinitions + "/" + domainFileName + ".yaml")
+
+		if errors.Is(err, fs.ErrNotExist) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Domain does not exist"))
+			return
+		}
+
+		// Update domain
+		f, err := os.Create(config.NginxDefinitions + "/" + domainFileName + ".yaml")
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		err = yaml.NewEncoder(f).Encode(req.Server)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		err = f.Close()
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
