@@ -6,6 +6,7 @@
     export let value: string = "";
     export let showErrors: boolean = true;
     export let description: string = "";
+    export let inpClass: string = "mb-6";
 
     let success: boolean | null = null;
 
@@ -29,7 +30,7 @@
     }
 </script>
 
-<div class="mb-6">
+<div class={inpClass}>
     <label for={id} class="block mb-1 font-medium text-gray-900 dark:text-gray-300">{label}</label>
     {#if description}
         <span class="text-md text-gray-500 dark:text-gray-400 mb-2">{description}</span>
