@@ -28,6 +28,14 @@
 <div>
     <h3 class="text-xl font-semibold">Editting {server.ID}</h3>
 
+    <InputSm
+        id={`s-id-${i}`}
+        label="ID"
+        placeholder="E.g. popplio, arcadia-rpc etc."
+        minlength={1}
+        bind:value={server.ID}
+    />
+
     <MultiInput 
         id={`s-names-${i}`} 
         title="Subdomain"
@@ -37,14 +45,6 @@
     />
 
     <div class="mb-2"></div>
-
-    <InputSm
-        id={`s-id-${i}`}
-        label="ID"
-        placeholder="E.g. popplio, arcadia-rpc etc."
-        minlength={1}
-        bind:value={server.ID}
-    />
 
     <InputSm
         id={`s-comment-${i}`}
