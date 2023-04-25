@@ -4,6 +4,7 @@
 	import Section from "$lib/components/Section.svelte";
     import Select from "$lib/components/Select.svelte";
 	import NgLocation from "./NGLocation.svelte";
+	import DangerButton from "$lib/components/DangerButton.svelte";
 
     interface NGServer {
         ID: string,
@@ -65,6 +66,12 @@
 
     {#each server.Locations as loc, i}
         <Section title={loc.Path}>
+            <DangerButton 
+                onclick={() => {
+                    // Delete the location
+                    server.Locations = server.Locations.filter((_, index) => index !== i);      
+                }}
+            >Delete Location</DangerButton>    
             <NgLocation bind:location={loc} i={i} />
         </Section>
     {/each}
