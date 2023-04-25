@@ -22,12 +22,11 @@
     <InputSm 
         id={`l-path-${i}`}
         label="Path"
+        description="You must have a path called '/' in order for stuff to work correctly"
         placeholder="E.g. /api"
         minlength={1}
         bind:value={location.Path}
     />
-    <GreyText>You must have a path called '/' in order for stuff to work correctly</GreyText>
-
     <InputSm 
         id={`l-proxy-${i}`}
         label="Proxy (Optional, leave blank to not proxy)"
