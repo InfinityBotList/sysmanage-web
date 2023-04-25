@@ -277,24 +277,28 @@ func loadNginxApi(r *chi.Mux) {
 				return
 			}
 
-			if len(srv.Names) > 0 {
-				for i := range srv.Names {
-					srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
+			if len(srv.Names) == 0 && !srv.Broken {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Server must have at least one subdomain"))
+				return
+			}
 
-					if strings.Contains(srv.Names[i], ".") || strings.Contains(srv.Names[i], " ") {
-						w.WriteHeader(http.StatusBadRequest)
-						w.Write([]byte("Subdomains should not include dots or spaces"))
-						return
-					}
+			for i := range srv.Names {
+				srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
-					if slices.Contains(getSub, srv.Names[i]) {
-						w.WriteHeader(http.StatusBadRequest)
-						w.Write([]byte("All subdomains must be unique"))
-						return
-					}
-
-					getSub = append(getSub, srv.Names[i])
+				if strings.Contains(srv.Names[i], ".") || strings.Contains(srv.Names[i], " ") {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte("Subdomains should not include dots or spaces"))
+					return
 				}
+
+				if slices.Contains(getSub, srv.Names[i]) {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte("All subdomains must be unique"))
+					return
+				}
+
+				getSub = append(getSub, srv.Names[i])
 			}
 
 			if len(srv.Locations) > 0 {
