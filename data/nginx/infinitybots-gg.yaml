@@ -1,21 +1,23 @@
 servers:
-  - id: "popplio"
-    names: 
-      - api
-      - spider
-    comment: "Popplio"
-    locations:
-      - path: / # Path of the location
-        proxy: "http://127.0.0.1:8081"
-        #opts:
-        #  - "proxy_set_header Host $host;"
-  - id: "arcadia-rpc"
-    names: 
-      - rpc
-    comment: "Arcadia RPC"
-    locations:
-      - path: / # Path of the location
-        proxy: "http://127.0.0.1:3010"
-      - path: /ws # Path of the location
-        proxy: "http://127.0.0.1:2222"
-    
+    - id: popplio
+      names:
+        - api
+        - spider
+      comment: Popplio
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:8081
+          opts: []
+    - id: arcadia-rpc
+      names:
+        - rpc
+      comment: Arcadia RPC
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:3010
+          opts: []
+        - path: /ws
+          proxy: http://127.0.0.1:2222
+          opts: []

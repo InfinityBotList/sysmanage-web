@@ -244,6 +244,8 @@ func loadNginxApi(r *chi.Mux) {
 			return
 		}
 
+		go persistToGit("")
+
 		w.WriteHeader(http.StatusNoContent)
 	})
 
@@ -319,6 +321,8 @@ func loadNginxApi(r *chi.Mux) {
 			w.Write([]byte(err.Error()))
 			return
 		}
+
+		go persistToGit("")
 
 		w.WriteHeader(http.StatusNoContent)
 	})
