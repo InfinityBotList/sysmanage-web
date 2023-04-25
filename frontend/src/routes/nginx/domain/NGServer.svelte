@@ -85,6 +85,38 @@
             >
                 Add Location Below
             </ButtonReact>
+            <ButtonReact 
+                onclick={() => {
+                    // Move the location up
+                    let newIndex = prompt("Which index would you like to move this location to? (0 is the top)");
+                    if (newIndex === null) return;
+
+                    let newIndexNum = parseInt(newIndex);
+
+                    if (isNaN(newIndexNum)) {
+                        alert("That is not a number!");
+                        return;
+                    }
+
+                    if (newIndexNum < 0 || newIndexNum > server.Locations.length - 1) {
+                        alert("That is not a valid index!");
+                        return;
+                    }
+
+                    // Get the location
+                    let location = server.Locations[i];
+
+                    // Get the location we are moving it to
+                    let newLocation = server.Locations[newIndexNum];
+
+                    // Set the location we are moving it to to the location we are moving
+                    server.Locations[newIndexNum] = location;
+                    server.Locations[i] = newLocation;
+
+                }}
+            >
+                Move Location
+            </ButtonReact>
             <NgLocation bind:location={loc} i={i} />
         </Section>
     {/each}
