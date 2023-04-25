@@ -279,7 +279,7 @@ func loadNginxApi(r *chi.Mux) {
 				for i := range srv.Names {
 					srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
-					if strings.Contains(srv.Names[i], ".") {
+					if srv.Names[i] == "@root" || strings.Contains(srv.Names[i], ".") {
 						w.WriteHeader(http.StatusBadRequest)
 						w.Write([]byte("Subdomains should not include dots"))
 						return

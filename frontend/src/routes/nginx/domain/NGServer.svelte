@@ -38,7 +38,7 @@
 
     <MultiInput 
         id={`s-names-${i}`} 
-        title="Subdomain"
+        title="Subdomain (@root for root domain)"
         bind:values={server.Names} 
         placeholder="example.com, www.example.com etc."
         minlength={3}

@@ -138,6 +138,10 @@ func buildNginx(reqId string) {
 				var parsedSlice []string
 
 				for _, v := range s {
+					if v == "@root" {
+						parsedSlice = append(parsedSlice, domain)
+						continue
+					}
 					parsedSlice = append(parsedSlice, v+"."+domain)
 				}
 
