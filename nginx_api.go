@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/infinitybotlist/eureka/crypto"
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 
@@ -279,7 +280,7 @@ func loadNginxApi(r *chi.Mux) {
 				for i := range srv.Names {
 					srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
-					if srv.Names[i] == "@root" || strings.Contains(srv.Names[i], ".") {
+					if strings.Contains(srv.Names[i], ".") {
 						w.WriteHeader(http.StatusBadRequest)
 						w.Write([]byte("Subdomains should not include dots"))
 						return
@@ -287,8 +288,10 @@ func loadNginxApi(r *chi.Mux) {
 				}
 			}
 
-			gotRoot := false
 			if len(srv.Locations) > 0 {
+				gotRoot := false
+				gotPaths := []string{}
+
 				for _, loc := range srv.Locations {
 					if loc.Path == "/" {
 						gotRoot = true
@@ -298,6 +301,14 @@ func loadNginxApi(r *chi.Mux) {
 						w.Write([]byte("Location Path must be specified"))
 						return
 					}
+
+					if slices.Contains(gotPaths, loc.Path) {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte("All locations must have a unique Path"))
+						return
+					}
+
+					gotPaths = append(gotPaths, loc.Path)
 				}
 
 				if !gotRoot {
