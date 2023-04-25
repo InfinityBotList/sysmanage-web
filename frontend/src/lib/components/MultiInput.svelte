@@ -66,8 +66,10 @@
                 minlength={minlength}
                 showErrors={showErrors}
             >
-                <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
-                <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>    
+                <span class="mb-1">
+                    <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
+                    <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
+                </span>
             </InputSm>
         {:else}
             <Input 
@@ -78,8 +80,10 @@
                 bind:value={value} 
                 minlength={minlength}
             >
-                <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
-                <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>    
+                <span class="mb-1">
+                    <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
+                    <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
+                </span>
             </Input>
         {/if}
     {/each}
