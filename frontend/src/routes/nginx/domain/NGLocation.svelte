@@ -13,6 +13,7 @@
 
     let opts: string[] = location.Opts || [];
 
+    // As Opts may be null, we use this reactive array to set it to an empty array if it is null
     $: location.Opts = opts;
 </script>
 

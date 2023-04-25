@@ -10,7 +10,7 @@
         Names: string[],
         Comment: string,
         Broken: boolean,
-        Location: NGLocation[],
+        Locations: NGLocation[],
     }
 
     interface NGLocation {
@@ -63,7 +63,7 @@
 
     <h3 class="text-xl font-semibold">Locations</h3>
 
-    {#each server.Location as loc, i}
+    {#each server.Locations as loc, i}
         <Section title={loc.Path}>
             <NgLocation bind:location={loc} i={i} />
         </Section>
