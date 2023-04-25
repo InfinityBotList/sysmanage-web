@@ -10,7 +10,7 @@ type NginxServer struct {
 	Names     []string        `yaml:"names" validate:"required"`
 	Comment   string          `yaml:"comment" validate:"required"`
 	Broken    bool            `yaml:"broken"`
-	Locations []NginxLocation `yaml:"locations"`
+	Locations []NginxLocation `yaml:"locations" validate:"required"`
 }
 
 type NginxLocation struct {
