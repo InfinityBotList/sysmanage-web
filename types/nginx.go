@@ -35,7 +35,7 @@ type NginxTemplate struct {
 }
 
 type NginxYaml struct {
-	Servers []NginxServer `yaml:"servers" validate:"required"`
+	Servers []NginxServer `yaml:"servers" validate:"required,dive"`
 }
 
 type NginxAPIPublishCert struct {
