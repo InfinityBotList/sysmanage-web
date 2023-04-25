@@ -3,6 +3,7 @@
     import ObjectRender from "$lib/components/ObjectRender.svelte";
     import Section from "$lib/components/Section.svelte";
 	import DangerButton from "$lib/components/DangerButton.svelte";
+	import ButtonReact from "$lib/components/ButtonReact.svelte";
 
     interface NgDomain {
         Domain: string,
@@ -44,10 +45,70 @@
                 }}
             >
                 Delete Server
-            </DangerButton>    
+            </DangerButton>
+            <ButtonReact
+                onclick={() => {
+                    // Add a new server
+                    domain.Server.Servers = [...domain.Server.Servers, {
+                        ID: "Not Specified",
+                        Names: [],
+                        Comment: "",
+                        Broken: false,
+                        Locations: []
+                    }];
+                }}
+            >
+                Add Server Below
+            </ButtonReact>    
+            <ButtonReact
+                onclick={() => {
+                    // Move the server up
+                    let newIndex = prompt("Which index would you like to move this server to? (0 is the top)");
+                    if (newIndex === null) return;
+
+                    let newIndexNum = parseInt(newIndex);
+
+                    if (isNaN(newIndexNum)) {
+                        alert("That is not a number!");
+                        return;
+                    }
+
+                    if (newIndexNum < 0 || newIndexNum > domain?.Server?.Servers.length - 1) {
+                        alert("That is not a valid index!");
+                        return;
+                    }
+
+                    // Get the location
+                    let location = domain?.Server?.Servers[i];
+
+                    // Get the location we are moving it to
+                    let newLocation = domain?.Server?.Servers[newIndexNum];
+
+                    // Set the location we are moving it to to the location we are moving
+                    domain.Server.Servers[newIndexNum] = location;
+                    domain.Server.Servers[i] = newLocation;
+                }}
+            >
+                Move Server
+            </ButtonReact>
+                
             <NgServer bind:server={server} i={i} />
         </Section>
     {/each}
+    <ButtonReact
+        onclick={() => {
+            // Add a new server
+            domain.Server.Servers = [...domain.Server.Servers, {
+                ID: "Not Specified",
+                Names: [],
+                Comment: "",
+                Broken: false,
+                Locations: []
+            }];
+        }}
+    >
+        Add Server
+    </ButtonReact>
     <hr class="mt-2 mb-2" />
     <Section title="Tree View">
         <ObjectRender object={domain} />
