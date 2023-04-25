@@ -29,7 +29,7 @@
     <label for={id} class="sr-only">{label}</label>
 {/if}
 <div id={id} class="mt-2 mb-2">
-    <span class="ml-4">
+    <div class="ml-4">
         {#each values as value, i}
             {#if small}
                 <InputSm
@@ -62,7 +62,7 @@
                 </Input>
             {/if}
         {/each}
-    </span>
+    </div>
 
     {#if values.length == 0}
         <ButtonReact onclick={() => addValue(-1)}>New {title}</ButtonReact>
