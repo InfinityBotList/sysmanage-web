@@ -119,7 +119,11 @@
                 Names: [],
                 Comment: "",
                 Broken: false,
-                Locations: []
+                Locations: [
+                    {
+                        Path: "/"
+                    }
+                ]
             }];
         }}
     >

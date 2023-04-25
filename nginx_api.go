@@ -287,13 +287,23 @@ func loadNginxApi(r *chi.Mux) {
 				}
 			}
 
+			gotRoot := false
 			if len(srv.Locations) > 0 {
 				for _, loc := range srv.Locations {
+					if loc.Path == "/" {
+						gotRoot = true
+					}
 					if loc.Path == "Not specified" {
 						w.WriteHeader(http.StatusBadRequest)
 						w.Write([]byte("Location Path must be specified"))
 						return
 					}
+				}
+
+				if !gotRoot {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte("Atleast one location named '/' must be specified"))
+					return
 				}
 			}
 		}

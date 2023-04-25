@@ -1,4 +1,5 @@
 <script lang="ts">
+	import GreyText from "$lib/components/GreyText.svelte";
 	import InputSm from "$lib/components/InputSm.svelte";
 	import MultiInput from "$lib/components/MultiInput.svelte";
 
@@ -25,6 +26,7 @@
         minlength={1}
         bind:value={location.Path}
     />
+    <GreyText>You must have a path called '/' in order for stuff to work correctly</GreyText>
 
     <InputSm 
         id={`l-proxy-${i}`}
