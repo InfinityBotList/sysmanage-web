@@ -21,6 +21,9 @@
     const addValue = (i: number) => {
         values = [...values.slice(0, i + 1), "", ...values.slice(i + 1)];
     }
+
+    let showBulkAdd = false;
+    let bulkAddValues = "";
 </script>
 
 {#if showLabel || values.length == 0}
@@ -55,5 +58,22 @@
 
     {#if values.length == 0}
         <ButtonReact onclick={() => addValue(-1)}>New {title}</ButtonReact>
+    {/if}
+
+    <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>Bulk Add</ButtonReact>
+    {#if showBulkAdd}
+        <Input
+            id={`${id}-bulk`}
+            label="Bulk Add"
+            placeholder="Enter one statement per line"
+            bind:value={bulkAddValues} 
+            minlength={0}
+            showErrors={true}
+        />
+
+        <ButtonReact onclick={() => {
+            values = bulkAddValues.split("\n");
+            showBulkAdd = false;
+        }}>Add</ButtonReact>
     {/if}
 </div>
