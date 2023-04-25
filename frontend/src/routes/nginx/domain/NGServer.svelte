@@ -1,6 +1,7 @@
 <script lang="ts">
 	import InputSm from "$lib/components/InputSm.svelte";
-import MultiInput from "$lib/components/MultiInput.svelte";
+    import MultiInput from "$lib/components/MultiInput.svelte";
+    import Select from "$lib/components/Select.svelte";
 
     interface NGServer {
         ID: string,
@@ -39,10 +40,27 @@ import MultiInput from "$lib/components/MultiInput.svelte";
     <div class="mb-2"></div>
 
     <InputSm
+        id={`s-id-${i}`}
+        label="ID"
+        placeholder="E.g. popplio, arcadia-rpc etc."
+        minlength={1}
+        bind:value={server.ID}
+    />
+
+    <InputSm
         id={`s-comment-${i}`}
         label="Comment"
         placeholder="E.g. Popplio Web API"
         minlength={1}
         bind:value={server.Comment}
+    />
+    <Select
+        name="broken"
+        placeholder="Is the server broken/disabled?"
+        bind:valueBool={server.Broken}
+        options={new Map([
+            ["Yes, it is", "true"],
+            ["No, its not", "false"],
+        ])}
     />
 </div>
