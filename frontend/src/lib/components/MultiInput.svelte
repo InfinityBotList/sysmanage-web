@@ -13,6 +13,7 @@
     export let small: boolean = true;
     export let showErrors: boolean = false;
     export let showLabel: boolean = true;
+    export let allowBulkAdd: boolean = true;
 
     const deleteValue = (i: number) => {
         values = values.filter((_, index) => index !== i);
@@ -24,6 +25,11 @@
 
     let showBulkAdd = false;
     let bulkAddValues = "";
+
+    $: if (bulkAddValues.length > 0) {
+        values = [...values, ...bulkAddValues.split("\n")];
+        bulkAddValues = "";
+    }
 </script>
 
 {#if showLabel || values.length == 0}
@@ -60,20 +66,21 @@
         <ButtonReact onclick={() => addValue(-1)}>New {title}</ButtonReact>
     {/if}
 
-    <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>Bulk Add</ButtonReact>
-    {#if showBulkAdd}
-        <Input
-            id={`${id}-bulk`}
-            label="Bulk Add"
-            placeholder="Enter one statement per line"
-            bind:value={bulkAddValues} 
-            minlength={0}
-            showErrors={true}
-        />
+    <div class="mb-3"></div>
 
-        <ButtonReact onclick={() => {
-            values = bulkAddValues.split("\n");
-            showBulkAdd = false;
-        }}>Add</ButtonReact>
+    {#if allowBulkAdd}
+        <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>Bulk Add</ButtonReact>
+        {#if showBulkAdd}
+            <Input
+                id={`${id}-bulk`}
+                label="Bulk Add"
+                placeholder="Enter one statement per line"
+                bind:value={bulkAddValues} 
+                minlength={0}
+                showErrors={true}
+            />
+        {/if}
     {/if}
+
+    <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
 </div>
