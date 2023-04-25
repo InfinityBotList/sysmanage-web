@@ -8,3 +8,11 @@ servers:
         - path: /
           proxy: http://127.0.0.1:4429
           opts: []
+    - id: api
+      names: []
+      comment: ""
+      broken: false
+      locations:
+        - path: /
+          proxy: ""
+          opts: []
