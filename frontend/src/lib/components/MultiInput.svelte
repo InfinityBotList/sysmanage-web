@@ -41,10 +41,10 @@
                     minlength={minlength}
                     showErrors={showErrors}
                 >
-                    <span class="mt-2">
+                    <div class="mt-2">
                         <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
                         <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
-                    </span>
+                    </div>
                 </InputSm>
             {:else}
                 <Input 
@@ -55,10 +55,10 @@
                     bind:value={value} 
                     minlength={minlength}
                 >
-                    <span class="mt-2">
+                    <div class="mt-2">
                         <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
                         <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
-                    </span>
+                    </div>
                 </Input>
             {/if}
         {/each}
