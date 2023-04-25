@@ -13,7 +13,6 @@
     export let small: boolean = true;
     export let showErrors: boolean = false;
     export let showLabel: boolean = true;
-    export let allowBulkAdd: boolean = true;
 
     const deleteValue = (i: number) => {
         values = values.filter((_, index) => index !== i);
@@ -22,13 +21,6 @@
     const addValue = (i: number) => {
         values = [...values.slice(0, i + 1), "", ...values.slice(i + 1)];
     }
-
-    let showBulkAdd = false;
-    let bulkAddValues = "";
-
-    $: if (bulkAddValues.length > 0) {
-        values = bulkAddValues.split("\n");
-    }
 </script>
 
 {#if showLabel || values.length == 0}
@@ -36,25 +28,7 @@
 {:else}
     <label for={id} class="sr-only">{label}</label>
 {/if}
-<div id={id} class="mt-2 mb-2 ml-4">
-    {#if allowBulkAdd}
-        <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>{showBulkAdd ? "Close" : "Import"}</ButtonReact>
-        {#if showBulkAdd}
-            <Input
-                id={`${id}-bulk`}
-                label="Bulk Add"
-                placeholder="Enter one statement per line"
-                bind:value={bulkAddValues} 
-                minlength={0}
-                showErrors={true}
-            />
-        {/if}
-    {/if}
-
-    {#if values.length > 0}
-        <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
-    {/if}
-
+<div id={id} class="mt-2 mb-2">
     {#each values as value, i}
         {#if small}
             <InputSm
