@@ -9,7 +9,7 @@
         <span>{title}</span>
     </summary>
 
-    <article class="mr-5">
+    <article class="ml-5">
         <slot />
     </article>
 </details>
