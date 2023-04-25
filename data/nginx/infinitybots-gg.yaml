@@ -86,3 +86,12 @@ servers:
             - add_header Access-Control-Allow-Origin *;
             - alias /iblcdn/public/;
             - autoindex_format json;
+    - id: tailscale
+      names:
+        - tailscale
+      comment: Tailscale Webhooks API
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:12091
+          opts: []
