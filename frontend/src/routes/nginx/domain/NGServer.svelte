@@ -1,25 +1,22 @@
 <script lang="ts">
 	import InputSm from "$lib/components/InputSm.svelte";
     import MultiInput from "$lib/components/MultiInput.svelte";
+	import Section from "$lib/components/Section.svelte";
     import Select from "$lib/components/Select.svelte";
+	import NgLocation from "./NGLocation.svelte";
 
     interface NGServer {
         ID: string,
         Names: string[],
         Comment: string,
         Broken: boolean,
-        Location: NGLocation,
+        Location: NGLocation[],
     }
 
     interface NGLocation {
         Path: string,
         Proxy?: string,
-        Opts?: KV[],
-    }
-
-    interface KV {
-        Name: string,
-        Value: string,
+        Opts?: string[],
     }
 
     export let server: NGServer;
@@ -63,4 +60,12 @@
             ["No, its not", "false"],
         ])}
     />
+
+    <h3 class="text-xl font-semibold">Locations</h3>
+
+    {#each server.Location as loc, i}
+        <Section title={loc.Path}>
+            <NgLocation bind:location={loc} i={i} />
+        </Section>
+    {/each}
 </div>

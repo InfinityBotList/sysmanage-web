@@ -21,8 +21,7 @@ servers:
       - path: / # Path of the location
         proxy: "http://127.0.0.1:8081"
         opts: # Options for the location, note that this cannot be a simple map as it needs to be ordered
-          - name: FOO
-            value: "BAR"
+          - "proxy_set_header Host $host" # As an example
 ```
 
 Cert and key file paths are derived by removing suffix and adding cert- and key- respectively as well as adding a PEM extension, e.g:

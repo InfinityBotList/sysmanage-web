@@ -14,14 +14,9 @@ type NginxServer struct {
 }
 
 type NginxLocation struct {
-	Path  string    `yaml:"path" validate:"required"`
-	Proxy string    `yaml:"proxy"`
-	Opts  []NginxKV `yaml:"opts"`
-}
-
-type NginxKV struct {
-	Name  string `yaml:"name" validate:"required"`
-	Value string `yaml:"value" validate:"required"`
+	Path  string   `yaml:"path" validate:"required"`
+	Proxy string   `yaml:"proxy"`
+	Opts  []string `yaml:"opts"`
 }
 
 type NginxMeta struct {

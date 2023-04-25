@@ -143,7 +143,7 @@ func buildNginx(reqId string) {
 
 				return strings.Join(parsedSlice, " ")
 			},
-			"ParseOpts": func(opts []types.NginxKV) string {
+			"ParseOpts": func(opts []string) string {
 				if len(opts) == 0 {
 					return ""
 				}
@@ -151,7 +151,11 @@ func buildNginx(reqId string) {
 				var parsedSlice []string
 
 				for _, v := range opts {
-					parsedSlice = append(parsedSlice, v.Name+" "+v.Value+";")
+					if strings.HasSuffix(v, ";") {
+						parsedSlice = append(parsedSlice, v)
+					} else {
+						parsedSlice = append(parsedSlice, v+";")
+					}
 				}
 
 				return "\n\t\t" + strings.Join(parsedSlice, "\n\t\t")
