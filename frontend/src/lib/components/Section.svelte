@@ -4,7 +4,7 @@
     export let open: boolean = false;
 </script>
 
-<details open={open} class="mb-2">
+<details open={open}>
     <summary class="font-semibold text-xl opacity-80 hover:cursor-pointer align-middle">
         <span>{title}</span>
     </summary>
