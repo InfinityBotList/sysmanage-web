@@ -18,6 +18,3 @@ servers:
         - path: /
           proxy: http://127.0.0.1:3010
           opts: []
-        - path: /ws
-          proxy: http://127.0.0.1:2222
-          opts: []
