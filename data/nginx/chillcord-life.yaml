@@ -3,7 +3,7 @@ servers:
       names:
         - '@root'
       comment: Website
-      broken: false
+      broken: true
       locations:
         - path: /
           proxy: http://127.0.0.1:4429
