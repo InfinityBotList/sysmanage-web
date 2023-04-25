@@ -79,4 +79,10 @@ servers:
             - alias /iblcdn/public/;
         - path: /json
           proxy: ""
-          opts: []
+          opts:
+            - sendfile on;
+            - sendfile_max_chunk 1m;
+            - autoindex on;
+            - add_header Access-Control-Allow-Origin *;
+            - alias /iblcdn/public/;
+            - autoindex_format json;
