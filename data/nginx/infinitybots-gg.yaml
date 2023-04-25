@@ -64,7 +64,8 @@ servers:
           proxy: http://127.0.0.1:5810
           opts: []
     - id: cdn
-      names: []
+      names:
+        - cdn
       comment: IBL CDN
       broken: false
       locations:

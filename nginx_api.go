@@ -277,12 +277,6 @@ func loadNginxApi(r *chi.Mux) {
 				return
 			}
 
-			if len(srv.Names) == 0 && !srv.Broken {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("Server must have at least one subdomain"))
-				return
-			}
-
 			for i := range srv.Names {
 				srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
