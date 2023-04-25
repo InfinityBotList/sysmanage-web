@@ -36,7 +36,7 @@
 {:else}
     <label for={id} class="sr-only">{label}</label>
 {/if}
-<div id={id} class="mt-2 mb-2">
+<div id={id} class="mt-2 mb-2 ml-4">
     {#if allowBulkAdd}
         <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>{showBulkAdd ? "Close" : "Import"}</ButtonReact>
         {#if showBulkAdd}
