@@ -275,6 +275,18 @@ func loadNginxApi(r *chi.Mux) {
 				return
 			}
 
+			if len(srv.Names) > 0 {
+				for i, name := range srv.Names {
+					srv.Names[i] = strings.Replace(name, req.Domain, "", 1)
+
+					if strings.Contains(name, ".") {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte("Subdomains should not include dots"))
+						return
+					}
+				}
+			}
+
 			if len(srv.Locations) > 0 {
 				for _, loc := range srv.Locations {
 					if loc.Path == "Not specified" {
