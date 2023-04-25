@@ -27,7 +27,7 @@
     let bulkAddValues = "";
 
     $: if (bulkAddValues.length > 0) {
-        values = [...values, ...bulkAddValues.split("\n")];
+        values = bulkAddValues.split("\n");
     }
 </script>
 
