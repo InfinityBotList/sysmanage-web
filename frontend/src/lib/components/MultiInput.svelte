@@ -51,7 +51,9 @@
         {/if}
     {/if}
 
-    <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
+    {#if values.length > 0}
+        <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
+    {/if}
 
     {#each values as value, i}
         {#if small}
