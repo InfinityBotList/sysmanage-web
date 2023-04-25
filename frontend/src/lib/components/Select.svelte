@@ -3,14 +3,6 @@
     export let value: string = "default";
     export let name: string;
     export let placeholder: string;
-
-    export let valueBool: boolean =  (value == "true" || value == "1");
-
-    $: if (value == "true" || value == "1") {
-      valueBool = true;
-    } else {
-      valueBool = false;
-    }
 </script>
 
 <label for={name} class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400">{placeholder}</label>

@@ -23,6 +23,10 @@
 
     export let server: NGServer;
     export let i: number;
+
+    let broken = server.Broken ? "true" : "false";
+
+    $: server.Broken = broken === "true";
 </script>
 
 <div>
@@ -56,7 +60,7 @@
     <Select
         name="broken"
         placeholder="Is the server broken/disabled?"
-        bind:valueBool={server.Broken}
+        bind:value={broken}
         options={new Map([
             ["Yes, it is", "true"],
             ["No, its not", "false"],
