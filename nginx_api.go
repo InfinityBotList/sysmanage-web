@@ -302,6 +302,12 @@ func loadNginxApi(r *chi.Mux) {
 						return
 					}
 
+					if strings.Contains(loc.Proxy, ";") || strings.Contains(loc.Proxy, " ") {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte("Proxy cannot contain spaces or semicolons"))
+						return
+					}
+
 					if slices.Contains(gotPaths, loc.Path) {
 						w.WriteHeader(http.StatusBadRequest)
 						w.Write([]byte("All locations must have a unique Path"))
