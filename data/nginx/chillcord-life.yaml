@@ -9,10 +9,11 @@ servers:
           proxy: http://127.0.0.1:4429
           opts: []
     - id: api
-      names: []
-      comment: ""
+      names:
+        - api
+      comment: Chillcord API
       broken: false
       locations:
         - path: /
-          proxy: ""
+          proxy: http://localhost:4428
           opts: []
