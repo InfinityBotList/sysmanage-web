@@ -269,6 +269,7 @@ func loadNginxApi(r *chi.Mux) {
 			return
 		}
 
+		getSub := []string{} // Used to check for duplicate subdomains
 		for _, srv := range req.Server.Servers {
 			if strings.Contains(srv.ID, " ") {
 				w.WriteHeader(http.StatusBadRequest)
@@ -280,11 +281,19 @@ func loadNginxApi(r *chi.Mux) {
 				for i := range srv.Names {
 					srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
-					if strings.Contains(srv.Names[i], ".") {
+					if strings.Contains(srv.Names[i], ".") || strings.Contains(srv.Names[i], " ") {
 						w.WriteHeader(http.StatusBadRequest)
-						w.Write([]byte("Subdomains should not include dots"))
+						w.Write([]byte("Subdomains should not include dots or spaces"))
 						return
 					}
+
+					if slices.Contains(getSub, srv.Names[i]) {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte("All subdomains must be unique"))
+						return
+					}
+
+					getSub = append(getSub, srv.Names[i])
 				}
 			}
 
