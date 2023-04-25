@@ -61,7 +61,10 @@
                 bind:value={value} 
                 minlength={minlength}
                 showErrors={showErrors}
-            />
+            >
+                <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
+                <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>    
+            </InputSm>
         {:else}
             <Input 
                 id={i.toString()}
@@ -69,7 +72,10 @@
                 placeholder={placeholder}
                 bind:value={value} 
                 minlength={minlength}
-            />
+            >
+                <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
+                <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>    
+            </Input>
         {/if}
 
         <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
