@@ -6,7 +6,7 @@ servers:
       broken: false
       locations:
         - path: /
-          proxy: http://localhost:4429
+          proxy: http://127.0.0.1:4429
           opts: []
     - id: api
       names:
@@ -15,5 +15,5 @@ servers:
       broken: false
       locations:
         - path: /
-          proxy: http://localhost:4428
+          proxy: http://127.0.0.1:4428
           opts: []
