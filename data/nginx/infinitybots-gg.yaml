@@ -18,3 +18,12 @@ servers:
         - path: /
           proxy: http://127.0.0.1:3010
           opts: []
+    - id: widgets
+      names:
+        - widgets
+      comment: Nightheart Widgets Server
+      broken: false
+      locations:
+        - path: /
+          proxy: http://localhost:3000
+          opts: []
