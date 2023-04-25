@@ -38,7 +38,7 @@
 {/if}
 <div id={id} class="mt-2 mb-2">
     {#if allowBulkAdd}
-        <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>Bulk Add</ButtonReact>
+        <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>{showBulkAdd ? "Close" : "Import"}</ButtonReact>
         {#if showBulkAdd}
             <Input
                 id={`${id}-bulk`}
@@ -57,6 +57,7 @@
         {#if small}
             <InputSm
                 id={i.toString()}
+                inpClass="mb-1"
                 label={title + " " + (i + 1)}
                 placeholder={placeholder}
                 bind:value={value} 
@@ -69,6 +70,7 @@
         {:else}
             <Input 
                 id={i.toString()}
+                inpClass="mb-1"
                 label={title + " " + (i + 1)}
                 placeholder={placeholder}
                 bind:value={value} 
