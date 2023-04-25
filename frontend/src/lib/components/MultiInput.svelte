@@ -37,7 +37,21 @@
 {:else}
     <label for={id} class="sr-only">{label}</label>
 {/if}
-<div id={id}>
+<div id={id} class="mt-2 mb-2">
+    {#if allowBulkAdd}
+        <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>Bulk Add</ButtonReact>
+        {#if showBulkAdd}
+            <Input
+                id={`${id}-bulk`}
+                label="Bulk Add"
+                placeholder="Enter one statement per line"
+                bind:value={bulkAddValues} 
+                minlength={0}
+                showErrors={true}
+            />
+        {/if}
+    {/if}
+
     {#each values as value, i}
         {#if small}
             <InputSm
@@ -67,20 +81,6 @@
     {/if}
 
     <div class="mb-3"></div>
-
-    {#if allowBulkAdd}
-        <ButtonReact onclick={() => showBulkAdd = !showBulkAdd}>Bulk Add</ButtonReact>
-        {#if showBulkAdd}
-            <Input
-                id={`${id}-bulk`}
-                label="Bulk Add"
-                placeholder="Enter one statement per line"
-                bind:value={bulkAddValues} 
-                minlength={0}
-                showErrors={true}
-            />
-        {/if}
-    {/if}
 
     <DangerButton onclick={() => values = []}>Clear {title}</DangerButton>
 </div>
