@@ -5,6 +5,7 @@
     import Select from "$lib/components/Select.svelte";
 	import NgLocation from "./NGLocation.svelte";
 	import DangerButton from "$lib/components/DangerButton.svelte";
+	import ButtonReact from "$lib/components/ButtonReact.svelte";
 
     interface NGServer {
         ID: string,
@@ -71,8 +72,30 @@
                     // Delete the location
                     server.Locations = server.Locations.filter((_, index) => index !== i);      
                 }}
-            >Delete Location</DangerButton>    
+            >
+                Delete Location
+            </DangerButton>
+            <ButtonReact
+                onclick={() => {
+                    // Add a new location
+                    server.Locations = [...server.Locations.slice(0, i + 1), {
+                        Path: "Not Specified",
+                    }, ...server.Locations.slice(i + 1)];
+                }}
+            >
+                Add Location Below
+            </ButtonReact>
             <NgLocation bind:location={loc} i={i} />
         </Section>
     {/each}
+    <ButtonReact
+        onclick={() => {
+            // Add a new location
+            server.Locations = [...server.Locations, {
+                Path: "Not Specified",
+            }];
+        }}
+    >
+        Add Location
+    </ButtonReact>
 </div>
