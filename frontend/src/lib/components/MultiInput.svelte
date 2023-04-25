@@ -41,7 +41,7 @@
                     minlength={minlength}
                     showErrors={showErrors}
                 >
-                    <span class="mb-3">
+                    <span class="mt-2">
                         <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
                         <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
                     </span>
@@ -55,7 +55,7 @@
                     bind:value={value} 
                     minlength={minlength}
                 >
-                    <span class="mb-3">
+                    <span class="mt-2">
                         <DangerButton onclick={() => deleteValue(i)}>Delete</DangerButton>
                         <ButtonReact onclick={() => addValue(i)}>Add</ButtonReact>        
                     </span>
