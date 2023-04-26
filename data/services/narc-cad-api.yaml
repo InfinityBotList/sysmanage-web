@@ -9,7 +9,6 @@ git:
     ref: refs/heads/master
     build_commands:
         - make run
-        - make mocks
         - bin/police-cad-api
     env: {}
     allow_dirty: false
