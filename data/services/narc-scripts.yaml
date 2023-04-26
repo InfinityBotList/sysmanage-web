@@ -1,6 +1,6 @@
 cmd: /usr/bin/npm start
 dir: /root/NARC/API
-target: cordx
+target: narc
 description: NARC Scripts Site
 after: ibl-maint
 broken: false
