@@ -9,7 +9,8 @@ git:
     ref: refs/heads/master
     build_commands:
         - go build -v
-    env: {}
+    env:
+        CGO_ENABLED: "0"
     allow_dirty: false
     config_files:
         - .env
