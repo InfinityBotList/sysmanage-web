@@ -1,4 +1,4 @@
-cmd: /root/NARC/bin/police-cad-api
+cmd: /root/NARC/CAD-API/police-cad-api
 dir: /root/NARC/CAD-API
 target: narc
 description: NARC CAD API
