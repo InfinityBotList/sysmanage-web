@@ -8,10 +8,8 @@ git:
     repo: https://github.com/NARC-FiveM/CAD-API
     ref: refs/heads/master
     build_commands:
-        - make run
-        - make mocks
-        - make swagger
-        - make serve-swagger
+        - go build -v
     env: {}
     allow_dirty: false
-    config_files: []
+    config_files:
+        - .env
