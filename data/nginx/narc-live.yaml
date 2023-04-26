@@ -6,5 +6,5 @@ servers:
       broken: false
       locations:
         - path: /
-          proxy: ""
+          proxy: http://127.0.0.1:5973
           opts: []
