@@ -8,7 +8,6 @@ git:
     repo: https://github.com/NARC-FiveM/CAD-API
     ref: refs/heads/master
     build_commands:
-        - make run
         - bin/police-cad-api
     env: {}
     allow_dirty: false
