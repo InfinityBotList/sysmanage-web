@@ -8,3 +8,12 @@ servers:
         - path: /
           proxy: http://127.0.0.1:5973
           opts: []
+    - id: CAD/MDT
+      names:
+        - cad
+      comment: NARC CAD/MDT
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:3973
+          opts: []
