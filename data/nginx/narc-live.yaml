@@ -1,1 +1,10 @@
 servers:
+    - id: Scripts
+      names:
+        - scripts
+      comment: NARC Scripts API
+      broken: false
+      locations:
+        - path: /
+          proxy: ""
+          opts: []
