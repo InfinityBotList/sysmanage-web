@@ -8,7 +8,7 @@ git:
     repo: https://github.com/NARC-FiveM/CAD-API
     ref: refs/heads/master
     build_commands:
-        - go build -v .
+        - make build
     env: {}
     allow_dirty: false
     config_files:
