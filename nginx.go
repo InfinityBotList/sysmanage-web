@@ -5,6 +5,7 @@ import (
 	"errors"
 	"html/template"
 	"os"
+	"os/exec"
 	"strings"
 	"sysmanage-web/types"
 
@@ -258,6 +259,34 @@ func buildNginx(reqId string) {
 			return
 		}
 
-		logMap.Add(reqId, "Created nginx file /etc/nginx/"+outFile, true)
+		logMap.Add(reqId, "Created nginx file /etc/nginx/conf.d/"+outFile, true)
+
+		// Run nginx -t to validate config
+		cmd := exec.Command("nginx", "-t")
+
+		cmd.Stdout = autoLogger{id: reqId}
+		cmd.Stderr = autoLogger{id: reqId, Error: true}
+
+		err = cmd.Run()
+
+		if err != nil {
+			logMap.Add(reqId, "ERROR: Failed to validate nginx config: "+err.Error(), true)
+			return
+		}
+
+		// Restart nginx
+		cmd = exec.Command("systemctl", "restart", "nginx")
+
+		cmd.Stdout = autoLogger{id: reqId}
+		cmd.Stderr = autoLogger{id: reqId, Error: true}
+
+		err = cmd.Run()
+
+		if err != nil {
+			logMap.Add(reqId, "ERROR: Failed to restart nginx: "+err.Error(), true)
+			return
+		}
+
+		logMap.Add(reqId, "Restarted nginx", true)
 	}
 }
