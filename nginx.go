@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"html/template"
-	"io"
 	"os"
 	"strings"
 	"sysmanage-web/types"
@@ -167,18 +166,6 @@ func buildNginx(reqId string) {
 		}).Parse(nginxTemplate),
 	)
 
-	// Create a temp folder for nginx to use
-	ngxDir, err := os.MkdirTemp("", ".ngx-temp")
-
-	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to create temp folder for nginx: "+err.Error(), true)
-		return
-	}
-
-	defer os.RemoveAll(ngxDir)
-
-	logMap.Add(reqId, "Created temp folder for nginx: "+ngxDir, true)
-
 	for _, file := range fsd {
 		if file.Name() == "_meta.yaml" {
 			logMap.Add(reqId, "Skipping _meta.yaml as already parsed", true)
@@ -246,7 +233,7 @@ func buildNginx(reqId string) {
 
 		// Create file
 		outFile := strings.TrimSuffix(file.Name(), ".yaml") + ".conf"
-		out, err := os.Create(ngxDir + "/" + outFile)
+		out, err := os.Create("/etc/nginx" + outFile)
 
 		if err != nil {
 			logMap.Add(reqId, "ERROR: Failed to create config file "+outFile+": "+err.Error(), true)
@@ -271,17 +258,6 @@ func buildNginx(reqId string) {
 			return
 		}
 
-		logMap.Add(reqId, "Created nginx file "+outFile, true)
-
-		// DEBUG: Read file
-		out.Seek(0, 0)
-		bytes, err := io.ReadAll(out)
-
-		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to read nginx file "+outFile+": "+err.Error(), true)
-			return
-		}
-
-		logMap.Add(reqId, "DEBUG: Nginx file "+outFile+" contents: "+string(bytes), true)
+		logMap.Add(reqId, "Created nginx file /etc/nginx/"+outFile, true)
 	}
 }
