@@ -1,0 +1,6 @@
+cmd: /root/NARC/CAD-API
+dir: /root/NARC/CAD-API
+target: cordx
+description: NARC CAD API
+after: ibl-maint
+broken: false
