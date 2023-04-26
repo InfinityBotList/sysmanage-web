@@ -233,7 +233,7 @@ func buildNginx(reqId string) {
 
 		// Create file
 		outFile := strings.TrimSuffix(file.Name(), ".yaml") + ".conf"
-		out, err := os.Create("/etc/nginx" + outFile)
+		out, err := os.Create("/etc/nginx/conf.d/" + outFile)
 
 		if err != nil {
 			logMap.Add(reqId, "ERROR: Failed to create config file "+outFile+": "+err.Error(), true)
