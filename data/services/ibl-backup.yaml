@@ -1,5 +1,0 @@
-cmd: "/usr/bin/ibl backupdb long"
-dir: "/root"
-target: ibl
-after: postgresql
-description: IBL Backup Service
