@@ -1,1 +1,10 @@
-servers: []
+servers:
+    - id: beta
+      names:
+        - beta
+      comment: DisWidgets Beta API
+      broken: false
+      locations:
+        - path: /
+          proxy: ""
+          opts: []
