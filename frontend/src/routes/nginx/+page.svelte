@@ -44,12 +44,12 @@
 	}
 
 	const showDomain = (
-		service: any, 
+		domainObj: any, 
 		domain: string,
 	): boolean => {
 		let flag = true
 
-		if(domain != "" && !service?.ID?.toLowerCase().includes(domain.toLowerCase())) {
+		if(domain != "" && !domainObj?.Domain?.toLowerCase().includes(domain.toLowerCase())) {
 			flag = false
 		}
 

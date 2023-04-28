@@ -33,7 +33,7 @@
 
         if(res.ok) {
             success("Successfully published certificates");
-            window.location.reload()
+            window.location.href = `/nginx/domain?id=${publishDomain}`;
         } else {
             let err = await res.text();
 
