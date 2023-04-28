@@ -33,8 +33,8 @@
 
         if(res.ok) {
             success("Successfully published certificates");
-            window.location.href = `/nginx/domain?id=${publishDomain}`;
-        } else {
+            window.location.reload()
+	} else {
             let err = await res.text();
 
             if(err == "ALREADY_EXISTS") {
@@ -110,8 +110,8 @@
 
         if(res.ok) {
             success("Successfully added domain");
-            window.location.reload();
-        } else {
+            window.location.href = `/nginx/domain?id=${publishDomain}`;
+	} else {
             let err = await res.text();
             error(err);
         }
