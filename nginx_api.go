@@ -278,6 +278,12 @@ func loadNginxApi(r *chi.Mux) {
 			}
 
 			for i := range srv.Names {
+				if srv.Names[i] == "" {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte("Emoty subdomains are not allowed"))
+					return
+				}
+
 				srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
 				if strings.Contains(srv.Names[i], ".") || strings.Contains(srv.Names[i], " ") {
