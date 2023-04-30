@@ -110,7 +110,7 @@
 
         if(res.ok) {
             success("Successfully added domain");
-            window.location.href = `/nginx/domain?id=${publishDomain}`;
+            window.location.href = `/nginx/domain?id=${addDomain}`;
 	} else {
             let err = await res.text();
             error(err);
