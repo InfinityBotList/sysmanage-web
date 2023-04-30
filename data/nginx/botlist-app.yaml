@@ -6,5 +6,5 @@ servers:
       broken: false
       locations:
         - path: /
-          proxy: http://localhost:1235
+          proxy: http://localhost:1234
           opts: []
