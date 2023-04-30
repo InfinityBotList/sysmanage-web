@@ -21,7 +21,7 @@ servers:
     - id: spider-api
       names:
         - spider
-      comment: v2 api for jobcord (spider
+      comment: v2 api for jobcord (spider)
       broken: false
       locations:
         - path: /
