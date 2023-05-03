@@ -105,3 +105,12 @@ servers:
         - path: /
           proxy: http://127.0.0.1:1234
           opts: []
+    - id: gitlogs-backup
+      names:
+        - git-sec
+      comment: Git Logs Backup Domain
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:19318
+          opts: []
