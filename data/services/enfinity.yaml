@@ -10,6 +10,6 @@ git:
     build_commands:
         - npm install
     env: {}
-    allow_dirty: true
+    allow_dirty: false
     config_files:
         - .env
