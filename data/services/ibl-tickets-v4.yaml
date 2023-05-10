@@ -1,5 +1,16 @@
-cmd: "/root/ibl-tickets/ibl-tickets"
-dir: "/root/ibl-tickets"
+cmd: /root/ibl-tickets/ibl-tickets
+dir: /root/ibl-tickets
 target: ibl
-after: ibl-maint
 description: IBL Tickets Bot [v4]
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/InfinityBotList/SupportBot
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+        - npm run build
+    env: {}
+    allow_dirty: true
+    config_files:
+        - .env
