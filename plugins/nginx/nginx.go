@@ -338,8 +338,18 @@ func updateDnsRecordCf(reqId string) {
 
 	for _, s := range srv {
 		for _, serverName := range s.Server.Servers {
+			if _, ok := zoneMap[s.Domain]; !ok {
+				logger.LogMap.Add(reqId, "No zone found for "+s.Domain+", skipping...", true)
+				continue
+			}
+
 			for _, name := range serverName.Names {
 				domExpanded := name + "." + s.Domain
+
+				if name == "@root" {
+					domExpanded = s.Domain
+				}
+
 				logger.LogMap.Add(reqId, "Updating IP of "+domExpanded+" to "+ip.String(), true)
 
 				// Find any existing records
