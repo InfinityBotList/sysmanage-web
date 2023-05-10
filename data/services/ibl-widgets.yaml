@@ -1,5 +1,15 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/Nightheart"
+cmd: /usr/bin/npm start
+dir: /root/Nightheart
 target: ibl
-after: popplio-v2
 description: IBL Widgets Server
+after: popplio-v2
+broken: false
+git:
+    repo: https://github.com/InfinityBotList/Nightheart
+    ref: refs/heads/main
+    build_commands:
+        - npm install
+        - npm run build
+    env: {}
+    allow_dirty: true
+    config_files: []
