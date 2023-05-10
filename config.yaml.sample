@@ -3,13 +3,6 @@ allowed_users:
   - 510065483693817867
 dp_secret: 
 dp_disable: false # Only enable when bootstrapping
-
-# Protected from killall 
-srvmod_bypass:
-  - sysmanage
-  - deployproxy
-  - ibl-maint
-
 url: https://sysmanage.infinitybots.gg
 
 # Common
