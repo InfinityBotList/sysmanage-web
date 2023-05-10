@@ -1,9 +1,12 @@
-package main
+package persist
 
 import (
 	"errors"
 	"fmt"
 	"strings"
+	"sysmanage-web/core/logger"
+	"sysmanage-web/core/plugins"
+	"sysmanage-web/core/state"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -20,16 +23,19 @@ func (po persistOutput) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func persistToGit(logId string) error {
-	// Open current directory as git repo
-
-	if logId != "" {
-		logMap.Add(logId, "Persisting changes to git", true)
+func PersistToGit(logId string) error {
+	if !plugins.Enabled("persist") {
+		return errors.New("not persisting, persist plugin is disabled")
 	}
 
-	if config.GithubPat == "" {
+	// Open current directory as git repo
+	if logId != "" {
+		logger.LogMap.Add(logId, "Persisting changes to git", true)
+	}
+
+	if state.Config.GithubPat == "" {
 		if logId != "" {
-			logMap.Add(logId, "WARNING: Github PAT not set. Git operations are disabled", true)
+			logger.LogMap.Add(logId, "WARNING: Github PAT not set. Git operations are disabled", true)
 		}
 		return nil
 	}
@@ -50,21 +56,21 @@ func persistToGit(logId string) error {
 	}
 
 	if logId != "" {
-		logMap.Add(logId, "Loaded working directory", true)
+		logger.LogMap.Add(logId, "Loaded working directory", true)
 	}
 
 	// First try pulling
 	err = w.Pull(&git.PullOptions{
 		Auth: &githttp.BasicAuth{
-			Username: config.GithubPat,
-			Password: config.GithubPat,
+			Username: state.Config.GithubPat,
+			Password: state.Config.GithubPat,
 		},
 	})
 
 	if err != nil {
 		if errors.Is(err, git.NoErrAlreadyUpToDate) {
 			if logId != "" {
-				logMap.Add(logId, "PASS: No changes to pull", true)
+				logger.LogMap.Add(logId, "PASS: No changes to pull", true)
 			}
 		} else {
 			fmt.Println(err)
@@ -72,20 +78,20 @@ func persistToGit(logId string) error {
 		}
 	} else {
 		if logId != "" {
-			logMap.Add(logId, "Pulled changes", true)
+			logger.LogMap.Add(logId, "Pulled changes", true)
 		}
 	}
 
 	if status, err := w.Status(); err == nil {
 		if status.IsClean() {
 			if logId != "" {
-				logMap.Add(logId, "No changes to persist", true)
+				logger.LogMap.Add(logId, "No changes to persist", true)
 			}
 
 			return nil
 		}
 	} else {
-		logMap.Add(logId, "FATAL: Error getting git status - "+err.Error(), true)
+		logger.LogMap.Add(logId, "FATAL: Error getting git status - "+err.Error(), true)
 	}
 
 	// Add all changes to the staging area
@@ -108,13 +114,13 @@ func persistToGit(logId string) error {
 	if err != nil {
 		if errors.Is(err, git.NoErrAlreadyUpToDate) {
 			if logId != "" {
-				logMap.Add(logId, "No changes to commit", true)
+				logger.LogMap.Add(logId, "No changes to commit", true)
 			}
 
 			return nil
 		} else if errors.Is(err, git.ErrEmptyCommit) {
 			if logId != "" {
-				logMap.Add(logId, "No changes to commit [doing so would create a empty commit]", true)
+				logger.LogMap.Add(logId, "No changes to commit [doing so would create a empty commit]", true)
 			}
 
 			return nil
@@ -125,15 +131,15 @@ func persistToGit(logId string) error {
 	}
 
 	if logId != "" {
-		logMap.Add(logId, "Committed changes", true)
+		logger.LogMap.Add(logId, "Committed changes", true)
 	}
 
 	outp := persistOutput{buf: &strings.Builder{}}
 
 	err = repo.Push(&git.PushOptions{
 		Auth: &githttp.BasicAuth{
-			Username: config.GithubPat,
-			Password: config.GithubPat,
+			Username: state.Config.GithubPat,
+			Password: state.Config.GithubPat,
 		},
 		Progress: outp,
 	})
@@ -143,8 +149,8 @@ func persistToGit(logId string) error {
 		err = repo.Push(&git.PushOptions{
 			Force: true,
 			Auth: &githttp.BasicAuth{
-				Username: config.GithubPat,
-				Password: config.GithubPat,
+				Username: state.Config.GithubPat,
+				Password: state.Config.GithubPat,
 			},
 			Progress: outp,
 		})
@@ -153,18 +159,18 @@ func persistToGit(logId string) error {
 			fmt.Println(err)
 
 			if logId != "" {
-				logMap.Add(logId, outp.buf.String()+": "+err.Error(), true)
+				logger.LogMap.Add(logId, outp.buf.String()+": "+err.Error(), true)
 			}
 
 			return err
 		}
 
 		if logId != "" {
-			logMap.Add(logId, "Pushed changes (force-push): "+outp.buf.String(), true)
+			logger.LogMap.Add(logId, "Pushed changes (force-push): "+outp.buf.String(), true)
 		}
 	} else {
 		if logId != "" {
-			logMap.Add(logId, "Pushed (no force-push):"+outp.buf.String(), true)
+			logger.LogMap.Add(logId, "Pushed (no force-push):"+outp.buf.String(), true)
 		}
 	}
 

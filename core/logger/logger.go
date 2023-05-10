@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"time"
@@ -62,19 +62,19 @@ func (l LogEntryMap) MarkDone(id string) {
 	l.Set(id, entry)
 }
 
-var logMap = LogEntryMap{}
+var LogMap = LogEntryMap{}
 
-type autoLogger struct {
-	id      string
+type AutoLogger struct {
+	ID      string
 	Error   bool
 	Newline bool
 }
 
-func (a autoLogger) Write(p []byte) (n int, err error) {
+func (a AutoLogger) Write(p []byte) (n int, err error) {
 	if a.Error {
-		logMap.Add(a.id, "ERROR: "+string(p), a.Newline)
+		LogMap.Add(a.ID, "ERROR: "+string(p), a.Newline)
 	} else {
-		logMap.Add(a.id, string(p), a.Newline)
+		LogMap.Add(a.ID, string(p), a.Newline)
 	}
 
 	return len(p), nil

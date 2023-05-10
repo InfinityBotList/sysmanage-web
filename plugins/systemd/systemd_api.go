@@ -1,4 +1,4 @@
-package main
+package systemd
 
 import (
 	"encoding/json"
@@ -14,7 +14,9 @@ import (
 	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
-	"sysmanage-web/types"
+	"sysmanage-web/core/logger"
+	"sysmanage-web/core/state"
+	"sysmanage-web/plugins/persist"
 )
 
 func loadServiceApi(r *chi.Mux) {
@@ -42,7 +44,7 @@ func loadServiceApi(r *chi.Mux) {
 	})
 
 	r.Post("/api/getDefinitionFolders", func(w http.ResponseWriter, r *http.Request) {
-		jsonStr, err := json.Marshal(config.ServiceDefinitions)
+		jsonStr, err := json.Marshal(serviceDefinitions)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -56,7 +58,7 @@ func loadServiceApi(r *chi.Mux) {
 
 	r.Post("/api/getMeta", func(w http.ResponseWriter, r *http.Request) {
 		// Open _meta.yaml
-		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
+		f, err := os.Open(serviceDefinitions + "/_meta.yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -65,7 +67,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Read file into TemplateYaml
-		var metaYaml types.MetaYAML
+		var metaYaml MetaYAML
 
 		err = yaml.NewDecoder(f).Decode(&metaYaml)
 
@@ -89,7 +91,7 @@ func loadServiceApi(r *chi.Mux) {
 	})
 
 	r.Post("/api/createService", func(w http.ResponseWriter, r *http.Request) {
-		var createService types.CreateTemplate
+		var createService CreateTemplate
 
 		err := yaml.NewDecoder(r.Body).Decode(&createService)
 
@@ -100,7 +102,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// validate createService
-		err = v.Struct(createService)
+		err = state.Validator.Struct(createService)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -109,7 +111,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Open _meta.yaml
-		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
+		f, err := os.Open(serviceDefinitions + "/_meta.yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -118,7 +120,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Read file into TemplateYaml
-		var metaYaml types.MetaYAML
+		var metaYaml MetaYAML
 
 		err = yaml.NewDecoder(f).Decode(&metaYaml)
 
@@ -162,7 +164,7 @@ func loadServiceApi(r *chi.Mux) {
 
 		// Check if service already exists
 		if r.URL.Query().Get("update") != "true" {
-			if _, err := os.Stat(config.ServiceDefinitions + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
+			if _, err := os.Stat(serviceDefinitions + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte("Service already exists:" + err.Error()))
 				return
@@ -173,7 +175,7 @@ func loadServiceApi(r *chi.Mux) {
 			}
 		} else {
 			// Open file and copy git integration into it
-			f, err := os.Open(config.ServiceDefinitions + "/" + createService.Name + ".yaml")
+			f, err := os.Open(serviceDefinitions + "/" + createService.Name + ".yaml")
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -182,7 +184,7 @@ func loadServiceApi(r *chi.Mux) {
 			}
 
 			// Read file into TemplateYaml
-			var serviceYaml types.TemplateYaml
+			var serviceYaml TemplateYaml
 
 			err = yaml.NewDecoder(f).Decode(&serviceYaml)
 
@@ -196,7 +198,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Create file
-		f, err = os.Create(config.ServiceDefinitions + "/" + createService.Name + ".yaml")
+		f, err = os.Create(serviceDefinitions + "/" + createService.Name + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -213,13 +215,13 @@ func loadServiceApi(r *chi.Mux) {
 			return
 		}
 
-		go persistToGit("")
+		go persist.PersistToGit("")
 
 		w.WriteHeader(http.StatusNoContent)
 	})
 
 	r.Post("/api/deleteService", func(w http.ResponseWriter, r *http.Request) {
-		var deleteService types.DeleteTemplate
+		var deleteService DeleteTemplate
 
 		err := yaml.NewDecoder(r.Body).Decode(&deleteService)
 
@@ -230,7 +232,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// validate deleteService
-		err = v.Struct(deleteService)
+		err = state.Validator.Struct(deleteService)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -259,59 +261,59 @@ func loadServiceApi(r *chi.Mux) {
 		logId := crypto.RandString(32)
 
 		go func() {
-			defer logMap.MarkDone(logId)
+			defer logger.LogMap.MarkDone(logId)
 
 			// delete yaml file, ignore if it doesn't exist
-			logMap.Add(logId, "Deleting service file...", true)
+			logger.LogMap.Add(logId, "Deleting service file...", true)
 
-			err = os.Remove(config.ServiceDefinitions + "/" + deleteService.Name + ".yaml")
+			err = os.Remove(serviceDefinitions + "/" + deleteService.Name + ".yaml")
 
 			if err != nil {
-				logMap.Add(logId, "Failed to delete service file: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to delete service file: "+err.Error(), true)
 			} else {
-				logMap.Add(logId, "Deleted service file successfully.", true)
+				logger.LogMap.Add(logId, "Deleted service file successfully.", true)
 			}
 
 			// disable service, ignore if it doesn't exist
 			err = exec.Command("systemctl", "disable", deleteService.Name).Run()
 
 			if err != nil {
-				logMap.Add(logId, "Failed to disable service: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to disable service: "+err.Error(), true)
 			} else {
-				logMap.Add(logId, "Disabled service successfully.", true)
+				logger.LogMap.Add(logId, "Disabled service successfully.", true)
 			}
 
 			// stop service, ignore if it doesn't exist
 			err = exec.Command("systemctl", "stop", deleteService.Name).Run()
 
 			if err != nil {
-				logMap.Add(logId, "Failed to stop service: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to stop service: "+err.Error(), true)
 			} else {
-				logMap.Add(logId, "Stopped service successfully.", true)
+				logger.LogMap.Add(logId, "Stopped service successfully.", true)
 			}
 
 			// delete service file, ignore if it doesn't exist
 			err = os.Remove("/etc/systemd/system/" + deleteService.Name + ".service")
 
 			if err != nil {
-				logMap.Add(logId, "Failed to delete service file: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to delete service file: "+err.Error(), true)
 			} else {
-				logMap.Add(logId, "Deleted service file successfully.", true)
+				logger.LogMap.Add(logId, "Deleted service file successfully.", true)
 			}
 
 			// reload systemd
 			err = exec.Command("systemctl", "daemon-reload").Run()
 
 			if err != nil {
-				logMap.Add(logId, "Failed to reload systemd: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to reload systemd: "+err.Error(), true)
 			} else {
-				logMap.Add(logId, "Reloaded systemd successfully.", true)
+				logger.LogMap.Add(logId, "Reloaded systemd successfully.", true)
 			}
 
-			err := persistToGit(logId)
+			err := persist.PersistToGit(logId)
 
 			if err != nil {
-				logMap.Add(logId, "Failed to persist to git: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to persist to git: "+err.Error(), true)
 			}
 		}()
 
@@ -356,24 +358,24 @@ func loadServiceApi(r *chi.Mux) {
 		logId := crypto.RandString(64)
 
 		cmd := exec.Command("journalctl", "-u", name, "-n", "50", "-f")
-		cmd.Stdout = autoLogger{id: logId}
-		cmd.Stderr = autoLogger{id: logId}
+		cmd.Stdout = logger.AutoLogger{ID: logId}
+		cmd.Stderr = logger.AutoLogger{ID: logId}
 		cmd.Stdin = nil
 
-		logMap.Add(logId, "goro:start", true)
+		logger.LogMap.Add(logId, "goro:start", true)
 
 		go func() {
-			logMap.Add(logId, "Starting logger for "+name, true)
+			logger.LogMap.Add(logId, "Starting logger for "+name, true)
 
 			err := cmd.Run()
 
 			if err != nil {
-				logMap.Add(logId, "Failed to get logs: "+err.Error(), true)
+				logger.LogMap.Add(logId, "Failed to get logs: "+err.Error(), true)
 			}
 
-			logMap.Add(logId, "Logger died:", true)
+			logger.LogMap.Add(logId, "Logger died:", true)
 
-			logMap.MarkDone(logId)
+			logger.LogMap.MarkDone(logId)
 		}()
 
 		go func() {
@@ -381,10 +383,10 @@ func loadServiceApi(r *chi.Mux) {
 
 			cmd.Process.Kill()
 
-			logMap.Add(logId, "Max open time reached, closing log.", true)
+			logger.LogMap.Add(logId, "Max open time reached, closing log.", true)
 
-			logMap.MarkDone(logId)
-			logMap.Set(logId, LogEntry{LastUpdate: time.Now()})
+			logger.LogMap.MarkDone(logId)
+			logger.LogMap.Set(logId, logger.LogEntry{LastUpdate: time.Now()})
 		}()
 
 		w.Write([]byte(logId))
@@ -400,8 +402,8 @@ func loadServiceApi(r *chi.Mux) {
 	})
 
 	r.Post("/api/getLogEntry", func(w http.ResponseWriter, r *http.Request) {
-		// Fetch from logmap
-		console := logMap.Get(r.URL.Query().Get("id"))
+		// Fetch from logger.LogMap
+		console := logger.LogMap.Get(r.URL.Query().Get("id"))
 
 		if console.IsDone {
 			w.Header().Set("X-Is-Done", "1")
@@ -433,7 +435,7 @@ func loadServiceApi(r *chi.Mux) {
 		case "killall":
 			// List all services and kill them
 			services := []string{"stop"}
-			fsd, err := os.ReadDir(config.ServiceDefinitions)
+			fsd, err := os.ReadDir(serviceDefinitions)
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -455,7 +457,7 @@ func loadServiceApi(r *chi.Mux) {
 					sname = file.Name()
 				}
 
-				if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+				if slices.Contains(srvModBypass, strings.TrimSuffix(sname, ".service")) {
 					continue
 				}
 
@@ -473,7 +475,7 @@ func loadServiceApi(r *chi.Mux) {
 		case "startall":
 			// List all services and start them
 			services := []string{"start"}
-			fsd, err := os.ReadDir(config.ServiceDefinitions)
+			fsd, err := os.ReadDir(serviceDefinitions)
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -494,9 +496,9 @@ func loadServiceApi(r *chi.Mux) {
 				if !strings.HasSuffix(file.Name(), ".yaml") {
 					sname = file.Name()
 				} else {
-					var service types.TemplateYaml
+					var service TemplateYaml
 
-					f, err := os.Open(config.ServiceDefinitions + "/" + file.Name())
+					f, err := os.Open(serviceDefinitions + "/" + file.Name())
 
 					if err != nil {
 						w.WriteHeader(http.StatusInternalServerError)
@@ -517,7 +519,7 @@ func loadServiceApi(r *chi.Mux) {
 					}
 				}
 
-				if slices.Contains(config.SrvModBypass, strings.TrimSuffix(sname, ".service")) {
+				if slices.Contains(srvModBypass, strings.TrimSuffix(sname, ".service")) {
 					continue
 				}
 
@@ -549,7 +551,7 @@ func loadServiceApi(r *chi.Mux) {
 			return
 		}
 
-		var gotService *types.ServiceManage
+		var gotService *ServiceManage
 		for _, service := range services {
 			if service.ID == name {
 				gotService = &service
@@ -566,7 +568,7 @@ func loadServiceApi(r *chi.Mux) {
 		logId := crypto.RandString(64)
 
 		go initDeploy(logId, *gotService)
-		go persistToGit("")
+		go persist.PersistToGit("")
 
 		w.Write([]byte(logId))
 	})
@@ -583,7 +585,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Check if service exists
-		var gotService *types.ServiceManage
+		var gotService *ServiceManage
 
 		for _, service := range services {
 			if service.ID == id {
@@ -598,7 +600,7 @@ func loadServiceApi(r *chi.Mux) {
 			return
 		}
 
-		var git *types.Git
+		var git *Git
 
 		err = yaml.NewDecoder(r.Body).Decode(&git)
 
@@ -608,7 +610,7 @@ func loadServiceApi(r *chi.Mux) {
 			return
 		}
 
-		err = v.Struct(git)
+		err = state.Validator.Struct(git)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -637,7 +639,7 @@ func loadServiceApi(r *chi.Mux) {
 		gotService.Service.Git = git
 
 		// Save service
-		f, err := os.Create(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+		f, err := os.Create(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -645,7 +647,7 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
 
 			return
 		}
@@ -658,7 +660,7 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
 
 			return
 		}
@@ -671,12 +673,12 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
 
 			return
 		}
 
-		err = os.Rename(config.ServiceDefinitions+"/"+gotService.ID+".yaml-1", config.ServiceDefinitions+"/"+gotService.ID+".yaml")
+		err = os.Rename(serviceDefinitions+"/"+gotService.ID+".yaml-1", serviceDefinitions+"/"+gotService.ID+".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -684,16 +686,16 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/" + gotService.ID + ".yaml-1")
+			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
 
 			return
 		}
 
-		go persistToGit("")
+		go persist.PersistToGit("")
 	})
 
 	r.Post("/api/updateMeta", func(w http.ResponseWriter, r *http.Request) {
-		var target types.MetaTarget
+		var target MetaTarget
 
 		err := json.NewDecoder(r.Body).Decode(&target)
 
@@ -703,7 +705,7 @@ func loadServiceApi(r *chi.Mux) {
 			return
 		}
 
-		err = v.Struct(target)
+		err = state.Validator.Struct(target)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -712,7 +714,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Open _meta.yaml
-		f, err := os.Open(config.ServiceDefinitions + "/_meta.yaml")
+		f, err := os.Open(serviceDefinitions + "/_meta.yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -721,7 +723,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Read file into TemplateYaml
-		var metaYaml types.MetaYAML
+		var metaYaml MetaYAML
 
 		err = yaml.NewDecoder(f).Decode(&metaYaml)
 
@@ -816,7 +818,7 @@ func loadServiceApi(r *chi.Mux) {
 		}
 
 		// Save service
-		f, err = os.Create(config.ServiceDefinitions + "/_meta.yaml-1")
+		f, err = os.Create(serviceDefinitions + "/_meta.yaml-1")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -824,7 +826,7 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+			os.Remove(serviceDefinitions + "/_meta.yaml-1")
 
 			return
 		}
@@ -837,7 +839,7 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+			os.Remove(serviceDefinitions + "/_meta.yaml-1")
 
 			return
 		}
@@ -850,12 +852,12 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+			os.Remove(serviceDefinitions + "/_meta.yaml-1")
 
 			return
 		}
 
-		err = os.Rename(config.ServiceDefinitions+"/_meta.yaml-1", config.ServiceDefinitions+"/_meta.yaml")
+		err = os.Rename(serviceDefinitions+"/_meta.yaml-1", serviceDefinitions+"/_meta.yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -863,12 +865,12 @@ func loadServiceApi(r *chi.Mux) {
 
 			// Close file and delete it
 			f.Close()
-			os.Remove(config.ServiceDefinitions + "/_meta.yaml-1")
+			os.Remove(serviceDefinitions + "/_meta.yaml-1")
 
 			return
 		}
 
-		go persistToGit("")
+		go persist.PersistToGit("")
 
 		w.WriteHeader(http.StatusOK)
 	})

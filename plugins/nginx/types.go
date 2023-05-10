@@ -1,4 +1,4 @@
-package types
+package nginx
 
 type NginxServerManage struct {
 	Domain string    `validate:"required"`

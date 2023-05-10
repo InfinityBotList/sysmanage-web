@@ -1,4 +1,4 @@
-package main
+package nginx
 
 import (
 	"crypto/tls"
@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sysmanage-web/types"
+	"sysmanage-web/core/state"
+	"sysmanage-web/plugins/persist"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/infinitybotlist/eureka/crypto"
@@ -46,7 +47,7 @@ func loadNginxApi(r *chi.Mux) {
 	})
 
 	r.Post("/api/nginx/publishCerts", func(w http.ResponseWriter, r *http.Request) {
-		var req types.NginxAPIPublishCert
+		var req NginxAPIPublishCert
 
 		err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -57,7 +58,7 @@ func loadNginxApi(r *chi.Mux) {
 		}
 
 		// Validate request
-		err = v.Struct(req)
+		err = state.Validator.Struct(req)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -227,7 +228,7 @@ func loadNginxApi(r *chi.Mux) {
 		}
 
 		// Add domain
-		f, err := os.Create(config.NginxDefinitions + "/" + domainFileName + ".yaml")
+		f, err := os.Create(nginxDefinitions + "/" + domainFileName + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -245,13 +246,13 @@ func loadNginxApi(r *chi.Mux) {
 			return
 		}
 
-		go persistToGit("")
+		go persist.PersistToGit("")
 
 		w.WriteHeader(http.StatusNoContent)
 	})
 
 	r.Post("/api/nginx/updateDomain", func(w http.ResponseWriter, r *http.Request) {
-		var req types.NginxServerManage
+		var req NginxServerManage
 
 		err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -261,7 +262,7 @@ func loadNginxApi(r *chi.Mux) {
 			return
 		}
 
-		err = v.Struct(req)
+		err = state.Validator.Struct(req)
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -341,7 +342,7 @@ func loadNginxApi(r *chi.Mux) {
 		// Check that the domain exists
 		domainFileName := strings.ReplaceAll(req.Domain, ".", "-")
 
-		_, err = os.Stat(config.NginxDefinitions + "/" + domainFileName + ".yaml")
+		_, err = os.Stat(nginxDefinitions + "/" + domainFileName + ".yaml")
 
 		if errors.Is(err, fs.ErrNotExist) {
 			w.WriteHeader(http.StatusBadRequest)
@@ -350,7 +351,7 @@ func loadNginxApi(r *chi.Mux) {
 		}
 
 		// Update domain
-		f, err := os.Create(config.NginxDefinitions + "/" + domainFileName + ".yaml")
+		f, err := os.Create(nginxDefinitions + "/" + domainFileName + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -374,7 +375,7 @@ func loadNginxApi(r *chi.Mux) {
 			return
 		}
 
-		go persistToGit("")
+		go persist.PersistToGit("")
 
 		w.WriteHeader(http.StatusNoContent)
 	})

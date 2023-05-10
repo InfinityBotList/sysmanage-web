@@ -1,4 +1,4 @@
-package types
+package systemd
 
 type ServiceManage struct {
 	Service TemplateYaml

@@ -1,4 +1,4 @@
-package main
+package nginx
 
 import (
 	"crypto/tls"
@@ -7,45 +7,46 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sysmanage-web/types"
+	"sysmanage-web/core/logger"
+	"sysmanage-web/core/state"
 
 	"gopkg.in/yaml.v3"
 )
 
-func loadNginxMeta() (types.NginxMeta, error) {
-	open, err := os.Open(config.NginxDefinitions + "/_meta.yaml")
+func loadNginxMeta() (NginxMeta, error) {
+	open, err := os.Open(nginxDefinitions + "/_meta.yaml")
 
 	if err != nil {
-		return types.NginxMeta{}, errors.New("Failed to open _meta.yaml file in " + config.NginxDefinitions + ": " + err.Error())
+		return NginxMeta{}, errors.New("Failed to open _meta.yaml file in " + nginxDefinitions + ": " + err.Error())
 	}
 
-	var meta types.NginxMeta
+	var meta NginxMeta
 
 	err = yaml.NewDecoder(open).Decode(&meta)
 
 	if err != nil {
-		return types.NginxMeta{}, errors.New("Failed to decode _meta.yaml file in " + config.NginxDefinitions + ": " + err.Error())
+		return NginxMeta{}, errors.New("Failed to decode _meta.yaml file in " + nginxDefinitions + ": " + err.Error())
 	}
 
 	// Validate meta
-	err = v.Struct(meta)
+	err = state.Validator.Struct(meta)
 
 	if err != nil {
-		return types.NginxMeta{}, errors.New("Failed to validate _meta.yaml file in " + config.NginxDefinitions + ": " + err.Error())
+		return NginxMeta{}, errors.New("Failed to validate _meta.yaml file in " + nginxDefinitions + ": " + err.Error())
 	}
 
 	return meta, nil
 }
 
-func getNginxDomainList() ([]types.NginxServerManage, error) {
+func getNginxDomainList() ([]NginxServerManage, error) {
 	// Get all files in path
-	fsd, err := os.ReadDir(config.NginxDefinitions)
+	fsd, err := os.ReadDir(nginxDefinitions)
 
 	if err != nil {
 		return nil, errors.New("Failed to read nginx definition " + err.Error())
 	}
 
-	servers := make([]types.NginxServerManage, 0)
+	servers := make([]NginxServerManage, 0)
 
 	for _, file := range fsd {
 		if file.Name() == "_meta.yaml" {
@@ -61,14 +62,14 @@ func getNginxDomainList() ([]types.NginxServerManage, error) {
 		}
 
 		// Read file into NginxServer
-		f, err := os.Open(config.NginxDefinitions + "/" + file.Name())
+		f, err := os.Open(nginxDefinitions + "/" + file.Name())
 
 		if err != nil {
 			return nil, errors.New("Failed to read nginx definition " + err.Error() + file.Name())
 		}
 
 		// Read file into NginxServer
-		var server types.NginxYaml
+		var server NginxYaml
 
 		err = yaml.NewDecoder(f).Decode(&server)
 
@@ -77,10 +78,10 @@ func getNginxDomainList() ([]types.NginxServerManage, error) {
 		}
 
 		if len(server.Servers) == 0 {
-			server.Servers = []types.NginxServer{}
+			server.Servers = []NginxServer{}
 		}
 
-		servers = append(servers, types.NginxServerManage{
+		servers = append(servers, NginxServerManage{
 			Domain: strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
 			Server: server,
 		})
@@ -90,45 +91,45 @@ func getNginxDomainList() ([]types.NginxServerManage, error) {
 }
 
 func buildNginx(reqId string) {
-	defer logMap.MarkDone(reqId)
+	defer logger.LogMap.MarkDone(reqId)
 
-	logMap.Add(reqId, "Waiting for other builds to finish...", true)
+	logger.LogMap.Add(reqId, "Waiting for other builds to finish...", true)
 
-	lsOp.Lock()
-	defer lsOp.Unlock()
+	state.LsOp.Lock()
+	defer state.LsOp.Unlock()
 
-	logMap.Add(reqId, "Starting build process to convert nginx templates to nginx config files...", true)
+	logger.LogMap.Add(reqId, "Starting build process to convert nginx templates to nginx config files...", true)
 
 	// First load in the _meta.yaml file from the folder
-	open, err := os.Open(config.NginxDefinitions + "/_meta.yaml")
+	open, err := os.Open(nginxDefinitions + "/_meta.yaml")
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to open _meta.yaml file in "+config.NginxDefinitions, true)
+		logger.LogMap.Add(reqId, "ERROR: Failed to open _meta.yaml file in "+nginxDefinitions, true)
 		return
 	}
 
-	var meta types.NginxMeta
+	var meta NginxMeta
 
 	err = yaml.NewDecoder(open).Decode(&meta)
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to decode _meta.yaml file in "+config.NginxDefinitions+": "+err.Error(), true)
+		logger.LogMap.Add(reqId, "ERROR: Failed to decode _meta.yaml file in "+nginxDefinitions+": "+err.Error(), true)
 		return
 	}
 
 	// Validate meta
-	err = v.Struct(meta)
+	err = state.Validator.Struct(meta)
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to validate _meta.yaml file in "+config.NginxDefinitions+": "+err.Error(), true)
+		logger.LogMap.Add(reqId, "ERROR: Failed to validate _meta.yaml file in "+nginxDefinitions+": "+err.Error(), true)
 		return
 	}
 
 	// Next load every nginx definition in the folder
-	fsd, err := os.ReadDir(config.NginxDefinitions)
+	fsd, err := os.ReadDir(nginxDefinitions)
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to read nginx definition "+err.Error(), true)
+		logger.LogMap.Add(reqId, "ERROR: Failed to read nginx definition "+err.Error(), true)
 		return
 	}
 
@@ -169,12 +170,12 @@ func buildNginx(reqId string) {
 
 	for _, file := range fsd {
 		if file.Name() == "_meta.yaml" {
-			logMap.Add(reqId, "Skipping _meta.yaml as already parsed", true)
+			logger.LogMap.Add(reqId, "Skipping _meta.yaml as already parsed", true)
 			continue // Skip _meta.yaml
 		}
 
 		if !strings.HasSuffix(file.Name(), ".yaml") {
-			logMap.Add(reqId, "Skipping "+file.Name()+" as not a yaml file", true)
+			logger.LogMap.Add(reqId, "Skipping "+file.Name()+" as not a yaml file", true)
 			continue // Skip non-yaml files
 		}
 
@@ -184,12 +185,12 @@ func buildNginx(reqId string) {
 
 		// Ensure certfile and keyfile exist
 		if _, err := os.Stat(certFile); os.IsNotExist(err) {
-			logMap.Add(reqId, "SANITY FAILED: Failed to find required certfile "+certFile, true)
+			logger.LogMap.Add(reqId, "SANITY FAILED: Failed to find required certfile "+certFile, true)
 			return
 		}
 
 		if _, err := os.Stat(keyFile); os.IsNotExist(err) {
-			logMap.Add(reqId, "SANITY FAILED: Failed to find required keyfile "+keyFile, true)
+			logger.LogMap.Add(reqId, "SANITY FAILED: Failed to find required keyfile "+keyFile, true)
 			return
 		}
 
@@ -197,38 +198,38 @@ func buildNginx(reqId string) {
 		_, err = tls.LoadX509KeyPair(certFile, keyFile)
 
 		if err != nil {
-			logMap.Add(reqId, "SANITY FAILED: Failed to parse certfile "+certFile+" and keyfile "+keyFile+": "+err.Error(), true)
+			logger.LogMap.Add(reqId, "SANITY FAILED: Failed to parse certfile "+certFile+" and keyfile "+keyFile+": "+err.Error(), true)
 			return
 		}
 
-		open, err := os.Open(config.NginxDefinitions + "/" + file.Name())
+		open, err := os.Open(nginxDefinitions + "/" + file.Name())
 
 		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to open nginx definition "+file.Name()+": "+err.Error(), true)
+			logger.LogMap.Add(reqId, "ERROR: Failed to open nginx definition "+file.Name()+": "+err.Error(), true)
 			return
 		}
 
 		defer open.Close()
 
-		var nginxCfg types.NginxYaml
+		var nginxCfg NginxYaml
 
 		err = yaml.NewDecoder(open).Decode(&nginxCfg)
 
 		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to decode nginx definition "+file.Name()+": "+err.Error(), true)
+			logger.LogMap.Add(reqId, "ERROR: Failed to decode nginx definition "+file.Name()+": "+err.Error(), true)
 			return
 		}
 
 		if len(nginxCfg.Servers) == 0 {
-			logMap.Add(reqId, "ERROR: Failed to find servers in nginx definition "+file.Name()+", skipping...", true)
+			logger.LogMap.Add(reqId, "ERROR: Failed to find servers in nginx definition "+file.Name()+", skipping...", true)
 			continue
 		}
 
 		// Validate nginx definition
-		err = v.Struct(nginxCfg)
+		err = state.Validator.Struct(nginxCfg)
 
 		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to validate nginx definition "+file.Name()+": "+err.Error(), true)
+			logger.LogMap.Add(reqId, "ERROR: Failed to validate nginx definition "+file.Name()+": "+err.Error(), true)
 			return
 		}
 
@@ -237,13 +238,13 @@ func buildNginx(reqId string) {
 		out, err := os.Create("/etc/nginx/conf.d/" + outFile)
 
 		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to create config file "+outFile+": "+err.Error(), true)
+			logger.LogMap.Add(reqId, "ERROR: Failed to create config file "+outFile+": "+err.Error(), true)
 			return
 		}
 
 		defer out.Close()
 
-		err = nginxTemplate.Execute(out, types.NginxTemplate{
+		err = nginxTemplate.Execute(out, NginxTemplate{
 			Servers:  nginxCfg.Servers,
 			Meta:     meta,
 			Domain:   strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
@@ -255,38 +256,38 @@ func buildNginx(reqId string) {
 		})
 
 		if err != nil {
-			logMap.Add(reqId, "ERROR: Failed to execute nginx template "+outFile+": "+err.Error(), true)
+			logger.LogMap.Add(reqId, "ERROR: Failed to execute nginx template "+outFile+": "+err.Error(), true)
 			return
 		}
 
-		logMap.Add(reqId, "Created nginx file /etc/nginx/conf.d/"+outFile, true)
+		logger.LogMap.Add(reqId, "Created nginx file /etc/nginx/conf.d/"+outFile, true)
 	}
 
 	// Run nginx -t to validate config
 	cmd := exec.Command("nginx", "-t")
 
-	cmd.Stdout = autoLogger{id: reqId}
-	cmd.Stderr = autoLogger{id: reqId, Error: true}
+	cmd.Stdout = logger.AutoLogger{ID: reqId}
+	cmd.Stderr = logger.AutoLogger{ID: reqId, Error: true}
 
 	err = cmd.Run()
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to validate nginx config: "+err.Error(), true)
+		logger.LogMap.Add(reqId, "ERROR: Failed to validate nginx config: "+err.Error(), true)
 		return
 	}
 
 	// Restart nginx
 	cmd = exec.Command("systemctl", "restart", "nginx")
 
-	cmd.Stdout = autoLogger{id: reqId}
-	cmd.Stderr = autoLogger{id: reqId, Error: true}
+	cmd.Stdout = logger.AutoLogger{ID: reqId}
+	cmd.Stderr = logger.AutoLogger{ID: reqId, Error: true}
 
 	err = cmd.Run()
 
 	if err != nil {
-		logMap.Add(reqId, "ERROR: Failed to restart nginx: "+err.Error(), true)
+		logger.LogMap.Add(reqId, "ERROR: Failed to restart nginx: "+err.Error(), true)
 		return
 	}
 
-	logMap.Add(reqId, "Restarted nginx", true)
+	logger.LogMap.Add(reqId, "Restarted nginx", true)
 }

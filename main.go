@@ -12,13 +12,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
+	"sysmanage-web/core/state"
+	"sysmanage-web/plugins/persist"
 	"sysmanage-web/types"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,22 +27,9 @@ var frontend embed.FS
 
 var (
 	config *types.Config
-	v      *validator.Validate
 
 	// Subbed frontend embed
 	serverRootSubbed fs.FS
-
-	// Mutex to ensure only one large scale operation is running at a time
-	lsOp = sync.Mutex{}
-
-	//go:embed data/servicegen/service.tmpl
-	serviceTemplate string
-
-	//go:embed data/nginxgen/nginx.tmpl
-	nginxTemplate string
-
-	//go:embed data/servicegen/target.tmpl
-	targetTemplate string
 )
 
 func ensureDpAuth(next http.Handler) http.Handler {
@@ -188,8 +175,7 @@ func main() {
 		panic(err)
 	}
 
-	// Create validator
-	v = validator.New()
+	state.Config = config
 
 	// Create subbed frontend embed
 	// Serve frontend
@@ -212,8 +198,25 @@ func main() {
 		middleware.Timeout(30*time.Second),
 	)
 
-	loadServiceApi(r)
-	loadNginxApi(r)
+	// Start loading the plugins
+	fmt.Println("Loading plugins...")
+
+	for name := range config.Plugins {
+		plugin, ok := plugins[name]
+
+		if !ok {
+			panic("Plugin " + name + " not found")
+		}
+
+		plugin(&types.PluginConfig{
+			Name: name,
+			Mux:  r,
+		})
+
+		state.LoadedPlugins = append(state.LoadedPlugins, name)
+
+		fmt.Println("Loading plugin " + name)
+	}
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnavailableForLegalReasons)
@@ -227,7 +230,7 @@ func main() {
 	}
 
 	// Always persist to git during initial startup
-	go persistToGit("")
+	go persist.PersistToGit("")
 
 	// Also, remove any old stale deploys here too
 	go func() {
