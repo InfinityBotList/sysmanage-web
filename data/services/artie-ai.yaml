@@ -1,5 +1,15 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/ArtieAI"
+cmd: /usr/bin/npm start
+dir: /root/ArtieAI
 target: artie
-after: ibl-maint
 description: Artie the AI
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/TheRealToxicDev/ArtieAI
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+    env: {}
+    allow_dirty: false
+    config_files:
+        - .env
