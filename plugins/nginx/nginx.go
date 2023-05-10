@@ -334,7 +334,7 @@ func updateDnsRecordCf(reqId string) {
 		for _, serverName := range s.Server.Servers {
 			for _, name := range serverName.Names {
 				domExpanded := name + "." + s.Domain
-				logger.LogMap.Add(reqId, "Updating IP of "+name+" to "+ip.String(), true)
+				logger.LogMap.Add(reqId, "Updating IP of "+domExpanded+" to "+ip.String(), true)
 
 				// Find any existing records
 
