@@ -353,7 +353,7 @@ func updateDnsRecordCf(reqId string) {
 				logger.LogMap.Add(reqId, "=> "+domExpanded+" to "+ip.String(), true)
 
 				// Find any existing records
-				records, _, err := cf.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(zoneMap[s.Domain]), cloudflare.ListDNSRecordsParams{Name: domExpanded})
+				records, _, err := cf.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(zoneMap[s.Domain]), cloudflare.ListDNSRecordsParams{Name: domExpanded, Type: "A"})
 
 				if err != nil {
 					logger.LogMap.Add(reqId, "Failed to list DNS records for "+domExpanded+": "+err.Error(), true)
