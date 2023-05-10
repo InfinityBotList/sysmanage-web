@@ -58,8 +58,6 @@ func (i OpaqueConfig) GetStringArray(key string) ([]string, error) {
 			val[i] = fmt.Sprintf("%s", v)
 		}
 
-		fmt.Println(val)
-
 		return val, nil
 	case nil:
 		return []string{}, nil
