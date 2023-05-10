@@ -3,6 +3,7 @@ package plugins
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"sysmanage-web/core/state"
 
@@ -49,11 +50,22 @@ func (i OpaqueConfig) GetStringArray(key string) ([]string, error) {
 		}
 
 		return val, nil
+	case []any:
+		// Convert to string array
+		val := make([]string, len(v))
+
+		for i, v := range v {
+			val[i] = fmt.Sprintf("%s", v)
+		}
+
+		fmt.Println(val)
+
+		return val, nil
 	case nil:
 		return []string{}, nil
 	}
 
-	return nil, errors.New("key not a string array: " + key)
+	return nil, errors.New("key not a string array: " + key + "type: " + fmt.Sprintf("%s", v))
 }
 
 func Enabled(plugin string) bool {

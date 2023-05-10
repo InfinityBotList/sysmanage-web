@@ -55,7 +55,7 @@ func InitPlugin(c *types.PluginConfig) error {
 	srvModBypass, err = cfgData.GetStringArray("srv_mod_bypass")
 
 	if err != nil {
-		return errors.New("srv_mod_bypass not set in config")
+		return err
 	}
 
 	loadServiceApi(c.Mux)

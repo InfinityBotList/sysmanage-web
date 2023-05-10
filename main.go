@@ -213,14 +213,18 @@ func main() {
 			panic("Plugin " + name + " not found")
 		}
 
-		plugin(&types.PluginConfig{
+		fmt.Println("Loading plugin " + name)
+
+		err := plugin(&types.PluginConfig{
 			Name: name,
 			Mux:  r,
 		})
 
-		state.LoadedPlugins = append(state.LoadedPlugins, name)
+		if err != nil {
+			panic(err)
+		}
 
-		fmt.Println("Loading plugin " + name)
+		state.LoadedPlugins = append(state.LoadedPlugins, name)
 	}
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
