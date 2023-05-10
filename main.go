@@ -34,6 +34,11 @@ var (
 
 func ensureDpAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if config.DPDisable {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		if r.Header.Get("X-DP-Host") == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Unauthorized. X-DP-Host header not found."))
