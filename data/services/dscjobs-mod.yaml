@@ -6,7 +6,7 @@ after: ibl-maint
 broken: false
 git:
     repo: https://github.com/DscJobs/Mod
-    ref: refs/heads/master
+    ref: refs/heads/main
     build_commands:
         - npm install
         - npm run build
