@@ -307,6 +307,8 @@ func getOutboundIP() (net.IP, error) {
 }
 
 func updateDnsRecordCf(reqId string) {
+	defer logger.LogMap.MarkDone(reqId)
+
 	if cf == nil {
 		logger.LogMap.Add(reqId, "Not updating DNS, CF is disabled!", true)
 		return

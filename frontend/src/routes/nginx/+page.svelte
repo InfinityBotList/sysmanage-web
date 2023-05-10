@@ -114,6 +114,12 @@
 		/>
 	{/if}
 
+	{#if updateDnsRecordCfId != ""}
+		<TaskWindow 
+			output={updateDnsRecordCfOutput}
+		/>
+	{/if}
+
 	<InputSm
 		id="domain"
 		label="Filter by domain"
