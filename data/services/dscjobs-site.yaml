@@ -1,5 +1,15 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/DscJobs"
+cmd: /usr/bin/npm start
+dir: /root/DscJobs
 target: dscjobs
-after: ibl-maint
 description: DscJobs Website
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/DscJobs/OldWebsite
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+    env: {}
+    allow_dirty: false
+    config_files:
+        - .env
