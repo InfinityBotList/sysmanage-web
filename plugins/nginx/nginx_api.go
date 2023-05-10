@@ -26,6 +26,14 @@ func loadNginxApi(r *chi.Mux) {
 		w.Write([]byte(reqId))
 	})
 
+	r.Post("/api/nginx/updateDnsRecordCf", func(w http.ResponseWriter, r *http.Request) {
+		reqId := crypto.RandString(64)
+
+		go updateDnsRecordCf(reqId)
+
+		w.Write([]byte(reqId))
+	})
+
 	r.Post("/api/nginx/getDomainList", func(w http.ResponseWriter, r *http.Request) {
 		domList, err := getNginxDomainList()
 
@@ -97,6 +105,15 @@ func loadNginxApi(r *chi.Mux) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Domain must contain a dot and must not be a subdomain"))
 			return
+		}
+
+		if cf != nil {
+			// Ensure domain is on cloudflare
+			if _, ok := zoneMap[req.Domain]; !ok {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Domain must be on Cloudflare"))
+				return
+			}
 		}
 
 		domain := strings.ReplaceAll(req.Domain, ".", "-")

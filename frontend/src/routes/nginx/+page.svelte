@@ -29,6 +29,28 @@
 		})
 	}
 
+	let updateDnsRecordCfId: string = "";
+	let updateDnsRecordCfOutput: string[] = [];
+	const updateDnsRecordCf = async () => {
+		let taskId = await fetch(`/api/nginx/updateDnsRecordCf`, {
+			method: "POST"
+		});
+
+		if(!taskId.ok) {
+			let errorStr = await taskId.text()
+
+			error(errorStr)
+
+			return
+		}
+
+		updateDnsRecordCfId = await taskId.text()
+
+		newTask(updateDnsRecordCfId, (output: string[]) => {
+			updateDnsRecordCfOutput = output
+		})
+	}
+
 	const getNginxDomainList = async () => {
 		let domList = await fetch(`/api/nginx/getDomainList`, {
 			method: "POST",
@@ -70,6 +92,11 @@
 		onclick={() => buildNginx()}
 	>
 		Build Nginx
+	</ButtonReact>
+	<ButtonReact 
+		onclick={() => updateDnsRecordCf()}
+	>
+		Update Cloudflare
 	</ButtonReact>
 	<Button 
 		link="/new/nginx"

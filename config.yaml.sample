@@ -12,6 +12,8 @@ github_pat:
 plugins:
   nginx:
     nginx_definitions: data/nginx
+    # Optional
+    cf_api_token: 
   persist:
     github_webhook_sig: 
   systemd:

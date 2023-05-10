@@ -1,6 +1,7 @@
 package state
 
 import (
+	"context"
 	"sync"
 	"sysmanage-web/types"
 
@@ -16,4 +17,6 @@ var (
 	Validator = validator.New()
 
 	LoadedPlugins = []string{}
+
+	Context = context.Background()
 )

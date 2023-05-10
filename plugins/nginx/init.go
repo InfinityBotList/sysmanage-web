@@ -5,11 +5,15 @@ import (
 	"os"
 	"sysmanage-web/core/plugins"
 	"sysmanage-web/types"
+
+	"github.com/cloudflare/cloudflare-go"
 )
 
-var nginxTemplate string
-
-var nginxDefinitions string
+var (
+	nginxTemplate    string
+	nginxDefinitions string
+	cf               *cloudflare.API
+)
 
 func InitPlugin(c *types.PluginConfig) error {
 	// Read data/nginxgen/nginx.tmpl
@@ -31,6 +35,20 @@ func InitPlugin(c *types.PluginConfig) error {
 
 	if err != nil {
 		return err
+	}
+
+	cfApiToken, err := cfgData.GetString("cf_api_token")
+
+	if err == nil {
+		api, err := cloudflare.NewWithAPIToken(cfApiToken)
+
+		if err != nil {
+			panic(err)
+		}
+
+		cf = api
+
+		setupCf()
 	}
 
 	loadNginxApi(c.Mux)

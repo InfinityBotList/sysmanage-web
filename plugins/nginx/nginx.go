@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"html/template"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -290,4 +291,54 @@ func buildNginx(reqId string) {
 	}
 
 	logger.LogMap.Add(reqId, "Restarted nginx", true)
+}
+
+// Get preferred outbound ip of this machine
+func getOutboundIP() (net.IP, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP, nil
+}
+
+func updateDnsRecordCf(reqId string) {
+	if cf == nil {
+		logger.LogMap.Add(reqId, "Not updating DNS, CF is disabled!", true)
+		return
+	}
+
+	logger.LogMap.Add(reqId, "Updating DNS record", true)
+
+	// Get current IP
+	ip, err := getOutboundIP()
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "Failed to get IP address:"+err.Error(), true)
+	}
+
+	logger.LogMap.Add(reqId, "Current IP address is "+ip.String(), true)
+
+	// Get servers to update
+	srv, err := getNginxDomainList()
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "Failed to get nginx domain list:"+err.Error(), true)
+	}
+
+	for _, s := range srv {
+		for _, serverName := range s.Server.Servers {
+			for _, name := range serverName.Names {
+				domExpanded := name + "." + s.Domain
+				logger.LogMap.Add(reqId, "Updating IP of "+name+" to "+ip.String(), true)
+
+				// Find any existing records
+
+			}
+		}
+	}
 }
