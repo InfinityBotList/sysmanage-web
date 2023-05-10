@@ -1,16 +1,20 @@
 package nginx
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"html/template"
 	"net"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sysmanage-web/core/logger"
 	"sysmanage-web/core/state"
+	"time"
 
+	"github.com/cloudflare/cloudflare-go"
 	"gopkg.in/yaml.v3"
 )
 
@@ -339,7 +343,57 @@ func updateDnsRecordCf(reqId string) {
 				logger.LogMap.Add(reqId, "Updating IP of "+domExpanded+" to "+ip.String(), true)
 
 				// Find any existing records
+				records, _, err := cf.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(zoneMap[s.Domain]), cloudflare.ListDNSRecordsParams{Name: domExpanded})
 
+				if err != nil {
+					logger.LogMap.Add(reqId, "Failed to list DNS records for "+domExpanded+": "+err.Error(), true)
+					continue
+				}
+
+				if len(records) > 1 {
+					logger.LogMap.Add(reqId, "Found multiple records for "+domExpanded+", skipping... len="+strconv.Itoa(len(records)), true)
+					continue
+				}
+
+				if len(records) == 1 {
+					logger.LogMap.Add(reqId, "Editing record "+domExpanded, true)
+
+					// Edit record
+					r := records[0]
+
+					trueBool := true
+
+					_, err = cf.UpdateDNSRecord(context.Background(), cloudflare.ZoneIdentifier(zoneMap[s.Domain]), cloudflare.UpdateDNSRecordParams{
+						ID:      r.ID,
+						Type:    "A",
+						Content: ip.String(),
+						Comment: "CI: Updated by sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
+						Proxied: &trueBool,
+					})
+
+					if err != nil {
+						logger.LogMap.Add(reqId, "Failed to update DNS record for "+domExpanded+": "+err.Error(), true)
+						continue
+					}
+				} else {
+					// Create record
+					logger.LogMap.Add(reqId, "Creating record "+domExpanded, true)
+
+					trueBool := true
+
+					_, err = cf.CreateDNSRecord(context.Background(), cloudflare.ZoneIdentifier(zoneMap[s.Domain]), cloudflare.CreateDNSRecordParams{
+						Name:      domExpanded,
+						Type:      "A",
+						Content:   ip.String(),
+						Comment:   "CI: Updated by sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
+						Proxied:   &trueBool,
+						Proxiable: true,
+					})
+
+					if err != nil {
+						logger.LogMap.Add(reqId, "Failed to create DNS record for "+domExpanded+": "+err.Error(), true)
+					}
+				}
 			}
 		}
 	}
