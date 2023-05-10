@@ -3,3 +3,13 @@ dir: "/root/enfinity"
 target: ibl
 after: ibl-maint
 description: Infinity Support Bot
+git:
+    repo: https://github.com/InfinityBotList/SupportBot
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+        - npm run build
+    env: {}
+    allow_dirty: true
+    config_files:
+        - .env
