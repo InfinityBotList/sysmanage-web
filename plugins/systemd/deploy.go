@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"strings"
 	"sysmanage-web/core/logger"
-	"sysmanage-web/core/plugins"
 	"sysmanage-web/core/state"
 	"time"
 
@@ -17,11 +16,6 @@ import (
 )
 
 func initDeploy(logId string, srv ServiceManage) {
-	if !plugins.Enabled("deploy") {
-		logger.LogMap.Add(logId, "FATAL: not deploying, deploy plugin is disabled.", true)
-		return
-	}
-
 	if srv.Service.Git == nil {
 		logger.LogMap.Add(logId, "FATAL: Service does not have git setup.", true)
 		return
