@@ -1,5 +1,16 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/DscJobsMod"
+cmd: /usr/bin/npm start
+dir: /root/DscJobsMod
 target: dscjobs
-after: ibl-maint
 description: DscJobs Moderation Bot
+after: ibl-maint
+broken: false
+git:
+    repo: https://github.com/DscJobs/Mod
+    ref: refs/heads/master
+    build_commands:
+        - npm install
+        - npm run build
+    env: {}
+    allow_dirty: false
+    config_files:
+        - config.toml
