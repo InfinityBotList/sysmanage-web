@@ -1,5 +1,6 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/ChillCord/API"
+cmd: /usr/bin/npm start
+dir: /root/ChillCord/API
 target: chillcord
-after: ibl-maint
 description: ChillCord API
+after: ibl-maint
+broken: true
