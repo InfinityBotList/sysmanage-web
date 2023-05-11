@@ -3,4 +3,4 @@ dir: /root/DisWidgets/DisWidgetsMod
 target: diswidgets
 description: DisWidgets moderation bot
 after: ibl-maint
-broken: false
+broken: true
