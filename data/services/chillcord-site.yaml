@@ -6,7 +6,7 @@ after: ibl-maint
 broken: false
 git:
     repo: https://github.com/Chill-Bot-Dev/ChillCord-Bot
-    ref: refs/heads/master
+    ref: refs/heads/main
     build_commands:
         - npm install
     env: {}
