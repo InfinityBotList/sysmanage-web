@@ -9,7 +9,6 @@ git:
     ref: refs/heads/master
     build_commands:
         - npm install
-        - npm run build
     env: {}
     allow_dirty: false
     config_files: []
