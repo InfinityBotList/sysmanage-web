@@ -96,10 +96,10 @@ servers:
         - path: /
           proxy: http://127.0.0.1:12091
           opts: []
-    - id: private-serverlist
+    - id: exp-protect
       names:
-        - sl
-      comment: Private Server Listing API
+        - exp-protect
+      comment: Experiment Protection Backend
       broken: false
       locations:
         - path: /
