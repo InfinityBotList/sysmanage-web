@@ -96,15 +96,6 @@ servers:
         - path: /
           proxy: http://127.0.0.1:12091
           opts: []
-    - id: exp-protect
-      names:
-        - exp-protect
-      comment: Experiment Protection Backend
-      broken: false
-      locations:
-        - path: /
-          proxy: http://127.0.0.1:1234
-          opts: []
     - id: gitlogs-backup
       names:
         - git-sec
