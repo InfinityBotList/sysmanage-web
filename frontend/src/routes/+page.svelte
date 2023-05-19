@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Service from './service/Service.svelte';
+	import Service from './plugins/systemd/service/Service.svelte';
 	import InputSm from '$lib/components/InputSm.svelte';
 	import ButtonReact from '$lib/components/ButtonReact.svelte';
 	import { error, success } from '$lib/strings';
@@ -135,12 +135,12 @@
 		Build Services
 	</ButtonReact>
 	<Button 
-		link="/nginx"
+		link="/plugins/nginx"
 	>
 		Nginx Settings
 	</Button>
 	<Button 
-		link="/new/service"
+		link="/plugins/systemd/new"
 	>
 		New Service
 	</Button>

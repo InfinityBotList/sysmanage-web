@@ -2,7 +2,7 @@
 	import InputSm from '$lib/components/InputSm.svelte';
 	import ButtonReact from '$lib/components/ButtonReact.svelte';
 	import { error, success } from '$lib/strings';
-	import TaskWindow from '../../lib/components/TaskWindow.svelte';
+	import TaskWindow from '../../../lib/components/TaskWindow.svelte';
 	import { newTask } from '$lib/tasks';
     import Domain from './Domain.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -99,7 +99,7 @@
 		Update Cloudflare
 	</ButtonReact>
 	<Button 
-		link="/new/nginx"
+		link="/plugins/nginx/new"
 	>
 		Add Domain
 	</Button>

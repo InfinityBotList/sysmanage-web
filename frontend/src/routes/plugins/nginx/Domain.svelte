@@ -10,7 +10,7 @@
 
 <LinkCard 
     title={domain?.Domain}
-    link={`/nginx/domain?id=${domain?.Domain}`}
+    link={`/plugins/nginx/domain?id=${domain?.Domain}`}
     linkText="Edit"
     onClickTitle={() => showDomainInfo = !showDomainInfo}
 >
