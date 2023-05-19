@@ -66,7 +66,7 @@
         success("Service created successfully!")
 
         setTimeout(() => {
-            goto(`/service?id=${name}`)
+            goto(`/plugins/systemd/service?id=${name}`)
         }, 1000)
     }
 </script>
