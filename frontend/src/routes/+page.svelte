@@ -145,7 +145,7 @@
 		New Service
 	</Button>
 	<Button 
-		link="/meta"
+		link="/plugins/systemd/meta"
 	>
 		Meta Editor
 	</Button>
