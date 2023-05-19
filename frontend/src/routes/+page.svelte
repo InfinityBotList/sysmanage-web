@@ -30,7 +30,7 @@
 </svelte:head>
 
 <section>
-	<h2 class="text-xl font-semibold">Links</h2>
+	<h2 class="text-xl font-semibold">What do you want to do?</h2>
 
     {#each links as link}
         <GreyText>{link.description}</GreyText>
