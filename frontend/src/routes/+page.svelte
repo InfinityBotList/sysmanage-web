@@ -12,8 +12,8 @@
 	<h2 class="text-xl font-semibold">What do you want to do?</h2>
 
     {#each links as link}
+        <h3 class="text-md font-semibold mt-5">{link.name}</h3>
         <Button link={link.link}>{link.name}</Button>
         <GreyText>{link.description}</GreyText>
-        <div class="mb-3"></div>
     {/each}
 </section>
