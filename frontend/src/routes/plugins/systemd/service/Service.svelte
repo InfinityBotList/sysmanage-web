@@ -121,7 +121,7 @@
 			<span class="ml-2">Stop</span>
 		</ButtonReact>
 
-		<Button link={`/service?id=${service?.ID}`}>
+		<Button link={`/plugins/systemd/service?id=${service?.ID}`}>
 			<Icon icon="mdi:file-edit" color="white" />
 			Edit
 		</Button>	
