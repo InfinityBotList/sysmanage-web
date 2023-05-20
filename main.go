@@ -23,7 +23,7 @@ import (
 )
 
 //go:embed all:frontend/build
-var frontend embed.FS
+var _frontend embed.FS
 
 var (
 	config *types.Config
@@ -184,7 +184,7 @@ func main() {
 
 	// Create subbed frontend embed
 	// Serve frontend
-	serverRootSubbed, err = fs.Sub(frontend, "frontend/build")
+	serverRootSubbed, err = fs.Sub(_frontend, "frontend/build")
 	if err != nil {
 		log.Fatal(err)
 	}
