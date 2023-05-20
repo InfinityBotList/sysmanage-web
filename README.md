@@ -2,10 +2,7 @@
 
 *All rights reserved...*
 
-Allows management of our systemd services, as well as creating/deleting them, quickly through the browser. This replaces ``infra-scripts`` and ``service-gen``.
+Allows management of our systems, though it can be used by anyone. 
+Core plugins included by default are ``nginx``, ``systemd``, ``persist``, ``frontend`` and ``actions``.
 
-**This must be running under deployproxy for additional security. When performing initial bootstrapping however, you can set dp_disable in ``config.yaml`` to disable this**
-
-1. Build ``frontend`` first using its README.md
-2. Run ``make`` to build the backend after creating the ``config.yaml`` file.  
- 
+This should be running under ``deployproxy`` or some other authentication proxy/system for additional security. If you wish to setup a different authentication proxy or do not want deployproxy auth checks, such as when performing initial bootstrapping, you can set ``dp_disable`` in ``config.yaml``.
