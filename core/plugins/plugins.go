@@ -11,6 +11,15 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// Update this list when adding new plugins
+var OfficialPlugins = []string{
+	"actions",
+	"frontend",
+	"nginx",
+	"persist",
+	"systemd",
+}
+
 type OpaqueConfig struct {
 	inner map[string]any
 }

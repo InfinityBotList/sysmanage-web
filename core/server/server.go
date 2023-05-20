@@ -167,6 +167,11 @@ func Init(
 ) {
 	frontend = frontendUi
 
+	if len(os.Args) > 0 {
+		parseArgs()
+		return
+	}
+
 	// Load config.yaml into Config struct
 	file, err := os.Open("config.yaml")
 
