@@ -48,27 +48,65 @@ var args = map[string]func(){
 			panic(err)
 		}
 
+		custDir := "tmp-cust"
+
+		err = os.Mkdir(custDir, 0755)
+
+		if err != nil {
+			panic(err)
+		}
+
 		for _, f := range fsd {
 			if !slices.Contains(plugins.OfficialPlugins, f.Name()) {
-				fmt.Println("Skipping custom plugin: " + f.Name())
-				continue
-			}
+				// Move out old plugin
+				fmt.Println("custom:", f.Name())
+				err = os.Rename("frontend/src/routes/plugins/"+f.Name(), custDir+"/"+f.Name())
 
-			// Remove old plugin
-			err = os.RemoveAll("frontend/src/routes/plugins/" + f.Name())
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+
+		// Remove old frontend
+		err = os.RemoveAll("frontend")
+
+		if err != nil {
+			panic(err)
+		}
+
+		// Move in new frontend
+		err = os.Rename(tmp+"/frontend", "frontend")
+
+		if err != nil {
+			panic(err)
+		}
+
+		// Move in custom plugins
+		fsd, err = os.ReadDir(custDir)
+
+		if err != nil {
+			panic(err)
+		}
+
+		for _, f := range fsd {
+			err = os.Rename(custDir+"/"+f.Name(), "frontend/src/routes/plugins/"+f.Name())
 
 			if err != nil {
-				fmt.Println("Failed to remove old plugin: " + f.Name())
 				panic(err)
 			}
+		}
 
-			// Copy new plugin
-			err = os.Rename(tmp+"/frontend/src/routes/plugins/"+f.Name(), "frontend/src/routes/plugins/"+f.Name())
+		err = os.RemoveAll(custDir)
 
-			if err != nil {
-				fmt.Println("Failed to copy new plugin: " + f.Name())
-				panic(err)
-			}
+		if err != nil {
+			panic(err)
+		}
+
+		err = os.RemoveAll(tmp)
+
+		if err != nil {
+			panic(err)
 		}
 	},
 }
