@@ -1,5 +1,0 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/MigiziWeb"
-target: migizi
-after: ibl-maint
-description: Migizi Site

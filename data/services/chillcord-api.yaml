@@ -1,6 +1,0 @@
-cmd: /usr/bin/npm start
-dir: /root/ChillCord/API
-target: chillcord
-description: ChillCord API
-after: ibl-maint
-broken: true

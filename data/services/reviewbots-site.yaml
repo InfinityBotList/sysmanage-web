@@ -1,6 +1,0 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/ReviewBots"
-target: reviewbots
-after: ibl-maint
-description: Review Bots Main Site
-broken: true # Does not work startup

@@ -1,6 +1,0 @@
-cmd: /usr/bin/npm start
-dir: /root/DisWidgets/Website
-target: diswidgets
-description: DisWidgets Site
-after: ibl-maint
-broken: true

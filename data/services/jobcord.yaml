@@ -1,6 +1,0 @@
-cmd: /root/JobCordAPI-v2/jobcord
-dir: /root/JobCordAPI-v2
-target: dscjobs
-description: JobCord
-after: ibl-maint
-broken: false

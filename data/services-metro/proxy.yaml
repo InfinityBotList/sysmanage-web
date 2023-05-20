@@ -1,5 +1,0 @@
-cmd: "/usr/bin/ibl proxy -o 0.0.0.0"
-dir: "/root"
-target: helpers-ibl
-after: nginx
-description: Base Proxy Helper [v4]

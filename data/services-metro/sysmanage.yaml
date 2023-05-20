@@ -1,6 +1,0 @@
-cmd: /root/github.com/infinitybotlist/sysmanage-web/github.com/infinitybotlist/sysmanage-web
-dir: /root/github.com/infinitybotlist/sysmanage-web
-target: helpers-ibl
-description: System Management
-after: network
-broken: false

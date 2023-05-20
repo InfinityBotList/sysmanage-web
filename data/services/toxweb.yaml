@@ -1,5 +1,0 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/ToxMod/Website"
-target: toxmod
-after: ibl-maint
-description: ToxMod Site

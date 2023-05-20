@@ -1,5 +1,0 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/SkynetBot"
-target: skynet
-after: ibl-maint
-description: Skynet Old

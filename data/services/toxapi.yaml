@@ -1,5 +1,0 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/ToxMod/API"
-target: toxmod
-after: ibl-maint
-description: ToxMod API

@@ -1,6 +1,0 @@
-cmd: /usr/bin/npm start
-dir: /root/Tweeter/Website
-target: tweeter
-description: Tweeter Bot Website
-after: ibl-maint
-broken: true

@@ -1,6 +1,0 @@
-cmd: "/usr/bin/npm start"
-dir: "/root/CordX/Beta"
-target: cordx
-after: ibl-maint
-description: CordX Beta Site
-broken: true # MongoDB issues
