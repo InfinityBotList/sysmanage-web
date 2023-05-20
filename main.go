@@ -206,14 +206,12 @@ func main() {
 	// Start loading the plugins
 	fmt.Println("Loading plugins...")
 
-	for name := range config.Plugins {
-		plugin, ok := plugins[name]
-
-		if !ok {
-			panic("Plugin " + name + " not found")
-		}
-
+	for name, plugin := range plugins {
 		fmt.Println("Loading plugin " + name)
+
+		if _, ok := state.Config.Plugins[name]; !ok {
+			panic("Plugin " + name + " not found in config.yaml")
+		}
 
 		err := plugin(&types.PluginConfig{
 			Name: name,
