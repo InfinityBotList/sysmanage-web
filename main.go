@@ -146,12 +146,12 @@ func routeStatic(next http.Handler) http.Handler {
 			f, err := serverRoot.Open(checkPath)
 
 			if err != nil {
-				fmt.Println("here")
-				r.URL.Path = "/404"
-				r.RequestURI = "/404"
-			} else {
-				f.Close()
+				w.Header().Set("Location", "/404?from="+r.URL.Path)
+				w.WriteHeader(http.StatusFound)
+				return
 			}
+
+			f.Close()
 
 			fserve := http.FileServer(serverRoot)
 			fserve.ServeHTTP(w, r)
