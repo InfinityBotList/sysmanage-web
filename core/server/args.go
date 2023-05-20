@@ -112,7 +112,7 @@ var args = map[string]func(){
 }
 
 func parseArgs() {
-	arg := os.Args[0]
+	arg := os.Args[1]
 
 	if f, ok := args[arg]; ok {
 		f()

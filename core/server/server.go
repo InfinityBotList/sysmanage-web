@@ -167,7 +167,7 @@ func Init(
 ) {
 	frontend = frontendUi
 
-	if len(os.Args) > 0 {
+	if len(os.Args) > 1 {
 		parseArgs()
 		return
 	}
