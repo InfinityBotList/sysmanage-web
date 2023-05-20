@@ -148,6 +148,7 @@ func routeStatic(next http.Handler) http.Handler {
 			if err != nil {
 				fmt.Println("here")
 				r.URL.Path = "/404"
+				r.RequestURI = "/404"
 			} else {
 				f.Close()
 			}
