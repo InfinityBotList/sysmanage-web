@@ -15,3 +15,5 @@ type PluginConfig struct {
 	Mux  *chi.Mux
 	Name string
 }
+
+type Plugin func(c *PluginConfig) error

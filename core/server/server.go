@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/sha512"
-	"embed"
 	"encoding/hex"
 	"fmt"
 	"io/fs"
@@ -23,8 +22,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed all:frontend/build
-var _frontend embed.FS
+var frontend fs.FS
 
 var (
 	config *types.Config
@@ -163,7 +161,12 @@ func routeStatic(next http.Handler) http.Handler {
 	})
 }
 
-func main() {
+func Init(
+	plugins map[string]types.Plugin,
+	frontendUi fs.FS,
+) {
+	frontend = frontendUi
+
 	// Load config.yaml into Config struct
 	file, err := os.Open("config.yaml")
 
@@ -185,7 +188,7 @@ func main() {
 
 	// Create subbed frontend embed
 	// Serve frontend
-	serverRootSubbed, err = fs.Sub(_frontend, "frontend/build")
+	serverRootSubbed, err = fs.Sub(frontend, "frontend/build")
 	if err != nil {
 		log.Fatal(err)
 	}
