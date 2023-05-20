@@ -147,9 +147,9 @@ func routeStatic(next http.Handler) http.Handler {
 
 			if err != nil {
 				r.URL.Path = "/404/index.html"
+			} else {
+				f.Close()
 			}
-
-			f.Close()
 
 			fserve := http.FileServer(serverRoot)
 			fserve.ServeHTTP(w, r)
