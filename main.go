@@ -146,9 +146,7 @@ func routeStatic(next http.Handler) http.Handler {
 			f, err := serverRoot.Open(checkPath)
 
 			if err != nil {
-				w.Header().Set("Location", "/404?from="+r.URL.Path)
-				w.WriteHeader(http.StatusFound)
-				return
+				r.URL.Path = "/404/index.html"
 			}
 
 			f.Close()

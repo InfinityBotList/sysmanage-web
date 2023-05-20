@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"sysmanage-web/core/plugins"
+	"sysmanage-web/plugins/frontend"
 	"sysmanage-web/types"
 
 	"github.com/cloudflare/cloudflare-go"
@@ -16,6 +17,21 @@ var (
 )
 
 func InitPlugin(c *types.PluginConfig) error {
+	// Register links
+	frontend.AddLink(c, frontend.Link{
+		Title:       "Nginx Configuration Management",
+		Description: "Manage nginx configurations on the system.",
+		LinkText:    "View Nginx Config",
+		Href:        "@root",
+	})
+
+	frontend.AddLink(c, frontend.Link{
+		Title:       "Add Nginx Server",
+		Description: "Add a new nginx server block to the system.",
+		LinkText:    "Add Server",
+		Href:        "@root/new",
+	})
+
 	// Read data/nginxgen/nginx.tmpl
 	bytes, err := os.ReadFile("data/nginxgen/nginx.tmpl")
 

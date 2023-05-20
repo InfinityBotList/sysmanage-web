@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"sysmanage-web/core/plugins"
+	"sysmanage-web/plugins/frontend"
 	"sysmanage-web/types"
 )
 
@@ -16,6 +17,21 @@ var (
 )
 
 func InitPlugin(c *types.PluginConfig) error {
+	// Register links
+	frontend.AddLink(c, frontend.Link{
+		Title:       "Systemd Service Management",
+		Description: "Manage systemd services on the system.",
+		LinkText:    "View Service List",
+		Href:        "@root",
+	})
+
+	frontend.AddLink(c, frontend.Link{
+		Title:       "Systemd Metadata Editor",
+		Description: "Edit the metadata of systemd targets on the system.",
+		LinkText:    "Edit Metadata",
+		Href:        "@root/meta",
+	})
+
 	// Open data/servicegen/target.tmpl
 	bytes, err := os.ReadFile("data/servicegen/target.tmpl")
 

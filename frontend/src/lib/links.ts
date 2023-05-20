@@ -1,10 +1,11 @@
 interface Link {
-    name: string;
-    description: string;
-    link: string;
-    plugin?: string;
+    Title:       string
+	Description: string
+	LinkText:    string
+	Href:        string
 }
 
+/*
 export const links: Link[] = [
     {
         name: "Service Management",
@@ -19,3 +20,24 @@ export const links: Link[] = [
         plugin: "nginx"
     },
 ]
+*/
+
+let links: Link[] = []
+
+export const getLinks = async (): Promise<Link[]> => {
+    if(links.length) {
+        return links // return cached links
+    }
+
+    let res = await fetch("/api/getRegisteredLinks", {
+        method: "POST"
+    })
+
+    if(!res.ok) {
+        throw new Error("Failed to fetch links")
+    }
+
+    links = await res.json()
+
+    return links
+}

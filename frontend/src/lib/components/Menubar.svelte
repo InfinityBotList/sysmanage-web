@@ -1,7 +1,7 @@
 <!--Tailwind menubar-->
 
 <script lang="ts">
-  import { links } from "$lib/links";
+  import { getLinks } from "$lib/links";
 
   function onClickMenu() {
     console.log("clicked");
@@ -33,8 +33,12 @@
   <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
     <a href="/" class="block px-3 py-2 text-base font-medium text-violet-600 rounded-md hover:text-gray-900 hover:bg-gray-50 dark:text-amber-400 dark:hover:text-white dark:hover:bg-gray-700">Home</a>
 
-    {#each links as link}
-      <a href={link.link} class="block px-3 py-2 text-base font-medium text-violet-600 rounded-md hover:text-gray-900 hover:bg-gray-50 dark:text-amber-400 dark:hover:text-white dark:hover:bg-gray-700">{link.name}</a>
-    {/each}
+    {#await getLinks() then links}
+      {#each links as link}
+        <a href={link.Href} class="block px-3 py-2 text-base font-medium text-violet-600 rounded-md hover:text-gray-900 hover:bg-gray-50 dark:text-amber-400 dark:hover:text-white dark:hover:bg-gray-700">{link.Title}</a>
+      {/each}
+    {:catch error}
+      <h2 class="text-xl">Error: {error?.message ? error?.message : error}</h2>
+    {/await}
   </div>
 </div>
