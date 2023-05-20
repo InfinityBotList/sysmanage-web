@@ -1,4 +1,4 @@
-module sysmanage-web
+module github.com/infinitybotlist/sysmanage-web
 
 go 1.20
 

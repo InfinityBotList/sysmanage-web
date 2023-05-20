@@ -1,4 +1,4 @@
-# sysmanage-web
+# github.com/infinitybotlist/sysmanage-web
 
 **Fork this repository if you would like to use it on your own system**
 

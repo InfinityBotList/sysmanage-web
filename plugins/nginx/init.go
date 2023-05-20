@@ -3,9 +3,10 @@ package nginx
 import (
 	"errors"
 	"os"
-	"sysmanage-web/core/plugins"
-	"sysmanage-web/plugins/frontend"
-	"sysmanage-web/types"
+
+	"github.com/infinitybotlist/sysmanage-web/core/plugins"
+	"github.com/infinitybotlist/sysmanage-web/plugins/frontend"
+	"github.com/infinitybotlist/sysmanage-web/types"
 
 	"github.com/cloudflare/cloudflare-go"
 )

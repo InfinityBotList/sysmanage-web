@@ -12,10 +12,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sysmanage-web/core/state"
-	"sysmanage-web/plugins/persist"
-	"sysmanage-web/types"
 	"time"
+
+	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
+	"github.com/infinitybotlist/sysmanage-web/types"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

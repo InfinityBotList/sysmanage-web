@@ -14,9 +14,9 @@ import (
 	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
-	"sysmanage-web/core/logger"
-	"sysmanage-web/core/state"
-	"sysmanage-web/plugins/persist"
+	"github.com/infinitybotlist/sysmanage-web/core/logger"
+	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 )
 
 func loadServiceApi(r *chi.Mux) {

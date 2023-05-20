@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sysmanage-web/core/state"
+
+	"github.com/infinitybotlist/sysmanage-web/core/state"
 
 	"golang.org/x/exp/slices"
 )

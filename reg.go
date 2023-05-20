@@ -1,12 +1,12 @@
 package main
 
 import (
-	"sysmanage-web/plugins/actions"
-	"sysmanage-web/plugins/frontend"
-	"sysmanage-web/plugins/nginx"
-	"sysmanage-web/plugins/persist"
-	"sysmanage-web/plugins/systemd"
-	"sysmanage-web/types"
+	"github.com/infinitybotlist/sysmanage-web/plugins/actions"
+	"github.com/infinitybotlist/sysmanage-web/plugins/frontend"
+	"github.com/infinitybotlist/sysmanage-web/plugins/nginx"
+	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
+	"github.com/infinitybotlist/sysmanage-web/plugins/systemd"
+	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
 type plugin func(c *types.PluginConfig) error

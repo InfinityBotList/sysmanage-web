@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sysmanage-web/core/state"
-	"sysmanage-web/plugins/persist"
+
+	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/infinitybotlist/eureka/crypto"

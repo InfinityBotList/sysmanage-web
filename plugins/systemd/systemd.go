@@ -7,9 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sysmanage-web/core/logger"
-	"sysmanage-web/core/state"
-	"sysmanage-web/plugins/persist"
+
+	"github.com/infinitybotlist/sysmanage-web/core/logger"
+	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 
 	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"

@@ -2,7 +2,8 @@ package frontend
 
 import (
 	"strings"
-	"sysmanage-web/types"
+
+	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
 var RegisteredLinks []Link

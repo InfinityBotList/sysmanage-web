@@ -5,9 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sysmanage-web/core/logger"
-	"sysmanage-web/core/state"
 	"time"
+
+	"github.com/infinitybotlist/sysmanage-web/core/logger"
+	"github.com/infinitybotlist/sysmanage-web/core/state"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -115,11 +116,11 @@ func initDeploy(logId string, srv ServiceManage) {
 					return
 				}
 
-				_, err = w.Commit("ci(update): Auto commit from sysmanage-web", &git.CommitOptions{
+				_, err = w.Commit("ci(update): Auto commit from github.com/infinitybotlist/sysmanage-web", &git.CommitOptions{
 					All:               true,
 					AllowEmptyCommits: true,
 					Author: &object.Signature{
-						Name: "sysmanage-web[auto]",
+						Name: "github.com/infinitybotlist/sysmanage-web[auto]",
 						When: time.Now(),
 					},
 				})

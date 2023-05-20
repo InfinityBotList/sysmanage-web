@@ -10,9 +10,10 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sysmanage-web/core/logger"
-	"sysmanage-web/core/state"
 	"time"
+
+	"github.com/infinitybotlist/sysmanage-web/core/logger"
+	"github.com/infinitybotlist/sysmanage-web/core/state"
 
 	"github.com/cloudflare/cloudflare-go"
 	"gopkg.in/yaml.v3"
@@ -377,7 +378,7 @@ func updateDnsRecordCf(reqId string) {
 						ID:      r.ID,
 						Type:    "A",
 						Content: ip.String(),
-						Comment: "CI: sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
+						Comment: "CI: github.com/infinitybotlist/sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
 						Proxied: &trueBool,
 					})
 
@@ -395,7 +396,7 @@ func updateDnsRecordCf(reqId string) {
 						Name:      domExpanded,
 						Type:      "A",
 						Content:   ip.String(),
-						Comment:   "CI: sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
+						Comment:   "CI: github.com/infinitybotlist/sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
 						Proxied:   &trueBool,
 						Proxiable: true,
 					})

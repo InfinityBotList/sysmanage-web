@@ -3,7 +3,8 @@ package state
 import (
 	"context"
 	"sync"
-	"sysmanage-web/types"
+
+	"github.com/infinitybotlist/sysmanage-web/types"
 
 	"github.com/go-playground/validator/v10"
 )

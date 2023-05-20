@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sysmanage-web/core/logger"
-	"sysmanage-web/core/plugins"
-	"sysmanage-web/core/state"
 	"time"
+
+	"github.com/infinitybotlist/sysmanage-web/core/logger"
+	"github.com/infinitybotlist/sysmanage-web/core/plugins"
+	"github.com/infinitybotlist/sysmanage-web/core/state"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -106,7 +107,7 @@ func PersistToGit(logId string) error {
 	_, err = w.Commit("ci(update): persist changes to git", &git.CommitOptions{
 		All: true,
 		Author: &object.Signature{
-			Name: "sysmanage-web[auto]",
+			Name: "github.com/infinitybotlist/sysmanage-web[auto]",
 			When: time.Now(),
 		},
 	})

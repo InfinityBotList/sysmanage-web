@@ -2,7 +2,8 @@ package nginx
 
 import (
 	"fmt"
-	"sysmanage-web/core/state"
+
+	"github.com/infinitybotlist/sysmanage-web/core/state"
 )
 
 var zoneMap = make(map[string]string)

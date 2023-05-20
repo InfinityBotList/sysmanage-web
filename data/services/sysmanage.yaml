@@ -1,11 +1,11 @@
-cmd: /root/sysmanage-web/sysmanage-web
-dir: /root/sysmanage-web
+cmd: /root/github.com/infinitybotlist/sysmanage-web/github.com/infinitybotlist/sysmanage-web
+dir: /root/github.com/infinitybotlist/sysmanage-web
 target: ibl
 description: System Management [v4]
 after: ibl-maint
 broken: false
 git:
-    repo: https://github.com/infinitybotlist/sysmanage-web
+    repo: https://github.com/infinitybotlist/github.com/infinitybotlist/sysmanage-web
     ref: refs/heads/main
     build_commands:
         - cd frontend
