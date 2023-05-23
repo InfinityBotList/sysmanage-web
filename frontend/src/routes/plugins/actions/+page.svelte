@@ -1,7 +1,9 @@
 <script lang="ts">
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import GreyText from "$lib/components/GreyText.svelte";
+	import TaskWindow from "$lib/components/TaskWindow.svelte";
 	import { error, success } from "$lib/strings";
+	import { newTask } from "$lib/tasks";
 
     interface Action {
         Name: string,
@@ -24,6 +26,40 @@
 
 		return await json;
 	}
+
+    let execActionTaskIds: string[] = []
+    let execActionTaskOutputs: string[][] = []
+    const executeAction = async (action: Action) => {
+        if(action.ConfirmDialog) {
+            let confirm = window.prompt(action.ConfirmDialog + " (yes to confirm)")
+
+            if(confirm?.toLowerCase() != "yes") {
+                return
+            }
+        }
+
+        let res = await fetch(`/api/executeAction?actionName=${action.Name}`, {
+            method: "POST"
+        })
+
+        if(res.ok) {
+            if(res.headers.get("X-Task-ID")) {
+                // Execute task
+                execActionTaskIds.push(res.headers.get("X-Task-ID") || "")
+                execActionTaskOutputs[execActionTaskIds.length - 1] = [action.Name + "\n"]
+
+                newTask(execActionTaskIds[execActionTaskIds.length - 1], (output: string[]) => {
+			        execActionTaskOutputs[execActionTaskIds.length - 1] = [action.Name + "\n", ...output]
+		        })
+            }
+
+            success("Action executed successfully")
+        } else {
+            let errorStr = await res.text()
+
+            error(errorStr)
+        }
+    }
 </script>
 
 <svelte:head>
@@ -44,27 +80,7 @@
                     </div>
                     <div class="flex flex-row items-center">
                         <ButtonReact
-                            onclick={async () => {
-                                if(action.ConfirmDialog) {
-                                    let confirm = window.prompt(action.ConfirmDialog + " (yes to confirm)")
-
-                                    if(confirm?.toLowerCase() != "yes") {
-                                        return
-                                    }
-                                }
-
-                                let res = await fetch(`/api/executeAction?actionName=${action.Name}`, {
-                                    method: "POST"
-                                })
-
-                                if(res.ok) {
-                                    success("Action executed successfully")
-                                } else {
-                                    let errorStr = await res.text()
-
-                                    error(errorStr)
-                                }
-                            }}
+                            onclick={() => executeAction(action)}
                         >
                             {action.Name}
                         </ButtonReact>
@@ -76,4 +92,10 @@
     {:catch err}
         <p class="text-red-500">{err}</p>
     {/await}
+
+    {#each execActionTaskIds as _, i}
+        <TaskWindow 
+            output={execActionTaskOutputs[i]}
+        />
+    {/each}
 </section>
