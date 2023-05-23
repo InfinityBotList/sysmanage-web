@@ -17,4 +17,4 @@ func (l actionList) Find(name string) (*Action, bool) {
 	return nil, false
 }
 
-var Actions actionList
+var Actions = actionList{}

@@ -10,7 +10,7 @@ func InitPlugin(c *types.PluginConfig) error {
 	frontend.AddLink(c, frontend.Link{
 		Title:       "Custom Actions",
 		Description: "Execute custom actions that are defined by plugins.",
-		LinkText:    "View Nginx Config",
+		LinkText:    "Execute An Action",
 		Href:        "@root",
 	})
 
