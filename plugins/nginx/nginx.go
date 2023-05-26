@@ -396,7 +396,7 @@ func updateDnsRecordCf(reqId string) {
 						Name:      domExpanded,
 						Type:      "A",
 						Content:   ip.String(),
-						Comment:   "CI: github.com/infinitybotlist/sysmanage-web on " + time.Now().Format("2006-01-02 15:04:05"),
+						Comment:   "CI: sysmanage on " + time.Now().Format("2006-01-02 15:04:05"),
 						Proxied:   &trueBool,
 						Proxiable: true,
 					})
