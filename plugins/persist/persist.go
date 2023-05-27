@@ -107,7 +107,7 @@ func PersistToGit(logId string) error {
 	_, err = w.Commit("ci(update): persist changes to git", &git.CommitOptions{
 		All: true,
 		Author: &object.Signature{
-			Name: "github.com/infinitybotlist/sysmanage-web[auto]",
+			Name: Username,
 			When: time.Now(),
 		},
 	})
