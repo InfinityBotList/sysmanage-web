@@ -87,8 +87,14 @@ func getNginxDomainList() ([]NginxServerManage, error) {
 			server.Servers = []NginxServer{}
 		}
 
+		domain := strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", ".")
+
+		if server.RealName != "" {
+			domain = server.RealName
+		}
+
 		servers = append(servers, NginxServerManage{
-			Domain: strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
+			Domain: domain,
 			Server: server,
 		})
 	}
@@ -250,10 +256,16 @@ func buildNginx(reqId string) {
 
 		defer out.Close()
 
+		domain := strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", ".")
+
+		if nginxCfg.RealName != "" {
+			domain = nginxCfg.RealName
+		}
+
 		err = nginxTemplate.Execute(out, NginxTemplate{
 			Servers:  nginxCfg.Servers,
 			Meta:     meta,
-			Domain:   strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", "."),
+			Domain:   domain,
 			CertFile: certFile,
 			KeyFile:  keyFile,
 			MetaCommon: func() string {

@@ -35,7 +35,8 @@ type NginxTemplate struct {
 }
 
 type NginxYaml struct {
-	Servers []NginxServer `yaml:"servers" validate:"required,dive"`
+	Servers  []NginxServer `yaml:"servers" validate:"required,dive"`
+	RealName string        `yaml:"real_name"` // If unset, will use file name
 }
 
 type NginxAPIPublishCert struct {
