@@ -50,11 +50,11 @@ func InitPlugin(c *types.PluginConfig) error {
 		fmt.Println("INFO: No use_token_auth set for persist plugin, defaulting to false")
 	}
 
-	if UseTokenAuth {
+	if !UseTokenAuth {
 		fmt.Println("INFO: Will use BasicAuth for git operations")
 	}
 
-	if !UseTokenAuth {
+	if UseTokenAuth {
 		fmt.Println("INFO: Will use TokenAuth for git operations")
 	}
 
