@@ -68,7 +68,7 @@
         }
 
         let domainListRaw: AvailableDomainListData[] = await domainListRes.json();
-        let domainList: string[] = domainListRaw.map((domainObj) => domainObj.Domain);
+        let domainList: string[] = domainListRaw.map((domainObj) => domainObj.Domain.replace(".", "-"));
 
         let certListRes = await fetch(`/api/nginx/getCertList`, {
             method: "POST"
@@ -86,7 +86,7 @@
 
         // Loop over certList, ensure domain isnt already in domainList, then add it to availableDomains
         for(let cert of certList) {
-            let certDomain = cert.replace("cert-", "").replace(".pem", "").replaceAll("-", ".")
+            let certDomain = cert.replace("cert-", "").replace(".pem", "")
 
             if(!domainList.includes(certDomain)) {
                 availableDomains.push(certDomain);
