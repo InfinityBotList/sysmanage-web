@@ -49,7 +49,7 @@
         success("Successfully updated domain!");
     }
 
-    let deleteDomainTaskId: string;
+    let deleteDomainTaskId: string = "";
     let deleteDomainTaskOutput: string[] = [];
     const deleteDomain = async () => {
         // Send prompt
