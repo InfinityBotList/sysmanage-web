@@ -243,7 +243,7 @@ func buildServices(reqId string) {
 		}
 
 		if service.Group == "" {
-			service.Group = ""
+			service.Group = "root"
 		}
 
 		targetNames := []string{}
