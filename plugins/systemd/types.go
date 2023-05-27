@@ -25,6 +25,8 @@ type TemplateYaml struct {
 	Description string `yaml:"description" validate:"required"` // Description in systemd
 	After       string `yaml:"after" validate:"required"`       // After in systemd
 	Broken      bool   `yaml:"broken"`                          // Does the service even work?
+	User        string `yaml:"user"`                            // User in systemd, defaults to root if unset
+	Group       string `yaml:"group"`                           // Group in systemd, if-else it defaults to root
 
 	// Only used by sysmanage
 	Git *Git `yaml:"git,omitempty" json:"Git,omitempty"`

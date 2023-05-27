@@ -11,6 +11,8 @@
     let directory: string = "/root/";
     let target: string;
     let description: string;
+    let user: string;
+    let group: string;
     let after: string = "ibl-maint"; // Usually what you want
     let brokenValue: string = "0";
 
@@ -53,6 +55,8 @@
                     description,
                     after,
                     broken: brokenValue === "0" ? true : false,
+                    user,
+                    group,
                 }
             }),
         });
@@ -135,6 +139,23 @@
                 ["No, its not", "1"],
             ])}
         />
+        <h2 class="text-xl font-semibold mt-4">Service User</h2>
+        <GreyText>Defaults to root if unset. Note that this could be a possible security risk to use the wrong user/group!</GreyText>
+        <InputSm
+            id="user"
+            label="User"
+            placeholder="E.g. root"
+            bind:value={user}
+            minlength={1}
+        />
+        <InputSm
+            id="group"
+            label="Group"
+            placeholder="E.g. root"
+            bind:value={group}
+            minlength={1}
+        />
+        <div class="mb-2"></div>
         <ButtonReact
                 onclick={() => createService()}
         >

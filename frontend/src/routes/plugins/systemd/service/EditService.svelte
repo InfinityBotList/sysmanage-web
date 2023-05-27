@@ -199,6 +199,8 @@
     let description: string = service?.Service?.Description || "";
     let after: string = service?.Service?.After;
     let brokenValue: string = service?.Service?.Broken ? "0" : "1";
+    let user: string = service?.Service?.User || "";
+    let group: string = service?.Service?.Group || "";
 
     interface Meta {
         Targets?: MetaTarget[]
@@ -237,6 +239,8 @@
                     description,
                     after,
                     broken: brokenValue === "0" ? true : false,
+                    user,
+                    group,
                 }
             }),
         });
@@ -353,6 +357,23 @@
                 ["No, its not", "1"],
             ])}
         />
+        <h2 class="text-xl font-semibold mt-4">Service User</h2>
+        <GreyText>Defaults to root if unset. Note that this could be a possible security risk to use the wrong user/group!</GreyText>
+        <InputSm
+            id="user"
+            label="User"
+            placeholder="E.g. root"
+            bind:value={user}
+            minlength={1}
+        />
+        <InputSm
+            id="group"
+            label="Group"
+            placeholder="E.g. root"
+            bind:value={group}
+            minlength={1}
+        />
+        <div class="mb-2"></div>
         <ButtonReact
                 onclick={() => editService()}
         >

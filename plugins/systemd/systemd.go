@@ -238,6 +238,14 @@ func buildServices(reqId string) {
 			continue
 		}
 
+		if service.User == "" {
+			service.User = "root"
+		}
+
+		if service.Group == "" {
+			service.Group = ""
+		}
+
 		targetNames := []string{}
 
 		for _, target := range meta.Targets {
