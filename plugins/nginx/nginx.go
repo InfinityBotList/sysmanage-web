@@ -409,3 +409,86 @@ func updateDnsRecordCf(reqId string) {
 		}
 	}
 }
+
+func deleteDomain(reqId, domain string) {
+	domain = strings.ReplaceAll(domain, ".", "-")
+
+	// Load meta
+	meta, err := loadNginxMeta()
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "Failed to load nginx meta: "+err.Error(), true)
+		return
+	}
+
+	certFile := meta.NginxCertPath + "/cert-" + domain + ".pem"
+	keyFile := meta.NginxCertPath + "/key-" + domain + ".pem"
+
+	// Delete certFile if it exists
+	_, err = os.Stat(certFile)
+
+	if err == nil {
+		err = os.Remove(certFile)
+
+		if err != nil {
+			logger.LogMap.Add(reqId, "Failed to delete cert file: "+err.Error(), true)
+			return
+		} else {
+			logger.LogMap.Add(reqId, "Deleted cert file", true)
+		}
+	}
+
+	// Delete keyFile if it exists
+	_, err = os.Stat(keyFile)
+
+	if err == nil {
+		err = os.Remove(keyFile)
+
+		if err != nil {
+			logger.LogMap.Add(reqId, "Failed to delete key file: "+err.Error(), true)
+			return
+		} else {
+			logger.LogMap.Add(reqId, "Deleted key file", true)
+		}
+	}
+
+	// Delete nginx config file
+	outFile := domain + ".conf"
+	err = os.Remove("/etc/nginx/conf.d/" + outFile)
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "Failed to delete nginx config file: "+err.Error(), true)
+		return
+	} else {
+		logger.LogMap.Add(reqId, "Deleted nginx config file", true)
+	}
+
+	// Reload nginx
+	// Run nginx -t to validate config
+	cmd := exec.Command("nginx", "-t")
+
+	cmd.Stdout = logger.AutoLogger{ID: reqId}
+	cmd.Stderr = logger.AutoLogger{ID: reqId, Error: true}
+
+	err = cmd.Run()
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "ERROR: Failed to validate nginx config: "+err.Error(), true)
+		return
+	}
+
+	// Restart nginx
+	cmd = exec.Command("systemctl", "restart", "nginx")
+
+	cmd.Stdout = logger.AutoLogger{ID: reqId}
+	cmd.Stderr = logger.AutoLogger{ID: reqId, Error: true}
+
+	err = cmd.Run()
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "ERROR: Failed to restart nginx: "+err.Error(), true)
+		return
+	}
+
+	logger.LogMap.Add(reqId, "Restarted nginx", true)
+}

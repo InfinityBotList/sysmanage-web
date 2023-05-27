@@ -5,6 +5,9 @@
 	import DangerButton from "$lib/components/DangerButton.svelte";
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import { error, success } from "$lib/strings";
+	import { goto } from "$app/navigation";
+	import { newTask } from "$lib/tasks";
+	import TaskWindow from "$lib/components/TaskWindow.svelte";
 
     interface NgDomain {
         Domain: string,
@@ -44,6 +47,33 @@
         }
 
         success("Successfully updated domain!");
+    }
+
+    let deleteDomainTaskId: string;
+    let deleteDomainTaskOutput: string[] = [];
+    const deleteDomain = async () => {
+        // Send prompt
+        let p = prompt("Are you sure you want to delete this domain? Type 'YES' to confirm.");
+
+        if (p !== "YES") {
+            return;
+        }
+
+        let res = await fetch(`/api/nginx/deleteDomain?domainName=${domain}`, {
+            method: "POST",
+        });
+
+		if(!res.ok) {
+			let errorStr = await res.text()
+			error(errorStr)
+			return
+		}
+
+		deleteDomainTaskId = await res.text()
+
+		newTask(deleteDomainTaskId, (output: string[]) => {
+			deleteDomainTaskOutput = output
+		})
     }
 </script>
 
@@ -138,3 +168,12 @@
 <ButtonReact
     onclick={saveChanges}
 >Save changes</ButtonReact>
+<DangerButton
+    onclick={deleteDomain}
+>Delete Domain</DangerButton>
+
+{#if deleteDomainTaskId != ""}
+    <TaskWindow 
+        output={deleteDomainTaskOutput}
+    />
+{/if}

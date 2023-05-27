@@ -397,4 +397,20 @@ func loadNginxApi(r *chi.Mux) {
 
 		w.WriteHeader(http.StatusNoContent)
 	})
+
+	r.Post("/api/nginx/deleteDomain", func(w http.ResponseWriter, r *http.Request) {
+		domainName := r.URL.Query().Get("domain")
+
+		if domainName == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Domain must be specified"))
+		}
+
+		// create task id
+		reqId := crypto.RandString(64)
+
+		go deleteDomain(reqId, domainName)
+
+		w.Write([]byte(reqId))
+	})
 }
