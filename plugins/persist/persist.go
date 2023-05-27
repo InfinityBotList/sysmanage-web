@@ -8,7 +8,6 @@ import (
 
 	"github.com/infinitybotlist/sysmanage-web/core/logger"
 	"github.com/infinitybotlist/sysmanage-web/core/plugins"
-	"github.com/infinitybotlist/sysmanage-web/core/state"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -34,7 +33,7 @@ func PersistToGit(logId string) error {
 		logger.LogMap.Add(logId, "Persisting changes to git", true)
 	}
 
-	if state.Config.GithubPat == "" {
+	if Username == "" || Password == "" {
 		if logId != "" {
 			logger.LogMap.Add(logId, "WARNING: Github PAT not set. Git operations are disabled", true)
 		}
@@ -63,8 +62,8 @@ func PersistToGit(logId string) error {
 	// First try pulling
 	err = w.Pull(&git.PullOptions{
 		Auth: &githttp.BasicAuth{
-			Username: state.Config.GithubPat,
-			Password: state.Config.GithubPat,
+			Username: Username,
+			Password: Password,
 		},
 	})
 
@@ -107,7 +106,7 @@ func PersistToGit(logId string) error {
 	_, err = w.Commit("ci(update): persist changes to git", &git.CommitOptions{
 		All: true,
 		Author: &object.Signature{
-			Name: Username,
+			Name: Author,
 			When: time.Now(),
 		},
 	})
@@ -139,8 +138,8 @@ func PersistToGit(logId string) error {
 
 	err = repo.Push(&git.PushOptions{
 		Auth: &githttp.BasicAuth{
-			Username: state.Config.GithubPat,
-			Password: state.Config.GithubPat,
+			Username: Username,
+			Password: Password,
 		},
 		Progress: outp,
 	})
@@ -150,8 +149,8 @@ func PersistToGit(logId string) error {
 		err = repo.Push(&git.PushOptions{
 			Force: true,
 			Auth: &githttp.BasicAuth{
-				Username: state.Config.GithubPat,
-				Password: state.Config.GithubPat,
+				Username: Username,
+				Password: Password,
 			},
 			Progress: outp,
 		})
