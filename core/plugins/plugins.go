@@ -41,6 +41,23 @@ func (i OpaqueConfig) GetString(key string) (string, error) {
 	return "", errors.New("key not a string: " + key)
 }
 
+func (i OpaqueConfig) GetBool(key string) (bool, error) {
+	v, ok := i.inner[key]
+
+	if !ok {
+		return false, errors.New("key not found: " + key)
+	}
+
+	switch v := v.(type) {
+	case bool:
+		return v, nil
+	case nil:
+		return false, nil
+	}
+
+	return false, errors.New("key not a string: " + key)
+}
+
 func (i OpaqueConfig) GetStringArray(key string) ([]string, error) {
 	v, ok := i.inner[key]
 

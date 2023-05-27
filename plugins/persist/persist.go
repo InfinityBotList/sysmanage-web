@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -136,11 +137,21 @@ func PersistToGit(logId string) error {
 
 	outp := persistOutput{buf: &strings.Builder{}}
 
-	err = repo.Push(&git.PushOptions{
-		Auth: &githttp.BasicAuth{
+	var auth transport.AuthMethod
+
+	if UseTokenAuth {
+		auth = &githttp.TokenAuth{
+			Token: Password,
+		}
+	} else {
+		auth = &githttp.BasicAuth{
 			Username: Username,
 			Password: Password,
-		},
+		}
+	}
+
+	err = repo.Push(&git.PushOptions{
+		Auth:     auth,
 		Progress: outp,
 	})
 

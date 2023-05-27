@@ -14,6 +14,8 @@ var Author string
 var Username string
 var Password string
 
+var UseTokenAuth bool
+
 func InitPlugin(c *types.PluginConfig) error {
 	cfgData, err := plugins.GetConfig(c.Name)
 
@@ -40,6 +42,20 @@ func InitPlugin(c *types.PluginConfig) error {
 	if err != nil {
 		fmt.Println("INFO: No password set for persist plugin, defaulting to PAT")
 		Password = state.Config.GithubPat
+	}
+
+	UseTokenAuth, err = cfgData.GetBool("use_token_auth")
+
+	if err != nil {
+		fmt.Println("INFO: No use_token_auth set for persist plugin, defaulting to false")
+	}
+
+	if UseTokenAuth {
+		fmt.Println("INFO: Will use BasicAuth for git operations")
+	}
+
+	if !UseTokenAuth {
+		fmt.Println("INFO: Will use TokenAuth for git operations")
 	}
 
 	return nil
