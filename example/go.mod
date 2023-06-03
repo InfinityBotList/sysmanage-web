@@ -1,4 +1,4 @@
-module sysmanage-ibl
+module sysmanage
 
 go 1.20
 
