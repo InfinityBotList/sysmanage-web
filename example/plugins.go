@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sysmanage/plugins/foo"
+
 	"github.com/infinitybotlist/sysmanage-web/plugins/actions"
 	"github.com/infinitybotlist/sysmanage-web/plugins/frontend"
 	"github.com/infinitybotlist/sysmanage-web/plugins/nginx"
@@ -30,6 +32,11 @@ var meta = types.ServerMeta{
 		// Frontend has no frontend, it is a backend plugin
 		"frontend": {
 			Init: frontend.InitPlugin,
+		},
+		// Example of a custom plugin
+		"foo": {
+			Init:     foo.InitPlugin,
+			Frontend: "frontend/extplugins/foo", // This is the path to the plugin's frontend
 		},
 	},
 	Frontend: types.FrontendConfig{
