@@ -380,18 +380,21 @@ var BuildActions = []action{
 	{
 		Name: "Copy build to out",
 		Func: func() {
-			err := os.RemoveAll("frontend/build")
+			// Create frontend if it doesnt exist
+			err := os.MkdirAll("frontend/build", 0755)
 
 			if err != nil {
 				panic(err)
 			}
 
-			err = os.MkdirAll("frontend/build", 0755)
+			// Remove frontend build dir
+			err = os.RemoveAll("frontend/build")
 
 			if err != nil {
 				panic(err)
 			}
 
+			// Move build dir
 			err = os.Rename("sm-build/build", "frontend/build")
 
 			if err != nil {
