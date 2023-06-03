@@ -2,3 +2,5 @@ config.yaml
 sysmanage-ibl
 deploys
 sm-build
+.gitignore
+sysmanage
