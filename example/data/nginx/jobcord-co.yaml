@@ -1,0 +1,29 @@
+servers:
+    - id: main-site
+      names:
+        - '@root'
+        - www
+      comment: main-site
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:4456
+          opts: []
+    - id: api
+      names:
+        - api
+      comment: API for jobcord (old)
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:4420
+          opts: []
+    - id: spider-api
+      names:
+        - spider
+      comment: v2 api for jobcord (spider)
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:5848
+          opts: []

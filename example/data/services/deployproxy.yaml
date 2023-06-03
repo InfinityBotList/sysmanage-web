@@ -1,0 +1,5 @@
+cmd: "/root/deployproxy/deployproxy"
+dir: "/root/deployproxy"
+target: ibl
+after: network
+description: DeployProxy [v4]

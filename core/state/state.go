@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"embed"
 	"sync"
 
 	"github.com/infinitybotlist/sysmanage-web/types"
@@ -12,6 +13,9 @@ import (
 var (
 	Config *types.Config
 
+	// Plugins
+	ServerMeta types.ServerMeta
+
 	// Mutex to ensure only one large scale operation is running at a time
 	LsOp = sync.Mutex{}
 
@@ -20,4 +24,6 @@ var (
 	LoadedPlugins = []string{}
 
 	Context = context.Background()
+
+	Assets map[string]embed.FS
 )

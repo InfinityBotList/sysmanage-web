@@ -1,0 +1,10 @@
+servers:
+    - id: vivum
+      names:
+        - vivum
+      comment: Vivum Intranet
+      broken: false
+      locations:
+        - path: /
+          proxy: http://localhost:1234
+          opts: []

@@ -16,4 +16,24 @@ type PluginConfig struct {
 	Name string
 }
 
-type Plugin func(c *PluginConfig) error
+type Plugin struct {
+	Init     func(c *PluginConfig) error
+	Frontend string // either a git repo, a local dir or @core if its a core plugin
+}
+
+type FrontendConfig struct {
+	FrontendPath string // the path to the frontend
+
+	ComponentProvider string // either a git repo, a local dir or @core to use the libs from sysmanage itself
+	CorelibProvider   string // either a git repo, a local dir or @core to use the libs from sysmanage itself
+
+	// an extra files to load from the corelib provider, key is the path to the file/folder in the src, value is the file/folder to the file in the out
+	//
+	// Note: the dst is relative to the build folder. If $lib/ is prefix, the dst is relative to the lib folder
+	ExtraFiles map[string]string
+}
+
+type ServerMeta struct {
+	Plugins  map[string]Plugin // List of plugins to load
+	Frontend FrontendConfig
+}

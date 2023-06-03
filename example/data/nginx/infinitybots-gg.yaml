@@ -1,0 +1,137 @@
+servers:
+    - id: popplio
+      names:
+        - api
+        - spider
+      comment: Popplio
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:8081
+          opts: []
+    - id: arcadia-rpc
+      names:
+        - rpc
+      comment: Arcadia RPC
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:3010
+          opts: []
+    - id: widgets
+      names:
+        - widgets
+      comment: Nightheart Widgets Server
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:3000
+          opts: []
+    - id: sysmanage
+      names:
+        - sysmanage
+      comment: Sysmanage console
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:1234
+          opts: []
+    - id: helpernode-metro
+      names:
+        - helpernode-metro
+      comment: Metro Sysmanage console
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:1234
+          opts: []
+    - id: persepolis
+      names:
+        - persepolis
+      comment: Persepolis Onboarding
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:3011
+          opts: []
+    - id: htmlsanitize
+      names:
+        - hs
+      comment: HTML Sanitization Service
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:5810
+          opts: []
+    - id: cdn
+      names:
+        - cdn
+      comment: IBL CDN
+      broken: false
+      locations:
+        - path: /
+          proxy: ""
+          opts:
+            - sendfile on;
+            - sendfile_max_chunk 1m;
+            - etag on;
+            - autoindex on;
+            - add_header Access-Control-Allow-Origin *;
+            - alias /iblcdn/public/;
+        - path: /json/
+          proxy: ""
+          opts:
+            - sendfile on;
+            - sendfile_max_chunk 1m;
+            - autoindex on;
+            - add_header Access-Control-Allow-Origin *;
+            - alias /iblcdn/public/;
+            - autoindex_format json;
+    - id: tailscale
+      names:
+        - tailscale
+      comment: Tailscale Webhooks API
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:12091
+          opts: []
+    - id: gitlogs-backup
+      names:
+        - git-sec
+      comment: Git Logs Backup Domain
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:19318
+          opts: []
+    - id: servo
+      names:
+        - servo
+      comment: servo gitea
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:5100
+          opts:
+            - rewrite ^/user/login.*$ /user/oauth2/nextcloud last;
+    - id: snip
+      names:
+        - snip
+      comment: opengist uses gitea -> cloud for auth
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:6157
+          opts:
+            - rewrite ^/login.*$ /oauth/gitea last;
+    - id: skynet
+      names:
+        - skynet
+      comment: Skynet WebViewer
+      broken: false
+      locations:
+        - path: /
+          proxy: http://127.0.0.1:4950
+          opts: []
+real_name: ""

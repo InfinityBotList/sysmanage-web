@@ -1,0 +1,20 @@
+[Service]
+Type=simple
+ExecStart={{.Command}}
+User={{.User}}
+Group={{.Group}}
+WorkingDirectory={{.Directory}}
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+RestartSec=1
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+PartOf={{.Target}}.target
+Description="{{.Description}}"
+After={{.After}}.service

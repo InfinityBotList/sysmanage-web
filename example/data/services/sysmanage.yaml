@@ -1,0 +1,6 @@
+cmd: /root/sysmanage-ibl/sysmanage-ibl
+dir: /root/sysmanage-ibl
+target: ibl
+description: System Management [v4]
+after: network
+broken: false

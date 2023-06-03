@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/infinitybotlist/sysmanage-web/core"
 	"github.com/infinitybotlist/sysmanage-web/core/state"
 	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 	"github.com/infinitybotlist/sysmanage-web/types"
@@ -162,10 +163,14 @@ func routeStatic(next http.Handler) http.Handler {
 }
 
 func Init(
-	plugins map[string]types.Plugin,
+	meta types.ServerMeta,
 	frontendUi fs.FS,
 ) {
+	core.Init()
+
 	frontend = frontendUi
+
+	state.ServerMeta = meta
 
 	if len(os.Args) > 1 {
 		parseArgs()
@@ -215,14 +220,14 @@ func Init(
 	// Start loading the plugins
 	fmt.Println("Loading plugins...")
 
-	for name, plugin := range plugins {
+	for name, plugin := range meta.Plugins {
 		fmt.Println("Loading plugin " + name)
 
 		if _, ok := state.Config.Plugins[name]; !ok {
 			panic("Plugin " + name + " not found in config.yaml")
 		}
 
-		err := plugin(&types.PluginConfig{
+		err := plugin.Init(&types.PluginConfig{
 			Name: name,
 			Mux:  r,
 		})

@@ -1,0 +1,35 @@
+{{range $server := .Servers }}
+# {{$server.Comment}}
+server {
+    listen 443 ssl http2;
+    ssl_certificate {{$.CertFile}};
+    ssl_certificate_key {{$.KeyFile}};
+    {{if $.Meta.OriginCertPath -}} 
+    ssl_client_certificate {{$.Meta.OriginCertPath}}; 
+    ssl_verify_client on;
+    {{end -}}
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    {{if $.Meta.Common }}{{$.MetaCommon }}{{end}}
+
+    server_name {{ConcatNames $.Domain $server.Names}};
+
+    {{range $loc := $server.Locations -}}
+    location {{$loc.Path}} {
+        {{if $loc.Proxy -}}
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+        client_max_body_size 100M;
+        proxy_pass {{$loc.Proxy}};
+        {{- end -}}
+        {{ParseOpts $loc.Opts}}
+    }
+    {{end}}
+}
+{{end -}}
