@@ -1,6 +1,10 @@
 # github.com/infinitybotlist/sysmanage-web
 
-**See ``sysmanage-ibl`` as a example on how to use sysmanage-web**
+**See the ``example`` directory as a example on how to use sysmanage-web library to configure a proper executable**
+
+# Getting started
+
+Simply copy the contents of the ``example`` directory out to a seperate folder (``sysmanage`` etc.), personalize it to your preferences, and build using ``make``
 
 Allows management of our systems, though it can be used by anyone. 
 Core plugins included by default are ``nginx``, ``systemd``, ``persist``, ``frontend`` and ``actions``.
