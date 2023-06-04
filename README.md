@@ -6,7 +6,8 @@
 
 1. Copy the contents of the ``example`` directory out to a seperate folder (``sysmanage`` etc.)
 2. Run ``git init`` and ``go mod tidy`` to download any deps needed
-3. Personalize it to your preferences, and build using ``make``
+3. Run ``npm i`` in ``frontend``.
+4. Personalize it to your preferences, and build using ``make``
 
 Allows management of our systems, though it can be used by anyone. 
 Core plugins included by default are ``nginx``, ``systemd``, ``persist``, ``frontend`` and ``actions``.
