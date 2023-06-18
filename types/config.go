@@ -18,14 +18,19 @@ type PluginConfig struct {
 
 type Plugin struct {
 	Init     func(c *PluginConfig) error
-	Frontend string // either a git repo, a local dir or @core if its a core plugin
+	Frontend Provider
+}
+
+type Provider struct {
+	Provider  string // use @core to use the libs from sysmanage itself, otherwise, specify a local directory
+	Overrides []string
 }
 
 type FrontendConfig struct {
-	FrontendPath string // the path to the frontend
+	FrontendProvider Provider // frontend provider
 
-	ComponentProvider string // either a git repo, a local dir or @core to use the libs from sysmanage itself
-	CorelibProvider   string // either a git repo, a local dir or @core to use the libs from sysmanage itself
+	ComponentProvider Provider // component provider
+	CorelibProvider   Provider // corelib provider
 
 	// an extra files to load from the corelib provider, key is the path to the file/folder in the src, value is the file/folder to the file in the out
 	//

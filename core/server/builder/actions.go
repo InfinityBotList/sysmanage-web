@@ -6,36 +6,118 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
 var info = color.New(color.FgCyan).SprintlnFunc()
-var errorText = color.New(color.FgRed).SprintlnFunc()
+
+//var errorText = color.New(color.FgRed).SprintlnFunc()
 
 type action struct {
 	Name string
 	Func func()
 }
 
-func copy(
+// CopyDir copies the content of src to dst. src should be a full path.
+func copyDir(dst, src string) error {
+	return filepath.Walk(src, func(path string, i fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// copy to this path
+		outpath := filepath.Join(dst, strings.TrimPrefix(path, src))
+
+		fmt.Print(info("=>", path, "->", outpath))
+
+		if i.IsDir() {
+			os.MkdirAll(outpath, i.Mode())
+			return nil // means recursive
+		}
+
+		// Ensure outpath is also created
+		err = os.MkdirAll(filepath.Dir(outpath), 0755)
+
+		if err != nil {
+			return err
+		}
+
+		// handle irregular files
+		if !i.Mode().IsRegular() {
+			switch i.Mode().Type() & os.ModeType {
+			case os.ModeSymlink:
+				link, err := os.Readlink(path)
+				if err != nil {
+					return err
+				}
+				return os.Symlink(link, outpath)
+			}
+			return nil
+		}
+
+		// copy contents of regular file efficiently
+
+		// open input
+		in, _ := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer in.Close()
+
+		// create output
+		fh, err := os.Create(outpath)
+		if err != nil {
+			return err
+		}
+		defer fh.Close()
+
+		// make it the same
+		fh.Chmod(i.Mode())
+
+		// copy content
+		_, err = io.Copy(fh, in)
+		return err
+	})
+}
+
+func copyProvider(
 	sp fs.FS,
-	path string,
+	src types.Provider,
 	dst string,
 ) error {
 	var srcFs fs.FS
 
 	os.MkdirAll(dst, 0755)
 
-	if strings.HasPrefix(path, "@core") {
+	if src.Provider == "@core" {
 		srcFs = sp
 	} else {
-		srcFs = os.DirFS(path)
+		srcFs = os.DirFS(src.Provider)
 	}
 
 	fs.WalkDir(srcFs, ".", func(path string, d fs.DirEntry, err error) error {
+		if strings.HasPrefix(path, ".svelte-kit") {
+			return nil
+		}
+
+		for _, ignore := range []string{
+			"node_modules",
+			".git",
+			"build",
+		} {
+			if strings.Contains(path, ignore) {
+				fmt.Print(info("=>", path, "(skipped)"))
+				return nil
+			}
+		}
+
+		fmt.Println("=>", path)
+		// Extract each file out
 		if err != nil {
 			panic("Error while walking " + path + ": " + err.Error())
 		}
@@ -57,6 +139,25 @@ func copy(
 
 		defer f.Close()
 
+		fileInfo, err := f.Stat()
+
+		if err != nil {
+			panic(err)
+		}
+
+		// handle irregular files
+		if !fileInfo.Mode().IsRegular() {
+			switch fileInfo.Mode().Type() & os.ModeType {
+			case os.ModeSymlink:
+				link, err := os.Readlink(path)
+				if err != nil {
+					return err
+				}
+				return os.Symlink(link, outPath)
+			}
+			return nil
+		}
+
 		// Create file
 		nf, err := os.Create(outPath)
 
@@ -72,38 +173,23 @@ func copy(
 
 		defer nf.Close()
 
-		fMode, err := f.Stat()
+		// Make it the same
+		err = nf.Chmod(fileInfo.Mode())
 
 		if err != nil {
-			panic(err)
-		}
-
-		err = nf.Chmod(fMode.Mode())
-
-		if err != nil {
-			panic(err)
+			return err
 		}
 
 		return nil
 	})
 
-	if strings.HasPrefix(path, "@core") {
-		// Split by :
-		parts := strings.Split(path, "::")
+	for _, override := range src.Overrides {
+		err := copyProvider(sp, types.Provider{
+			Provider: override,
+		}, dst)
 
-		if len(parts) == 1 {
-			return nil // No override folder
-		} else {
-			// Override folder
-			overrides := parts[1:]
-
-			for _, override := range overrides {
-				err := copy(sp, override, dst)
-
-				if err != nil {
-					return err
-				}
-			}
+		if err != nil {
+			return err
 		}
 	}
 
@@ -114,8 +200,8 @@ var BuildActions = []action{
 	{
 		Name: "Create build template",
 		Func: func() {
-			if state.ServerMeta.Frontend.FrontendPath == "" {
-				panic("Frontend path is empty")
+			if state.ServerMeta.Frontend.FrontendProvider.Provider == "" {
+				panic("Frontend provider is empty")
 			}
 
 			cp, ok := state.Assets["frontend"]
@@ -132,7 +218,7 @@ var BuildActions = []action{
 
 			os.RemoveAll("sm-build")
 
-			err = copy(subbed, state.ServerMeta.Frontend.FrontendPath, "sm-build")
+			err = copyProvider(subbed, state.ServerMeta.Frontend.FrontendProvider, "sm-build")
 
 			if err != nil {
 				panic(err)
@@ -154,7 +240,7 @@ var BuildActions = []action{
 			os.MkdirAll("sm-build/src/routes/plugins", 0755)
 
 			for name, plugin := range state.ServerMeta.Plugins {
-				if plugin.Frontend == "" {
+				if plugin.Frontend.Provider == "" {
 					continue
 				}
 
@@ -167,7 +253,7 @@ var BuildActions = []action{
 				}
 
 				dstPath := "src/routes/plugins/" + name
-				err = copy(subbed, plugin.Frontend, "sm-build/"+dstPath)
+				err = copyProvider(subbed, plugin.Frontend, "sm-build/"+dstPath)
 
 				if err != nil {
 					panic(err)
@@ -202,22 +288,9 @@ var BuildActions = []action{
 				panic(err)
 			}
 
-			if state.ServerMeta.Frontend.ComponentProvider == "@core" && state.ServerMeta.Frontend.FrontendPath != "@core" {
-				fmt.Println("=> Removing user-provided components due to @core component provider")
-
-				// Remove user-provided components, replace with core components from compile to ensure consistency
-				err = os.RemoveAll(state.ServerMeta.Frontend.FrontendPath + "/src/lib/components")
-
-				if err != nil {
-					fmt.Print(errorText("Error while removing user-provided components: " + err.Error()))
-				}
-
-				copy(subbed, "@core", state.ServerMeta.Frontend.FrontendPath+"/src/lib/components")
-			}
-
 			fmt.Println("=> Copying components to build")
 
-			err = copy(subbed, state.ServerMeta.Frontend.ComponentProvider, "sm-build/src/lib/components")
+			err = copyProvider(subbed, state.ServerMeta.Frontend.ComponentProvider, "sm-build/src/lib/components")
 
 			if err != nil {
 				panic(err)
@@ -251,22 +324,9 @@ var BuildActions = []action{
 				panic(err)
 			}
 
-			if state.ServerMeta.Frontend.CorelibProvider == "@core" && state.ServerMeta.Frontend.FrontendPath != "@core" {
-				fmt.Println("=> Removing user-provided corelib due to @core corelib provider")
-
-				// Remove user-provided components, replace with core components from compile to ensure consistency
-				err = os.RemoveAll(state.ServerMeta.Frontend.FrontendPath + "/src/lib/corelib")
-
-				if err != nil {
-					fmt.Print(errorText("Error while removing user-provided corelib: " + err.Error()))
-				}
-
-				copy(subbed, "@core", state.ServerMeta.Frontend.FrontendPath+"/src/lib/corelib")
-			}
-
 			fmt.Println("=> Copying corelib to build")
 
-			err = copy(subbed, state.ServerMeta.Frontend.CorelibProvider, "sm-build/src/lib/corelib")
+			err = copyProvider(subbed, state.ServerMeta.Frontend.CorelibProvider, "sm-build/src/lib/corelib")
 
 			if err != nil {
 				panic(err)
@@ -287,65 +347,17 @@ var BuildActions = []action{
 					out = "sm-build/src/lib/" + strings.Replace(dst, "$lib/", "", 1)
 				}
 
-				if strings.HasPrefix(src, "file://") {
-					src = strings.Replace(src, "file://", "", 1)
+				err := copyDir(out, src)
 
-					fmt.Print(info("=>", src, "->", out))
-
-					// Read file
-					f, err := os.Open(src)
-
-					if err != nil {
-						panic(err)
-					}
-
-					// Split file by / to get dir
-					parts := strings.Split(out, "/")
-
-					// Get second-last part
-					if len(parts) > 1 {
-						var dirName string = "sm-build/" + parts[len(parts)-2]
-
-						os.MkdirAll(dirName, 0755)
-					}
-
-					// Create file
-					cf, err := os.Create(out)
-
-					if err != nil {
-						panic(err)
-					}
-
-					_, err = io.Copy(cf, f)
-
-					if err != nil {
-						panic(err)
-					}
-
-					f.Close()
-					continue
+				if err != nil {
+					panic(err)
 				}
-
-				copy(nil, src, out)
 			}
 		},
 	},
 	{
 		Name: "Build frontend",
 		Func: func() {
-			fmt.Println("=> Hack: patch vite to symlink .bin/vite ../vite/bin/vite.js ")
-			err := os.Remove("sm-build/node_modules/.bin/vite")
-
-			if err != nil {
-				panic(err)
-			}
-
-			err = os.Symlink("../vite/bin/vite.js", "sm-build/node_modules/.bin/vite")
-
-			if err != nil {
-				panic(err)
-			}
-
 			cmd := exec.Command("npm", "install")
 			cmd.Dir = "sm-build"
 			cmd.Stdin = os.Stdin
@@ -355,7 +367,7 @@ var BuildActions = []action{
 			cmd.Env = append(cmd.Env, "FORCE_COLOR=true")
 			cmd.Env = append(cmd.Env, "COLOR=always")
 
-			err = cmd.Run()
+			err := cmd.Run()
 
 			if err != nil {
 				panic(err)
