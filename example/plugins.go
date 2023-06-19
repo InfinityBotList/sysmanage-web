@@ -58,8 +58,8 @@ var meta = types.ServerMeta{
 			Provider: "@core",
 		}, // Use a custom corelib provider if you want to modify the corelib
 		ExtraFiles: map[string]string{
-			"frontend/src/lib/images":          "$lib/images",        // The FrontendPath is irrelevant here, all src's are relative to the root of the project
-			"frontend/src/lib/images/logo.png": "static/favicon.png", // Since this is specifically a file-file copy, we need to specify this with file://
+			"frontend/src/lib/images":          "$lib/images",
+			"frontend/src/lib/images/logo.png": "static/favicon.png",
 		},
 	},
 }
