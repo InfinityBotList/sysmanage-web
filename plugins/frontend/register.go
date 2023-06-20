@@ -10,5 +10,6 @@ var RegisteredLinks []Link
 
 func AddLink(c *types.PluginConfig, link Link) {
 	link.Href = strings.ReplaceAll(link.Href, "@root", "/plugins/"+c.Name)
+	link.Plugin = c.Name
 	RegisteredLinks = append(RegisteredLinks, link)
 }

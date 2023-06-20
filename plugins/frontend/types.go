@@ -5,4 +5,5 @@ type Link struct {
 	Description string
 	LinkText    string
 	Href        string
+	Plugin      string
 }
