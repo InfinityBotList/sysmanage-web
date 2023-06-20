@@ -85,7 +85,7 @@ func copyDir(dst, src string) error {
 	})
 }
 
-func copyProvider(
+func CopyProvider(
 	sp fs.FS,
 	src types.Provider,
 	dst string,
@@ -184,7 +184,7 @@ func copyProvider(
 	})
 
 	for _, override := range src.Overrides {
-		err := copyProvider(sp, types.Provider{
+		err := CopyProvider(sp, types.Provider{
 			Provider: override,
 		}, dst)
 
@@ -218,7 +218,7 @@ var BuildActions = []action{
 
 			os.RemoveAll("sm-build")
 
-			err = copyProvider(subbed, state.ServerMeta.Frontend.FrontendProvider, "sm-build")
+			err = CopyProvider(subbed, state.ServerMeta.Frontend.FrontendProvider, "sm-build")
 
 			if err != nil {
 				panic(err)
@@ -253,7 +253,7 @@ var BuildActions = []action{
 				}
 
 				dstPath := "src/routes/plugins/" + name
-				err = copyProvider(subbed, plugin.Frontend, "sm-build/"+dstPath)
+				err = CopyProvider(subbed, plugin.Frontend, "sm-build/"+dstPath)
 
 				if err != nil {
 					panic(err)
@@ -290,7 +290,7 @@ var BuildActions = []action{
 
 			fmt.Println("=> Copying components to build")
 
-			err = copyProvider(subbed, state.ServerMeta.Frontend.ComponentProvider, "sm-build/src/lib/components")
+			err = CopyProvider(subbed, state.ServerMeta.Frontend.ComponentProvider, "sm-build/src/lib/components")
 
 			if err != nil {
 				panic(err)
@@ -326,7 +326,7 @@ var BuildActions = []action{
 
 			fmt.Println("=> Copying corelib to build")
 
-			err = copyProvider(subbed, state.ServerMeta.Frontend.CorelibProvider, "sm-build/src/lib/corelib")
+			err = CopyProvider(subbed, state.ServerMeta.Frontend.CorelibProvider, "sm-build/src/lib/corelib")
 
 			if err != nil {
 				panic(err)
