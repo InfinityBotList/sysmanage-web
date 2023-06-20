@@ -25,3 +25,4 @@ plugins:
   frontend:
   actions:
   foo:
+  logger:
