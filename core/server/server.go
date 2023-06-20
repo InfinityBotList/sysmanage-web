@@ -51,69 +51,76 @@ func ensureDpAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		if r.Header.Get("X-DP-UserID") != "" {
-			// Check if user is allowed
-			for _, user := range config.AllowedUsers {
-				if user == r.Header.Get("X-DP-UserID") {
-					// User is possibly allowed
-					if r.Header.Get("X-DP-Signature") == "" {
-						w.WriteHeader(http.StatusUnauthorized)
-						w.Write([]byte("Unauthorized. X-DP-Signature header not found."))
-						return
-					}
-
-					// Check for X-DP-Timestamp
-					if r.Header.Get("X-DP-Timestamp") == "" {
-						w.WriteHeader(http.StatusUnauthorized)
-						w.Write([]byte("Unauthorized. X-DP-Timestamp header not found."))
-						return
-					}
-
-					ts := r.Header.Get("X-DP-Timestamp")
-
-					// Validate DP-Secret next
-					h := hmac.New(sha512.New, []byte(config.DPSecret))
-					h.Write([]byte(ts))
-					h.Write([]byte(r.Header.Get("X-DP-UserID")))
-					hexed := hex.EncodeToString(h.Sum(nil))
-
-					if r.Header.Get("X-DP-Signature") != hexed {
-						w.WriteHeader(http.StatusUnauthorized)
-						w.Write([]byte("Unauthorized. Signature from deployproxy mismatch"))
-						return
-					}
-
-					// Check if timestamp is valid
-					timestamp, err := strconv.ParseInt(ts, 10, 64)
-
-					if err != nil {
-						w.WriteHeader(http.StatusUnauthorized)
-						w.Write([]byte("Unauthorized. X-DP-Timestamp is not a valid integer."))
-						return
-					}
-
-					if time.Now().Unix()-timestamp > 10 {
-						w.WriteHeader(http.StatusUnauthorized)
-						w.Write([]byte("Unauthorized. X-DP-Timestamp is too old."))
-						return
-					}
-
-					// User is allowed
-					next.ServeHTTP(w, r)
-					return
-				}
-			}
-
-			// User is not allowed
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized, user not in allowlist"))
-			return
-		} else {
+		if r.Header.Get("X-DP-UserID") == "" {
 			// User is not authenticated
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Unauthorized. Not running under deployproxy?"))
 			return
 		}
+
+		// Check if user is allowed
+		if len(config.AllowedUsers) != 0 {
+			var allowed bool
+
+			for _, user := range config.AllowedUsers {
+				if user == r.Header.Get("X-DP-UserID") {
+					allowed = true
+					break
+				}
+			}
+
+			if !allowed {
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("Unauthorized. User not allowed to access this site."))
+				return
+			}
+		}
+
+		// User is possibly allowed
+		if r.Header.Get("X-DP-Signature") == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. X-DP-Signature header not found."))
+			return
+		}
+
+		// Check for X-DP-Timestamp
+		if r.Header.Get("X-DP-Timestamp") == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. X-DP-Timestamp header not found."))
+			return
+		}
+
+		ts := r.Header.Get("X-DP-Timestamp")
+
+		// Validate DP-Secret next
+		h := hmac.New(sha512.New, []byte(config.DPSecret))
+		h.Write([]byte(ts))
+		h.Write([]byte(r.Header.Get("X-DP-UserID")))
+		hexed := hex.EncodeToString(h.Sum(nil))
+
+		if r.Header.Get("X-DP-Signature") != hexed {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. Signature from deployproxy mismatch"))
+			return
+		}
+
+		// Check if timestamp is valid
+		timestamp, err := strconv.ParseInt(ts, 10, 64)
+
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. X-DP-Timestamp is not a valid integer."))
+			return
+		}
+
+		if time.Now().Unix()-timestamp > 10 {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. X-DP-Timestamp is too old."))
+			return
+		}
+
+		// User is allowed
+		next.ServeHTTP(w, r)
 	})
 }
 
