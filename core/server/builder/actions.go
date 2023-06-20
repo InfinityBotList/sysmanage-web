@@ -24,7 +24,7 @@ type action struct {
 }
 
 // CopyDir copies the content of src to dst. src should be a full path.
-func copyDir(dst, src string) error {
+func CopyDir(dst, src string) error {
 	return filepath.Walk(src, func(path string, i fs.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -240,6 +240,18 @@ var BuildActions = []action{
 			os.MkdirAll("sm-build/src/routes/plugins", 0755)
 
 			for name, plugin := range state.ServerMeta.Plugins {
+				if plugin.BuildScript != nil {
+					fmt.Println("=> Running build script for", name)
+					err := plugin.BuildScript(&types.BuildScript{
+						RootBuildDir: "sm-build",
+						BuildDir:     "sm-build/src/routes/plugins/" + name,
+					})
+
+					if err != nil {
+						panic(err)
+					}
+				}
+
 				if plugin.Frontend.Provider == "" {
 					continue
 				}
@@ -347,7 +359,7 @@ var BuildActions = []action{
 					out = "sm-build/src/lib/" + strings.Replace(dst, "$lib/", "", 1)
 				}
 
-				err := copyDir(out, src)
+				err := CopyDir(out, src)
 
 				if err != nil {
 					panic(err)

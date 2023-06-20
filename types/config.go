@@ -18,8 +18,16 @@ type PluginConfig struct {
 }
 
 type Plugin struct {
-	Init     func(c *PluginConfig) error
-	Frontend Provider
+	Init        func(c *PluginConfig) error
+	BuildScript func(b *BuildScript) error
+	Frontend    Provider
+}
+
+type BuildScript struct {
+	// Build directory (sm-build/plugins/<plugin name>)
+	BuildDir string
+	// Root build directory (sm-build)
+	RootBuildDir string
 }
 
 type Provider struct {
