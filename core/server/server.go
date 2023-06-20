@@ -264,9 +264,13 @@ Sysmanage has undergone some big changes between v0 and v1
 		w.Write([]byte("API endpoint not found..."))
 	})
 
+	if meta.Port == 0 {
+		meta.Port = 30010
+	}
+
 	// Create server
 	s := &http.Server{
-		Addr:    ":30010",
+		Addr:    ":" + strconv.Itoa(meta.Port),
 		Handler: r,
 	}
 

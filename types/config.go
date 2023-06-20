@@ -41,6 +41,7 @@ type FrontendConfig struct {
 
 type ServerMeta struct {
 	ConfigVersion int
+	Port          int
 	Plugins       map[string]Plugin // List of plugins to load
 	Frontend      FrontendConfig
 }
