@@ -18,8 +18,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func loadNginxApi(r *chi.Mux) {
-	r.Post("/api/nginx/buildNginx", func(w http.ResponseWriter, r *http.Request) {
+func loadNginxApi(r chi.Router) {
+	r.Post("/buildNginx", func(w http.ResponseWriter, r *http.Request) {
 		reqId := crypto.RandString(64)
 
 		go buildNginx(reqId)
@@ -27,7 +27,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.Write([]byte(reqId))
 	})
 
-	r.Post("/api/nginx/updateDnsRecordCf", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/updateDnsRecordCf", func(w http.ResponseWriter, r *http.Request) {
 		reqId := crypto.RandString(64)
 
 		go updateDnsRecordCf(reqId)
@@ -35,7 +35,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.Write([]byte(reqId))
 	})
 
-	r.Post("/api/nginx/getDomainList", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/getDomainList", func(w http.ResponseWriter, r *http.Request) {
 		domList, err := getNginxDomainList()
 
 		if err != nil {
@@ -55,7 +55,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.Write(bytes)
 	})
 
-	r.Post("/api/nginx/publishCerts", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/publishCerts", func(w http.ResponseWriter, r *http.Request) {
 		var req NginxAPIPublishCert
 
 		err := json.NewDecoder(r.Body).Decode(&req)
@@ -160,7 +160,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/api/nginx/getCertList", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/getCertList", func(w http.ResponseWriter, r *http.Request) {
 		// Load meta
 		meta, err := loadNginxMeta()
 
@@ -197,7 +197,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.Write(bytes)
 	})
 
-	r.Post("/api/nginx/addDomain", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/addDomain", func(w http.ResponseWriter, r *http.Request) {
 		domainName := r.URL.Query().Get("domain")
 
 		if domainName == "" {
@@ -269,7 +269,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/api/nginx/updateDomain", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/updateDomain", func(w http.ResponseWriter, r *http.Request) {
 		var req NginxServerManage
 
 		err := json.NewDecoder(r.Body).Decode(&req)
@@ -398,7 +398,7 @@ func loadNginxApi(r *chi.Mux) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/api/nginx/deleteDomain", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/deleteDomain", func(w http.ResponseWriter, r *http.Request) {
 		domainName := r.URL.Query().Get("domain")
 
 		if domainName == "" {

@@ -12,7 +12,7 @@
 	let showServiceInfo = false;
 
 	const restartService = async () => {
-		let res = await fetch(`/api/systemctl?tgt=${service?.ID}&act=restart`, {
+		let res = await fetch(`/api/systemd/systemctl?tgt=${service?.ID}&act=restart`, {
 			method: "POST",
 		});
 
@@ -32,7 +32,7 @@
 	}
 
 	const stopService = async () => {
-		let res = await fetch(`/api/systemctl?tgt=${service?.ID}&act=stop`, {
+		let res = await fetch(`/api/systemd/systemctl?tgt=${service?.ID}&act=stop`, {
 			method: "POST",
 		});
 
@@ -52,7 +52,7 @@
 	}
 
 	const startService = async () => {
-		let res = await fetch(`/api/systemctl?tgt=${service?.ID}&act=start`, {
+		let res = await fetch(`/api/systemd/systemctl?tgt=${service?.ID}&act=start`, {
 			method: "POST",
 		});
 

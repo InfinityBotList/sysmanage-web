@@ -6,7 +6,7 @@ import InputSm from "$lib/components/InputSm.svelte";
 	import UpdateTarget from "./UpdateTarget.svelte";
 
     const updateMeta = async (action: string, target: MetaTarget) => {
-        let response = await fetch(`/api/updateMeta?action=${action}`, {
+        let response = await fetch(`/api/systemd/updateMeta?action=${action}`, {
             method: "POST",
             body: JSON.stringify(target)
         });
@@ -29,7 +29,7 @@ import InputSm from "$lib/components/InputSm.svelte";
     }
 
     const getMeta = async () => {
-        let metaRes = await fetch(`/api/getMeta`, {
+        let metaRes = await fetch(`/api/systemd/getMeta`, {
             method: "POST",
         });
 

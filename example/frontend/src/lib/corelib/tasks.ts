@@ -5,7 +5,7 @@ const timeout = 500;
 export const newTask = (logId: string, callback: (outp: string[]) => void) => {
     let hasStarted = false;
     let c = setInterval(async () => {
-        let res = await fetch(`/api/getLogEntry?id=${logId}`, {
+        let res = await fetch(`/api/logger/getLogEntry?id=${logId}`, {
             method: "POST",
         });
 

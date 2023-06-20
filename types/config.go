@@ -12,8 +12,9 @@ type Config struct {
 }
 
 type PluginConfig struct {
-	Mux  *chi.Mux
-	Name string
+	Mux    chi.Router
+	RawMux *chi.Mux
+	Name   string
 }
 
 type Plugin struct {
@@ -39,6 +40,7 @@ type FrontendConfig struct {
 }
 
 type ServerMeta struct {
-	Plugins  map[string]Plugin // List of plugins to load
-	Frontend FrontendConfig
+	ConfigVersion int
+	Plugins       map[string]Plugin // List of plugins to load
+	Frontend      FrontendConfig
 }

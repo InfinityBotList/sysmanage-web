@@ -19,9 +19,9 @@ import (
 	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 )
 
-func loadServiceApi(r *chi.Mux) {
+func loadServiceApi(r chi.Router) {
 	// Returns the list of services
-	r.Post("/api/getServiceList", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/getServiceList", func(w http.ResponseWriter, r *http.Request) {
 		serviceList, err := getServiceList(true)
 
 		if err != nil {
@@ -43,7 +43,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write(jsonStr)
 	})
 
-	r.Post("/api/getDefinitionFolders", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/getDefinitionFolders", func(w http.ResponseWriter, r *http.Request) {
 		jsonStr, err := json.Marshal(serviceDefinitions)
 
 		if err != nil {
@@ -56,7 +56,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write(jsonStr)
 	})
 
-	r.Post("/api/getMeta", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/getMeta", func(w http.ResponseWriter, r *http.Request) {
 		// Open _meta.yaml
 		f, err := os.Open(serviceDefinitions + "/_meta.yaml")
 
@@ -90,7 +90,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write(jsonStr)
 	})
 
-	r.Post("/api/createService", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/createService", func(w http.ResponseWriter, r *http.Request) {
 		var createService CreateTemplate
 
 		err := yaml.NewDecoder(r.Body).Decode(&createService)
@@ -220,7 +220,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/api/deleteService", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/deleteService", func(w http.ResponseWriter, r *http.Request) {
 		var deleteService DeleteTemplate
 
 		err := yaml.NewDecoder(r.Body).Decode(&deleteService)
@@ -321,7 +321,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write([]byte(logId))
 	})
 
-	r.Post("/api/systemctl", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/systemctl", func(w http.ResponseWriter, r *http.Request) {
 		tgt := r.URL.Query().Get("tgt")
 		act := r.URL.Query().Get("act")
 
@@ -346,7 +346,7 @@ func loadServiceApi(r *chi.Mux) {
 	// Simple goroutine to clean up open entries
 	const maxOpenTime = time.Minute * 5 // for now, 5 minutes
 
-	r.Post("/api/getServiceLogs", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/getServiceLogs", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("id")
 
 		if name == "" {
@@ -392,7 +392,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write([]byte(logId))
 	})
 
-	r.Post("/api/restartServer", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/restartServer", func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			cmd := exec.Command("reboot")
 			_ = cmd.Run()
@@ -401,26 +401,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/api/getLogEntry", func(w http.ResponseWriter, r *http.Request) {
-		// Fetch from logger.LogMap
-		console := logger.LogMap.Get(r.URL.Query().Get("id"))
-
-		if console.IsDone {
-			w.Header().Set("X-Is-Done", "1")
-		}
-
-		bytes, err := json.Marshal(console.LastLog)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to marshal log entry."))
-			return
-		}
-
-		w.Write([]byte(bytes))
-	})
-
-	r.Post("/api/buildServices", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/buildServices", func(w http.ResponseWriter, r *http.Request) {
 		reqId := crypto.RandString(64)
 
 		go buildServices(reqId)
@@ -428,7 +409,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write([]byte(reqId))
 	})
 
-	r.Post("/api/serviceMod", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/serviceMod", func(w http.ResponseWriter, r *http.Request) {
 		act := r.URL.Query().Get("act")
 
 		switch act {
@@ -540,7 +521,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/api/initDeploy", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/initDeploy", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("id")
 
 		services, err := getServiceList(false)
@@ -573,7 +554,7 @@ func loadServiceApi(r *chi.Mux) {
 		w.Write([]byte(logId))
 	})
 
-	r.Post("/api/createGit", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/createGit", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
 
 		services, err := getServiceList(false)
@@ -694,7 +675,7 @@ func loadServiceApi(r *chi.Mux) {
 		go persist.PersistToGit("")
 	})
 
-	r.Post("/api/updateMeta", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/updateMeta", func(w http.ResponseWriter, r *http.Request) {
 		var target MetaTarget
 
 		err := json.NewDecoder(r.Body).Decode(&target)

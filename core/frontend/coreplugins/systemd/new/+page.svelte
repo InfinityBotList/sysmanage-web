@@ -28,7 +28,7 @@
     let meta: Meta = {};
 
     const getMeta = async () => {
-        let metaRes = await fetch(`/api/getMeta`, {
+        let metaRes = await fetch(`/api/systemd/getMeta`, {
             method: "POST",
         });
 
@@ -44,7 +44,7 @@
     }
 
     const createService = async () => {
-        let createService = await fetch(`/api/createService`, {
+        let createService = await fetch(`/api/systemd/createService`, {
             method: "POST",
             body: JSON.stringify({
                 name,

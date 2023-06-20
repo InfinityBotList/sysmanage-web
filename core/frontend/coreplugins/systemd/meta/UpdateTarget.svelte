@@ -16,7 +16,7 @@
     let editDescription = target?.Description;
 
     const update = async (target: MetaTarget) => {
-        let response = await fetch(`/api/updateMeta?action=update&name=${target?.Name}`, {
+        let response = await fetch(`/api/systemd/updateMeta?action=update&name=${target?.Name}`, {
             method: "POST",
             body: JSON.stringify(target)
         });

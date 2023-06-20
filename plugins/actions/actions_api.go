@@ -7,8 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func loadActionsApi(r *chi.Mux) {
-	r.Post("/api/getActionList", func(w http.ResponseWriter, r *http.Request) {
+func loadActionsApi(r chi.Router) {
+	r.Post("/getActionList", func(w http.ResponseWriter, r *http.Request) {
 		bytes, err := json.Marshal(Actions)
 
 		if err != nil {
@@ -20,7 +20,7 @@ func loadActionsApi(r *chi.Mux) {
 		w.Write(bytes)
 	})
 
-	r.Post("/api/executeAction", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/executeAction", func(w http.ResponseWriter, r *http.Request) {
 		actionName := r.URL.Query().Get("actionName")
 
 		if actionName == "" {

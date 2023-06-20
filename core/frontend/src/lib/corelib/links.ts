@@ -29,7 +29,7 @@ export const getLinks = async (): Promise<Link[]> => {
         return links // return cached links
     }
 
-    let res = await fetch("/api/getRegisteredLinks", {
+    let res = await fetch("/api/frontend/getRegisteredLinks", {
         method: "POST"
     })
 

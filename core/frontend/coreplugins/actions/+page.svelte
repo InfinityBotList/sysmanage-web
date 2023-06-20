@@ -12,7 +12,7 @@
     }
 
     const getActionList = async () => {
-		let serviceList = await fetch(`/api/getActionList`, {
+		let serviceList = await fetch(`/api/actions/getActionList`, {
 			method: "POST",
 		});
 
@@ -38,7 +38,7 @@
             }
         }
 
-        let res = await fetch(`/api/executeAction?actionName=${action.Name}`, {
+        let res = await fetch(`/api/actions/executeAction?actionName=${action.Name}`, {
             method: "POST"
         })
 

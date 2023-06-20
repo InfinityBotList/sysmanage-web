@@ -7,8 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func loadFrontendApi(r *chi.Mux) {
-	r.Post("/api/getRegisteredLinks", func(w http.ResponseWriter, r *http.Request) {
+func loadFrontendApi(r chi.Router) {
+	r.Post("/getRegisteredLinks", func(w http.ResponseWriter, r *http.Request) {
 		bytes, err := json.Marshal(RegisteredLinks)
 
 		if err != nil {

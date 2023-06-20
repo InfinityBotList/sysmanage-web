@@ -23,7 +23,7 @@
 			return
 		}
 
-		let res = await fetch(`/api/deleteService`, {
+		let res = await fetch(`/api/systemd/deleteService`, {
 			method: "POST",
 			body: JSON.stringify({
 				name: service?.ID,
@@ -46,7 +46,7 @@
 	let deployTaskId: string = "";
 	let deployTaskOutput: string[] = [];
 	const initDeploy = async () => {
-		let res = await fetch(`/api/initDeploy?id=${service?.ID}`, {
+		let res = await fetch(`/api/systemd/initDeploy?id=${service?.ID}`, {
 			method: "POST",
 		});
 
@@ -66,7 +66,7 @@
 	let getServiceLogTaskId: string = "";
 	let getServiceLogTaskOutput: string[] = [];
 	const getServiceLogs = async () => {
-		let res = await fetch(`/api/getServiceLogs?id=${service?.ID}`, {
+		let res = await fetch(`/api/systemd/getServiceLogs?id=${service?.ID}`, {
 			method: "POST",
 		});
 
@@ -171,7 +171,7 @@
 
 
     const createGit = async () => {
-        let res = await fetch(`/api/createGit?id=${service?.ID}`, {
+        let res = await fetch(`/api/systemd/createGit?id=${service?.ID}`, {
             method: "POST",
             body: JSON.stringify({
                 repo: gitRepo,
@@ -212,7 +212,7 @@
     }
 
     const getMeta = async () => {
-        let metaRes = await fetch(`/api/getMeta`, {
+        let metaRes = await fetch(`/api/systemd/getMeta`, {
             method: "POST",
         });
 
@@ -228,7 +228,7 @@
     }
 
     const editService = async () => {
-        let editService = await fetch(`/api/createService?update=true`, {
+        let editService = await fetch(`/api/systemd/createService?update=true`, {
             method: "POST",
             body: JSON.stringify({
                 name,

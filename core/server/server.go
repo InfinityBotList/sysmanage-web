@@ -177,6 +177,16 @@ func Init(
 		return
 	}
 
+	if meta.ConfigVersion < 1 {
+		fmt.Println(`
+Sysmanage has undergone some big changes between v0 and v1
+
+- Plugin routes are now scoped to the name of the plugin
+- Corelib has been updated
+- To automatically update corelib, run "sysmanage updatecore"`)
+		os.Exit(1)
+	}
+
 	// Load config.yaml into Config struct
 	file, err := os.Open("config.yaml")
 
@@ -227,14 +237,17 @@ func Init(
 			panic("Plugin " + name + " not found in config.yaml")
 		}
 
-		err := plugin.Init(&types.PluginConfig{
-			Name: name,
-			Mux:  r,
-		})
+		r.Route("/api/"+name, func(mr chi.Router) {
+			err := plugin.Init(&types.PluginConfig{
+				Name:   name,
+				Mux:    mr,
+				RawMux: r,
+			})
 
-		if err != nil {
-			panic(err)
-		}
+			if err != nil {
+				panic(err)
+			}
+		})
 
 		state.LoadedPlugins = append(state.LoadedPlugins, name)
 	}

@@ -9,7 +9,7 @@
 	import Button from '$lib/components/Button.svelte';
 
 	const getServiceList = async () => {
-		let serviceList = await fetch(`/api/getServiceList`, {
+		let serviceList = await fetch(`/api/systemd/getServiceList`, {
 			method: "POST",
 		});
 
@@ -56,7 +56,7 @@
 	let buildServicesTaskId: string = "";
 	let buildServicesTaskOutput: string[] = [];
 	const buildServices = async () => {
-		let taskId = await fetch(`/api/buildServices`, {
+		let taskId = await fetch(`/api/systemd/buildServices`, {
 			method: "POST"
 		});
 
@@ -82,7 +82,7 @@
 			return
 		}
 
-		let res = await fetch(`/api/restartServer`, {
+		let res = await fetch(`/api/systemd/restartServer`, {
 			method: "POST"
 		});
 
@@ -104,7 +104,7 @@
 			return
 		}
 
-		let res = await fetch(`/api/serviceMod?act=${action}`, {
+		let res = await fetch(`/api/systemd/serviceMod?act=${action}`, {
 			method: "POST",
 		});
 

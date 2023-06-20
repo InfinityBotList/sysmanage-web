@@ -5,6 +5,7 @@ import (
 
 	"github.com/infinitybotlist/sysmanage-web/plugins/actions"
 	"github.com/infinitybotlist/sysmanage-web/plugins/frontend"
+	"github.com/infinitybotlist/sysmanage-web/plugins/logger"
 	"github.com/infinitybotlist/sysmanage-web/plugins/nginx"
 	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 	"github.com/infinitybotlist/sysmanage-web/plugins/systemd"
@@ -12,6 +13,7 @@ import (
 )
 
 var meta = types.ServerMeta{
+	ConfigVersion: 1,
 	Plugins: map[string]types.Plugin{
 		"nginx": {
 			Init: nginx.InitPlugin,
@@ -45,6 +47,9 @@ var meta = types.ServerMeta{
 			Frontend: types.Provider{
 				Provider: "frontend/extplugins/foo", // This is the path to the plugin's frontend
 			},
+		},
+		"logger": {
+			Init: logger.InitPlugin,
 		},
 	},
 	Frontend: types.FrontendConfig{

@@ -13,7 +13,7 @@
             throw new Error("No service id provided");
         }
 
-		let serviceList = await fetch(`/api/getServiceList`, {
+		let serviceList = await fetch(`/api/systemd/getServiceList`, {
 			method: "POST",
 		});
 
