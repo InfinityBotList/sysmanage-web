@@ -112,6 +112,4 @@ func RunCommand() {
 		fmt.Println()
 		HelpCommand()
 	}
-
-	os.Exit(1)
 }
