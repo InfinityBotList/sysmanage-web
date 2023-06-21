@@ -5,23 +5,6 @@ interface Link {
 	Href:        string
 }
 
-/*
-export const links: Link[] = [
-    {
-        name: "Service Management",
-        description: "Systemd service management",
-        link: "/plugins/systemd",
-        plugin: "systemd"
-    },
-    {
-        name: "Nginx Management",
-        description: "Add, update, remove and manage nginx-proxied domains",
-        link: "/plugins/nginx",
-        plugin: "nginx"
-    },
-]
-*/
-
 let links: Link[] = []
 
 export const getLinks = async (): Promise<Link[]> => {

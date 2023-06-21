@@ -72,6 +72,42 @@ func init() {
 			},
 		},
 		{
+			Name:        "updatecomponents",
+			Description: "Update the core frontend components (components)",
+			Run: func() {
+				files, ok := state.Assets["frontend"]
+
+				if !ok {
+					fmt.Println("No frontend assets found")
+					os.Exit(1)
+				}
+
+				fmt.Println("Updating components of frontend")
+
+				err := os.RemoveAll("frontend/src/lib/components")
+
+				if err != nil {
+					panic(err)
+				}
+
+				os.MkdirAll("frontend/src/lib/components", 0755)
+
+				fileSubbed, err := fs.Sub(files, "frontend/src/lib/components")
+
+				if err != nil {
+					panic(err)
+				}
+
+				err = builder.CopyProvider(fileSubbed, state.ServerMeta.Frontend.ComponentProvider, "frontend/src/lib/components")
+
+				if err != nil {
+					panic(err)
+				}
+
+				fmt.Println("Done")
+			},
+		},
+		{
 			Name:        "help",
 			Description: "Show this help message",
 			Run:         HelpCommand,
