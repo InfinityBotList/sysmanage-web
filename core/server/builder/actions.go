@@ -118,6 +118,7 @@ func CopyProvider(
 			"tailwind.config.js",
 			"vite.config.js",
 			"README.md",
+			"src/app.d.ts",
 		} {
 			if strings.Contains(path, ignore) {
 				fmt.Print(info("=>", path, "(skipped)"))
