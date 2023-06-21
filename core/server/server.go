@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/infinitybotlist/sysmanage-web/core"
+	"github.com/infinitybotlist/sysmanage-web/core/server/cmd"
 	"github.com/infinitybotlist/sysmanage-web/core/state"
 	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 	"github.com/infinitybotlist/sysmanage-web/types"
@@ -186,7 +187,7 @@ func Init(
 	state.ServerMeta = meta
 
 	if len(os.Args) > 1 {
-		parseArgs()
+		cmd.RunCommand()
 		return
 	}
 
