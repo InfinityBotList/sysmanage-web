@@ -17,6 +17,8 @@ var (
 	cf               *cloudflare.API
 )
 
+const ID = "nginx"
+
 func InitPlugin(c *types.PluginConfig) error {
 	// Register links
 	frontend.AddLink(c, frontend.Link{

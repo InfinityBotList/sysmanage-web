@@ -248,16 +248,16 @@ Sysmanage has undergone some big changes between v0 and v1
 	// Start loading the plugins
 	fmt.Println("Loading plugins...")
 
-	for name, plugin := range meta.Plugins {
-		fmt.Println("Loading plugin " + name)
+	for _, plugin := range meta.Plugins {
+		fmt.Println("Loading plugin " + plugin.ID)
 
-		if _, ok := state.Config.Plugins[name]; !ok {
-			panic("Plugin " + name + " not found in config.yaml")
+		if _, ok := state.Config.Plugins[plugin.ID]; !ok {
+			panic("Plugin " + plugin.ID + " not found in config.yaml")
 		}
 
-		r.Route("/api/"+name, func(mr chi.Router) {
+		r.Route("/api/"+plugin.ID, func(mr chi.Router) {
 			err := plugin.Init(&types.PluginConfig{
-				Name:   name,
+				Name:   plugin.ID,
 				Mux:    mr,
 				RawMux: r,
 			})
@@ -267,7 +267,7 @@ Sysmanage has undergone some big changes between v0 and v1
 			}
 		})
 
-		state.LoadedPlugins = append(state.LoadedPlugins, name)
+		state.LoadedPlugins = append(state.LoadedPlugins, plugin.ID)
 	}
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {

@@ -16,6 +16,8 @@ var Password string
 
 var UseTokenAuth bool
 
+const ID = "persist"
+
 func InitPlugin(c *types.PluginConfig) error {
 	cfgData, err := plugins.GetConfig(c.Name)
 

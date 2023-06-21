@@ -18,6 +18,7 @@ type PluginConfig struct {
 }
 
 type Plugin struct {
+	ID          string // Note that the id of the plugin should never be changed as it determines API endpoints
 	Init        func(c *PluginConfig) error
 	BuildScript func(b *BuildScript) error
 	Frontend    Provider
@@ -50,8 +51,8 @@ type FrontendConfig struct {
 type ServerMeta struct {
 	ConfigVersion  int
 	Port           int
-	FrontendServer *FrontendServer   // Leave blank to use static frontend
-	Plugins        map[string]Plugin // List of plugins to load
+	FrontendServer *FrontendServer // Leave blank to use static frontend
+	Plugins        []Plugin        // List of plugins to load
 	Frontend       FrontendConfig
 }
 

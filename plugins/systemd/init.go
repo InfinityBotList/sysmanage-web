@@ -17,6 +17,8 @@ var (
 	srvModBypass       []string
 )
 
+const ID = "systemd"
+
 func InitPlugin(c *types.PluginConfig) error {
 	// Register links
 	frontend.AddLink(c, frontend.Link{

@@ -239,12 +239,16 @@ var BuildActions = []action{
 
 			os.MkdirAll("sm-build/src/routes/plugins", 0755)
 
-			for name, plugin := range state.ServerMeta.Plugins {
+			for _, plugin := range state.ServerMeta.Plugins {
+				if plugin.ID == "" {
+					panic("Plugin ID is empty")
+				}
+
 				if plugin.BuildScript != nil {
-					fmt.Println("=> Running build script for", name)
+					fmt.Println("=> Running build script for", plugin.ID)
 					err := plugin.BuildScript(&types.BuildScript{
 						RootBuildDir: "sm-build",
-						BuildDir:     "sm-build/src/routes/plugins/" + name,
+						BuildDir:     "sm-build/src/routes/plugins/" + plugin.ID,
 					})
 
 					if err != nil {
@@ -256,15 +260,15 @@ var BuildActions = []action{
 					continue
 				}
 
-				fmt.Println("=> Copying plugin", name)
+				fmt.Println("=> Copying plugin", plugin.ID)
 
-				subbed, err := fs.Sub(cp, "frontend/coreplugins/"+name)
+				subbed, err := fs.Sub(cp, "frontend/coreplugins/"+plugin.ID)
 
 				if err != nil {
 					panic(err)
 				}
 
-				dstPath := "src/routes/plugins/" + name
+				dstPath := "src/routes/plugins/" + plugin.ID
 				err = CopyProvider(subbed, plugin.Frontend, "sm-build/"+dstPath)
 
 				if err != nil {

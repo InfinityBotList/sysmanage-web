@@ -5,6 +5,8 @@ import (
 	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
+const ID = "actions"
+
 func InitPlugin(c *types.PluginConfig) error {
 	// Register links
 	frontend.AddLink(c, frontend.Link{
