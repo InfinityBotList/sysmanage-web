@@ -116,6 +116,10 @@ func CopyProvider(
 			}
 		}
 
+		if path == "." {
+			return nil
+		}
+
 		fmt.Println("=>", path)
 		// Extract each file out
 		if err != nil {
