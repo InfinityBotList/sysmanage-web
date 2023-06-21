@@ -101,10 +101,6 @@ func CopyProvider(
 	}
 
 	fs.WalkDir(srcFs, ".", func(path string, d fs.DirEntry, err error) error {
-		if strings.HasPrefix(path, ".svelte-kit") {
-			return nil
-		}
-
 		for _, ignore := range []string{
 			"node_modules",
 			".git",
