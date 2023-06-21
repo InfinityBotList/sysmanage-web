@@ -145,6 +145,9 @@ func startFrontendServer() {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Dir = dir
+	cmd.Env = os.Environ()
+
+	cmd.Env = append(cmd.Env, state.ServerMeta.FrontendServer.ExtraEnv...)
 
 	go func() {
 		err := cmd.Run()

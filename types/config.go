@@ -58,7 +58,8 @@ type ServerMeta struct {
 type FrontendServer struct {
 	Host                string
 	ExtraHeadersToAllow []string
-	Dir                 string // The directory to serve
-	DirAbsolute         bool   // If true, the dir is absolute, otherwise, it's relative to the root of the project
-	RunCommand          string // The command to run to start the server
+	Dir                 string   // The directory to serve
+	DirAbsolute         bool     // If true, the dir is absolute, otherwise, it's relative to the root of the project
+	RunCommand          string   // The command to run to start the server
+	ExtraEnv            []string // Extra environment variables to pass to the server, format KEY=value
 }
