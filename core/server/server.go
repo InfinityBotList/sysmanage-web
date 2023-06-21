@@ -302,7 +302,7 @@ Sysmanage has undergone some big changes between v0 and v1
 	}()
 
 	// Start server
-	fmt.Println("Starting server on port 30010")
+	fmt.Println("Starting server on port " + strconv.Itoa(meta.Port))
 	err = s.ListenAndServe()
 
 	if err != nil {
