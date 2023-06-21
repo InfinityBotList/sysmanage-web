@@ -127,6 +127,12 @@ func ensureDpAuth(next http.Handler) http.Handler {
 func routeStatic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.URL.Path, "/api") {
+			if state.ServerMeta.FrontendServer != nil {
+				fmt.Println("Using external frontend server, query it instead through a simple proxy")
+				proxy(w, r)
+				return
+			}
+
 			serverRoot := http.FS(serverRootSubbed)
 
 			// Get file extension
@@ -213,11 +219,16 @@ Sysmanage has undergone some big changes between v0 and v1
 
 	state.Config = config
 
-	// Create subbed frontend embed
-	// Serve frontend
-	serverRootSubbed, err = fs.Sub(frontend, "frontend/build")
-	if err != nil {
-		log.Fatal(err)
+	if meta.FrontendServer != nil {
+		fmt.Println("Starting up external frontend server")
+		startFrontendServer()
+	} else {
+		// Create subbed frontend embed
+		// Serve frontend
+		serverRootSubbed, err = fs.Sub(frontend, "frontend/build")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Create wildcard route

@@ -48,8 +48,17 @@ type FrontendConfig struct {
 }
 
 type ServerMeta struct {
-	ConfigVersion int
-	Port          int
-	Plugins       map[string]Plugin // List of plugins to load
-	Frontend      FrontendConfig
+	ConfigVersion  int
+	Port           int
+	FrontendServer *FrontendServer   // Leave blank to use static frontend
+	Plugins        map[string]Plugin // List of plugins to load
+	Frontend       FrontendConfig
+}
+
+type FrontendServer struct {
+	Host                string
+	ExtraHeadersToAllow []string
+	Dir                 string // The directory to serve
+	DirAbsolute         bool   // If true, the dir is absolute, otherwise, it's relative to the root of the project
+	RunCommand          string // The command to run to start the server
 }
