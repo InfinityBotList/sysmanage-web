@@ -109,6 +109,15 @@ func CopyProvider(
 			"node_modules",
 			".git",
 			"build",
+			"package.json",
+			"package-lock.json",
+			"yarn.lock",
+			"tsconfig.json",
+			"svelte.config.js",
+			"postcss.config.js",
+			"tailwind.config.js",
+			"vite.config.js",
+			"README.md",
 		} {
 			if strings.Contains(path, ignore) {
 				fmt.Print(info("=>", path, "(skipped)"))
