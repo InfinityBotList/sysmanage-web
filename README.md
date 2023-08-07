@@ -4,6 +4,12 @@
 
 # Getting started
 
+## Automatic
+
+1. Run ``projbuilder/build.py``
+
+## Manual
+
 1. Copy the contents of the ``example`` directory out to a seperate folder (``sysmanage`` etc.)
 2. Run ``git init`` and ``go mod tidy`` to download any deps needed
 3. Run ``npm i`` in ``frontend``.
