@@ -155,8 +155,9 @@ Sysmanage has undergone some big changes between v0 and v1
 
 	// First run preload scripts
 	for _, plugin := range meta.Plugins {
-		fmt.Println("Running preload action for", plugin.ID)
 		if plugin.Preload != nil {
+			fmt.Println("Running preload action for", plugin.ID)
+
 			err := plugin.Preload(&types.PluginConfig{
 				Name:   plugin.ID,
 				RawMux: r,
