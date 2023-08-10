@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/infinitybotlist/sysmanage-web/core/logger"
-	"github.com/infinitybotlist/sysmanage-web/core/plugins"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -25,10 +24,6 @@ func (po persistOutput) Write(p []byte) (n int, err error) {
 }
 
 func PersistToGit(logId string) error {
-	if !plugins.Enabled("persist") {
-		return errors.New("not persisting, persist plugin is disabled")
-	}
-
 	// Open current directory as git repo
 	if logId != "" {
 		logger.LogMap.Add(logId, "Persisting changes to git", true)

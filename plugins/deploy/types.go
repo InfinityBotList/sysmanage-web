@@ -17,7 +17,7 @@ type DeployMeta struct {
 type DeploySource struct {
 	Type  string `yaml:"type"`
 	Url   string `yaml:"url"`
-	Token string `yaml:"pat"`
+	Token string `yaml:"token"`
 	Ref   string `yaml:"ref"`
 }
 

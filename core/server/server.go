@@ -13,7 +13,6 @@ import (
 	"github.com/infinitybotlist/sysmanage-web/core"
 	"github.com/infinitybotlist/sysmanage-web/core/server/cmd"
 	"github.com/infinitybotlist/sysmanage-web/core/state"
-	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 	"github.com/infinitybotlist/sysmanage-web/types"
 
 	"github.com/go-chi/chi/v5"
@@ -216,22 +215,6 @@ Sysmanage has undergone some big changes between v0 and v1
 		Addr:    ":" + strconv.Itoa(meta.Port),
 		Handler: r,
 	}
-
-	// Always persist to git during initial startup
-	go persist.PersistToGit("")
-
-	// Also, remove any old stale deploys here too
-	go func() {
-		if _, err := os.Stat("deploys"); err == nil {
-			fmt.Println("Removing old deploys")
-
-			err = os.RemoveAll("deploys")
-
-			if err != nil {
-				panic(err)
-			}
-		}
-	}()
 
 	// Start server
 	fmt.Println("Starting server on port " + strconv.Itoa(meta.Port))

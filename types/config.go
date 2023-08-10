@@ -5,8 +5,7 @@ import (
 )
 
 type Config struct {
-	GithubPat string                    `yaml:"github_pat"`
-	Plugins   map[string]map[string]any `yaml:"plugins"`
+	Plugins map[string]map[string]any `yaml:"plugins"`
 }
 
 type PluginConfig struct {

@@ -2,6 +2,8 @@ package deploy
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/infinitybotlist/sysmanage-web/core/plugins"
@@ -39,6 +41,19 @@ func InitPlugin(c *types.PluginConfig) error {
 	}
 
 	state.AuthExemptRoutes = append(state.AuthExemptRoutes, "/createDeploy")
+
+	// Also, remove any old stale deploys here too
+	go func() {
+		if _, err := os.Stat("/tmp/deploys"); err == nil {
+			fmt.Println("Removing old deploys")
+
+			err = os.RemoveAll("/tmp/deploys")
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}()
 
 	loadDeployApi(c.Mux)
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/infinitybotlist/sysmanage-web/core/plugins"
-	"github.com/infinitybotlist/sysmanage-web/core/state"
 	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
@@ -32,33 +31,37 @@ func InitPlugin(c *types.PluginConfig) error {
 		Author = "sysmanage-web[auto]"
 	}
 
-	Username, err = cfgData.GetString("username")
-
-	if err != nil {
-		fmt.Println("INFO: No username set for persist plugin, defaulting to PAT")
-		Username = state.Config.GithubPat
-	}
-
-	Password, err = cfgData.GetString("password")
-
-	if err != nil {
-		fmt.Println("INFO: No password set for persist plugin, defaulting to PAT")
-		Password = state.Config.GithubPat
-	}
-
 	UseTokenAuth, err = cfgData.GetBool("use_token_auth")
 
 	if err != nil {
 		fmt.Println("INFO: No use_token_auth set for persist plugin, defaulting to false")
 	}
 
-	if !UseTokenAuth {
-		fmt.Println("INFO: Will use BasicAuth for git operations")
+	Password, err = cfgData.GetString("password")
+
+	if err != nil {
+		return err
 	}
 
-	if UseTokenAuth {
+	Username, err = cfgData.GetString("username")
+
+	if err != nil {
+		if UseTokenAuth {
+			fmt.Println("INFO: No username set for persist plugin, defaulting to password")
+			Username = Password
+		} else {
+			return err
+		}
+	}
+
+	if !UseTokenAuth {
+		fmt.Println("INFO: Will use BasicAuth for git operations")
+	} else {
 		fmt.Println("INFO: Will use TokenAuth for git operations")
 	}
+
+	// Always persist to git during initial startup
+	go PersistToGit("")
 
 	return nil
 }
