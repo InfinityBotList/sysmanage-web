@@ -13,7 +13,6 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
 	github.com/cloudflare/circl v1.1.0 // indirect
-	github.com/cloudflare/cloudflare-go v0.67.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.4.1 // indirect
@@ -41,8 +40,10 @@ require (
 )
 
 require (
+	github.com/cloudflare/cloudflare-go v0.67.0
 	github.com/fatih/color v1.15.0
 	github.com/go-git/go-git/v5 v5.6.1
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/infinitybotlist/eureka v0.0.0-20230123041109-426207f20916
+	gopkg.in/yaml.v2 v2.2.4
 )
