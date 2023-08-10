@@ -286,8 +286,6 @@ func BuildServices(reqId string) {
 		}
 	}
 
-	logger.LogMap.Add(reqId, "Finished building services.", true)
-
 	// Now we need to reload systemd
 	logger.LogMap.Add(reqId, "Reloading systemd...", true)
 
