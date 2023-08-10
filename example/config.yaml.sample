@@ -1,20 +1,17 @@
-allowed_users:
-  - 728871946456137770
-  - 510065483693817867
-dp_secret: 
-dp_disable: false # Only enable when bootstrapping
-url: https://sysmanage.infinitybots.gg
-
-# Common
-github_pat: 
-
 # Enabled plugins
 plugins:
+  authdp:
+    dp_secret: 
+    url: https://example.com
+    allowed_users:
+      - 728871946456137770
+      - 510065483693817867
+      - 1132812361959481354
   nginx:
     nginx_definitions: data/nginx
-    cf_api_token: 
+    cf_api_token:  
   persist:
-    github_webhook_sig: 
+    password: 
   systemd:
     service_definitions: data/services
     service_out: /etc/systemd/system
