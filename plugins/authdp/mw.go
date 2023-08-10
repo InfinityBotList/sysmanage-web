@@ -40,6 +40,9 @@ func DpAuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		// User is allowed, set constants.UserIdHeader to user id for other plugins to use it
+		r.Header.Set(constants.UserIdHeader, r.Header.Get("X-DP-UserID"))
+
 		// Check if user is allowed
 		if len(allowedUsers) > 0 && !slices.Contains(allowedUsers, r.Header.Get(constants.UserIdHeader)) {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -91,9 +94,6 @@ func DpAuthMiddleware(next http.Handler) http.Handler {
 			w.Write([]byte("Unauthorized. X-DP-Timestamp is too old."))
 			return
 		}
-
-		// User is allowed, set constants.UserIdHeader to user id for other plugins to use it
-		r.Header.Set(constants.UserIdHeader, r.Header.Get("X-DP-UserID"))
 
 		next.ServeHTTP(w, r)
 	})
