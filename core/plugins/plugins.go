@@ -108,7 +108,7 @@ func (i OpaqueConfig) GetStringArray(key string) ([]string, error) {
 		val := make([]string, len(v))
 
 		for i, v := range v {
-			val[i] = fmt.Sprintf("%s", v)
+			val[i] = fmt.Sprint(v)
 		}
 
 		return val, nil
