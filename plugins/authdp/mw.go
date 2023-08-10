@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -42,6 +43,8 @@ func DpAuthMiddleware(next http.Handler) http.Handler {
 
 		// User is allowed, set constants.UserIdHeader to user id for other plugins to use it
 		r.Header.Set(constants.UserIdHeader, r.Header.Get("X-DP-UserID"))
+
+		fmt.Println(r.Header.Get(constants.UserIdHeader))
 
 		// Check if user is allowed
 		if len(allowedUsers) > 0 && !slices.Contains(allowedUsers, r.Header.Get(constants.UserIdHeader)) {
