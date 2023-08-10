@@ -7,7 +7,17 @@ import (
 
 const ID = "acl"
 
+var preloaded bool
+
 func InitPlugin(c *types.PluginConfig) error {
+	if !preloaded {
+		panic("acl plugin must be preloaded")
+	}
+	return nil
+}
+
+func Preload(c *types.PluginConfig) error {
 	c.RawMux.Use(MuxMiddleware)
+	preloaded = true
 	return nil
 }

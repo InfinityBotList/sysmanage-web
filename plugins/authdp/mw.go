@@ -41,21 +41,10 @@ func DpAuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Check if user is allowed
-		if len(state.Config.AllowedUsers) != 0 {
-			var allowed bool
-
-			for _, user := range state.Config.AllowedUsers {
-				if user == r.Header.Get("X-DP-UserID") {
-					allowed = true
-					break
-				}
-			}
-
-			if !allowed {
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte("Unauthorized. User not allowed to access this site."))
-				return
-			}
+		if len(allowedUsers) > 0 && !slices.Contains(allowedUsers, r.Header.Get(constants.UserIdHeader)) {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized. User not allowed to access this site."))
+			return
 		}
 
 		// User is possibly allowed

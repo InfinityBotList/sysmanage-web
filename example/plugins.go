@@ -17,8 +17,9 @@ var meta = types.ServerMeta{
 	ConfigVersion: 1,
 	Plugins: []types.Plugin{
 		{
-			ID:   authdp.ID,
-			Init: authdp.InitPlugin,
+			ID:      authdp.ID,
+			Init:    authdp.InitPlugin,
+			Preload: authdp.Preload,
 		},
 		{
 			ID:   nginx.ID,

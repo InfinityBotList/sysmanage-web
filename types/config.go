@@ -1,11 +1,12 @@
 package types
 
-import "github.com/go-chi/chi/v5"
+import (
+	"github.com/go-chi/chi/v5"
+)
 
 type Config struct {
-	AllowedUsers []string                  `yaml:"allowed_users"`
-	GithubPat    string                    `yaml:"github_pat"`
-	Plugins      map[string]map[string]any `yaml:"plugins"`
+	GithubPat string                    `yaml:"github_pat"`
+	Plugins   map[string]map[string]any `yaml:"plugins"`
 }
 
 type PluginConfig struct {
@@ -18,6 +19,7 @@ type Plugin struct {
 	ID          string // Note that the id of the plugin should never be changed as it determines API endpoints
 	Init        func(c *PluginConfig) error
 	BuildScript func(b *BuildScript) error
+	Preload     func(c *PluginConfig) error // Function to call on preload. Note that only Name and RawMux are set
 	Frontend    Provider
 }
 

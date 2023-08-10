@@ -153,6 +153,27 @@ Sysmanage has undergone some big changes between v0 and v1
 	// Start loading the plugins
 	fmt.Println("Loading plugins...")
 
+	// First run preload scripts
+	for _, plugin := range meta.Plugins {
+		fmt.Println("Running preload action for", plugin.ID)
+		if plugin.Preload != nil {
+			err := plugin.Preload(&types.PluginConfig{
+				Name:   plugin.ID,
+				RawMux: r,
+			})
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	// Load the other middleware post preload
+	r.Use(
+		routeStatic,
+		middleware.Timeout(30*time.Second),
+	)
+
 	for _, plugin := range meta.Plugins {
 		fmt.Println("Loading plugin " + plugin.ID)
 
@@ -179,11 +200,6 @@ Sysmanage has undergone some big changes between v0 and v1
 		fmt.Fprintln(os.Stderr, "No auth plugins loaded. For security purposes, please load at least one auth plugin. You can use `authdp` for a reasonably secure auth plugin")
 		os.Exit(1)
 	}
-
-	r.Use(
-		routeStatic,
-		middleware.Timeout(30*time.Second),
-	)
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnavailableForLegalReasons)

@@ -11,11 +11,18 @@ import (
 const ID = "authdp"
 
 var (
-	dpSecret string
-	url      string
+	dpSecret     string
+	url          string
+	allowedUsers []string
 )
 
+var preloaded bool
+
 func InitPlugin(c *types.PluginConfig) error {
+	if !preloaded {
+		panic("authdp plugin must be preloaded")
+	}
+
 	cfgData, err := plugins.GetConfig(c.Name)
 
 	if err != nil {
@@ -34,9 +41,19 @@ func InitPlugin(c *types.PluginConfig) error {
 		return err
 	}
 
+	allowedUsers, err = cfgData.GetStringArray("allowed_users")
+
+	if err != nil {
+		return err
+	}
+
 	state.AuthPlugins = append(state.AuthPlugins, ID)
 
-	c.RawMux.Use(DpAuthMiddleware)
+	return nil
+}
 
+func Preload(c *types.PluginConfig) error {
+	c.RawMux.Use(DpAuthMiddleware)
+	preloaded = true
 	return nil
 }
