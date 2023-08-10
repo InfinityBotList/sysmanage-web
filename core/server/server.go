@@ -1,9 +1,6 @@
 package server
 
 import (
-	"crypto/hmac"
-	"crypto/sha512"
-	"encoding/hex"
 	"fmt"
 	"io/fs"
 	"log"
@@ -32,98 +29,6 @@ var (
 	// Subbed frontend embed
 	serverRootSubbed fs.FS
 )
-
-func ensureDpAuth(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if config.DPDisable {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		if r.Header.Get("X-DP-Host") == "" {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. X-DP-Host header not found."))
-			return
-		}
-
-		if r.Header.Get("X-DP-Host") != config.URL {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. Domain rebind detected. Expected " + config.URL + " but got " + r.Header.Get("X-DP-Host")))
-			return
-		}
-
-		if r.Header.Get("X-DP-UserID") == "" {
-			// User is not authenticated
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. Not running under deployproxy?"))
-			return
-		}
-
-		// Check if user is allowed
-		if len(config.AllowedUsers) != 0 {
-			var allowed bool
-
-			for _, user := range config.AllowedUsers {
-				if user == r.Header.Get("X-DP-UserID") {
-					allowed = true
-					break
-				}
-			}
-
-			if !allowed {
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte("Unauthorized. User not allowed to access this site."))
-				return
-			}
-		}
-
-		// User is possibly allowed
-		if r.Header.Get("X-DP-Signature") == "" {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. X-DP-Signature header not found."))
-			return
-		}
-
-		// Check for X-DP-Timestamp
-		if r.Header.Get("X-DP-Timestamp") == "" {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. X-DP-Timestamp header not found."))
-			return
-		}
-
-		ts := r.Header.Get("X-DP-Timestamp")
-
-		// Validate DP-Secret next
-		h := hmac.New(sha512.New, []byte(config.DPSecret))
-		h.Write([]byte(ts))
-		h.Write([]byte(r.Header.Get("X-DP-UserID")))
-		hexed := hex.EncodeToString(h.Sum(nil))
-
-		if r.Header.Get("X-DP-Signature") != hexed {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. Signature from deployproxy mismatch"))
-			return
-		}
-
-		// Check if timestamp is valid
-		timestamp, err := strconv.ParseInt(ts, 10, 64)
-
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. X-DP-Timestamp is not a valid integer."))
-			return
-		}
-
-		if time.Now().Unix()-timestamp > 10 {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized. X-DP-Timestamp is too old."))
-			return
-		}
-
-		// User is allowed
-		next.ServeHTTP(w, r)
-	})
-}
 
 func routeStatic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -236,14 +141,13 @@ Sysmanage has undergone some big changes between v0 and v1
 	r := chi.NewRouter()
 
 	// A good base middleware stack
+	//
+	// Load core middleware here
 	r.Use(
 		middleware.Recoverer,
 		middleware.Logger,
 		middleware.CleanPath,
 		middleware.RealIP,
-		ensureDpAuth,
-		routeStatic,
-		middleware.Timeout(30*time.Second),
 	)
 
 	// Start loading the plugins
@@ -270,6 +174,16 @@ Sysmanage has undergone some big changes between v0 and v1
 
 		state.LoadedPlugins = append(state.LoadedPlugins, plugin.ID)
 	}
+
+	if len(state.AuthPlugins) == 0 {
+		fmt.Fprintln(os.Stderr, "No auth plugins loaded. For security purposes, please load at least one auth plugin. You can use `authdp` for a reasonably secure auth plugin")
+		os.Exit(1)
+	}
+
+	r.Use(
+		routeStatic,
+		middleware.Timeout(30*time.Second),
+	)
 
 	r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnavailableForLegalReasons)

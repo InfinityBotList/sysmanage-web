@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
-	"github.com/infinitybotlist/sysmanage-web/core/server/builder"
+	"github.com/infinitybotlist/sysmanage-web/core/plugins"
+	"github.com/infinitybotlist/sysmanage-web/core/server/cmd/builder"
 	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"golang.org/x/exp/slices"
 )
 
 var bold = color.New(color.Bold).SprintFunc()
@@ -105,6 +108,26 @@ func init() {
 				}
 
 				fmt.Println("Done")
+			},
+		},
+		{
+			Name:        "listplugins",
+			Description: "List all plugins with their status (official/custom)",
+			Run: func() {
+				officialPlugins := plugins.GetOfficialPluginList()
+
+				plList := make([]string, 0, len(state.ServerMeta.Plugins))
+				for _, pl := range state.ServerMeta.Plugins {
+					var plType string = "custom"
+
+					if slices.Contains(officialPlugins, pl.ID) {
+						plType = "official"
+					}
+
+					plList = append(plList, pl.ID+" ("+plType+")")
+				}
+
+				fmt.Println(strings.Join(plList, "\n"))
 			},
 		},
 		{

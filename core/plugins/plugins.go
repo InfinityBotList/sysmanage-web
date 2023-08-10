@@ -12,12 +12,21 @@ import (
 )
 
 // Update this list when adding new plugins
-var OfficialPlugins = []string{
+var officialPlugins = []string{
+	"acl",
 	"actions",
+	"authdp",
+	"deploy",
 	"frontend",
+	"logger",
 	"nginx",
 	"persist",
 	"systemd",
+}
+
+// Returns the list of official plugins
+func GetOfficialPluginList() []string {
+	return officialPlugins
 }
 
 type OpaqueConfig struct {
@@ -55,7 +64,24 @@ func (i OpaqueConfig) GetBool(key string) (bool, error) {
 		return false, nil
 	}
 
-	return false, errors.New("key not a string: " + key)
+	return false, errors.New("key not a boolean: " + key)
+}
+
+func (i OpaqueConfig) GetInt(key string) (int, error) {
+	v, ok := i.inner[key]
+
+	if !ok {
+		return 0, errors.New("key not found: " + key)
+	}
+
+	switch v := v.(type) {
+	case uint8, uint16, uint32, uint64, uint, int8, int16, int32, int64, int:
+		return int(v.(int)), nil
+	case nil:
+		return 0, nil
+	}
+
+	return 0, errors.New("key not a integer: " + key)
 }
 
 func (i OpaqueConfig) GetStringArray(key string) ([]string, error) {

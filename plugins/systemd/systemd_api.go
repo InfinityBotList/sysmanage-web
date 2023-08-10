@@ -2,7 +2,6 @@ package systemd
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"os"
 	"os/exec"
@@ -22,7 +21,7 @@ import (
 func loadServiceApi(r chi.Router) {
 	// Returns the list of services
 	r.Post("/getServiceList", func(w http.ResponseWriter, r *http.Request) {
-		serviceList, err := getServiceList(true)
+		serviceList, err := GetServiceList(true)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -160,41 +159,6 @@ func loadServiceApi(r chi.Router) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Service name cannot contain dots."))
 			return
-		}
-
-		// Check if service already exists
-		if r.URL.Query().Get("update") != "true" {
-			if _, err := os.Stat(serviceDefinitions + "/" + createService.Name + ".yaml"); errors.Is(err, os.ErrExist) {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("Service already exists:" + err.Error()))
-				return
-			} else if !errors.Is(err, os.ErrNotExist) {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to check if service exists:" + err.Error()))
-				return
-			}
-		} else {
-			// Open file and copy git integration into it
-			f, err := os.Open(serviceDefinitions + "/" + createService.Name + ".yaml")
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to read service definition." + err.Error()))
-				return
-			}
-
-			// Read file into TemplateYaml
-			var serviceYaml TemplateYaml
-
-			err = yaml.NewDecoder(f).Decode(&serviceYaml)
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to read service definition" + err.Error()))
-				return
-			}
-
-			createService.Service.Git = serviceYaml.Git
 		}
 
 		// Create file
@@ -404,7 +368,7 @@ func loadServiceApi(r chi.Router) {
 	r.Post("/buildServices", func(w http.ResponseWriter, r *http.Request) {
 		reqId := crypto.RandString(64)
 
-		go buildServices(reqId)
+		go BuildServices(reqId)
 
 		w.Write([]byte(reqId))
 	})
@@ -521,160 +485,6 @@ func loadServiceApi(r chi.Router) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	r.Post("/initDeploy", func(w http.ResponseWriter, r *http.Request) {
-		name := r.URL.Query().Get("id")
-
-		services, err := getServiceList(false)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to get service list."))
-			return
-		}
-
-		var gotService *ServiceManage
-		for _, service := range services {
-			if service.ID == name {
-				gotService = &service
-				break
-			}
-		}
-
-		if gotService == nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Service not found."))
-			return
-		}
-
-		logId := crypto.RandString(64)
-
-		go initDeploy(logId, *gotService)
-		go persist.PersistToGit("")
-
-		w.Write([]byte(logId))
-	})
-
-	r.Post("/createGit", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("id")
-
-		services, err := getServiceList(false)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to get service list."))
-			return
-		}
-
-		// Check if service exists
-		var gotService *ServiceManage
-
-		for _, service := range services {
-			if service.ID == id {
-				gotService = &service
-				break
-			}
-		}
-
-		if gotService == nil {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Service not found."))
-			return
-		}
-
-		var git *Git
-
-		err = yaml.NewDecoder(r.Body).Decode(&git)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to decode git data."))
-			return
-		}
-
-		err = state.Validator.Struct(git)
-
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid git data."))
-			return
-		}
-
-		if !strings.HasPrefix(git.Repo, "https://") {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid git URL."))
-			return
-		}
-
-		if !strings.HasPrefix(git.Ref, "refs/heads/") {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Currently, only refs starting with refs/heads/ are supported."))
-			return
-		}
-
-		if len(git.BuildCommands) == 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("No build commands specified."))
-			return
-		}
-
-		gotService.Service.Git = git
-
-		// Save service
-		f, err := os.Create(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to save service."))
-
-			// Close file and delete it
-			f.Close()
-			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
-
-			return
-		}
-
-		err = yaml.NewEncoder(f).Encode(gotService.Service)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to save service."))
-
-			// Close file and delete it
-			f.Close()
-			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
-
-			return
-		}
-
-		err = f.Close()
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to save service."))
-
-			// Close file and delete it
-			f.Close()
-			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
-
-			return
-		}
-
-		err = os.Rename(serviceDefinitions+"/"+gotService.ID+".yaml-1", serviceDefinitions+"/"+gotService.ID+".yaml")
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to save service."))
-
-			// Close file and delete it
-			f.Close()
-			os.Remove(serviceDefinitions + "/" + gotService.ID + ".yaml-1")
-
-			return
-		}
-
-		go persist.PersistToGit("")
-	})
-
 	r.Post("/updateMeta", func(w http.ResponseWriter, r *http.Request) {
 		var target MetaTarget
 
@@ -763,7 +573,7 @@ func loadServiceApi(r chi.Router) {
 			flag := false
 
 			// Ensure no services are using this target
-			serviceList, err := getServiceList(false)
+			serviceList, err := GetServiceList(false)
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)

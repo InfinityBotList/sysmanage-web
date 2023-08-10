@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func getServiceStatus(ids []string) []string {
+func GetServiceStatus(ids []string) []string {
 	ids = append([]string{"check"}, ids...)
 	cmd := exec.Command("systemctl", ids...)
 	out, _ := cmd.CombinedOutput()
@@ -24,7 +24,7 @@ func getServiceStatus(ids []string) []string {
 	return strings.Split(string(out), "\n")
 }
 
-func getServiceList(getStatus bool) ([]ServiceManage, error) {
+func GetServiceList(getStatus bool) ([]ServiceManage, error) {
 	// Get all files in path
 	fsd, err := os.ReadDir(serviceDefinitions)
 
@@ -77,7 +77,7 @@ func getServiceList(getStatus bool) ([]ServiceManage, error) {
 
 	// Get status of services
 	if getStatus {
-		statuses := getServiceStatus(ids)
+		statuses := GetServiceStatus(ids)
 
 		for i := range services {
 			services[i].Status = statuses[i]
@@ -87,7 +87,7 @@ func getServiceList(getStatus bool) ([]ServiceManage, error) {
 	return services, nil
 }
 
-func buildServices(reqId string) {
+func BuildServices(reqId string) {
 	defer logger.LogMap.MarkDone(reqId)
 
 	logger.LogMap.Add(reqId, "Waiting for other builds to finish...", true)

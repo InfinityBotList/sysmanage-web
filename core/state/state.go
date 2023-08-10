@@ -26,4 +26,10 @@ var (
 	Context = context.Background()
 
 	Assets map[string]embed.FS
+
+	// Public API. All plugins handling page authentication should add to this array
+	AuthPlugins = []string{}
+
+	// Public API. List of routes that should be exempted during authentication. Plugins should add to this array if required
+	AuthExemptRoutes = []string{}
 )

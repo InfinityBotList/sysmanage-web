@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/infinitybotlist/sysmanage-web/core/plugins/constants"
 )
 
 var (
-	routes       []ACLRouteEntry
-	plugins      []ACLPluginEntry
-	pluginLoaded bool
+	routes  []ACLRouteEntry
+	plugins []ACLPluginEntry
 )
 
 // Adds an ACL entry for a route to the list of ACL entries
@@ -20,11 +21,6 @@ func AddRoute(e ACLRouteEntry) {
 // Adds an ACL entry for a plugin to the list of ACL entries
 func AddPlugin(e ACLPluginEntry) {
 	plugins = append(plugins, e)
-}
-
-// Returns whether or not to perform ACL checks
-func Enabled() bool {
-	return pluginLoaded
 }
 
 func CheckACL(userId string, r *http.Request) *ACLCheck {
@@ -114,7 +110,7 @@ func CheckACL(userId string, r *http.Request) *ACLCheck {
 
 func MuxMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userId := r.Header.Get("X-DP-UserID")
+		userId := r.Header.Get(constants.UserIdHeader)
 
 		if userId == "" {
 			w.WriteHeader(http.StatusInternalServerError)

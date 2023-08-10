@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/infinitybotlist/sysmanage-web/core/plugins"
 	"github.com/infinitybotlist/sysmanage-web/plugins/acl"
 )
 
@@ -13,7 +14,7 @@ import (
 func GetRegisteredLinks(r *http.Request) ([]Link, error) {
 	var reg []Link
 
-	if acl.Enabled() {
+	if plugins.Enabled("acl") {
 		var aclResultCache = make(map[string]bool)
 
 		for _, link := range RegisteredLinks {

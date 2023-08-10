@@ -162,36 +162,6 @@
         return obj;
     }
 
-    let gitRepo: string = service?.Service?.Git?.Repo || "";
-    let gitRef: string = service?.Service?.Git?.Ref || "refs/heads/";
-    let gitBuildCommands: string[] = service?.Service?.Git?.BuildCommands || [];
-    let configFiles: string[] = service?.Service?.Git?.ConfigFiles || [];
-    let gitEnv: [string, string][] = parseMap(service?.Service?.Git?.Env) || [];
-    let allowDirty: string = service?.Service?.Git?.AllowDirty?.toString() || false;
-
-
-    const createGit = async () => {
-        let res = await fetch(`/api/systemd/createGit?id=${service?.ID}`, {
-            method: "POST",
-            body: JSON.stringify({
-                repo: gitRepo,
-                ref: gitRef,
-                build_commands: gitBuildCommands,
-                env: parseMapReverse(gitEnv),
-                allow_dirty: allowDirty == "true",
-                config_files: configFiles,
-            })
-        });
-
-        if(!res.ok) {
-            let errorStr = await res.text()
-            error(errorStr)
-            return
-        }
-
-        success("Git integration created")
-    }
-
     let name: string = service?.ID || "";
     let command: string = service?.Service?.Command || "";
     let directory: string = service?.Service?.Directory || "";
@@ -382,6 +352,9 @@
     {/await}
 </div>
 
+<!--
+TODO, in new deploy framework
+
 <h2 class="font-semibold text-xl">Git Integration</h2>
 {#if service?.Service?.Git}
     <p>Git Integration is correctly configured</p>
@@ -473,3 +446,4 @@
 
     <ButtonReact onclick={() => createGit()}>Create/Update</ButtonReact>
 </div>
+-->
