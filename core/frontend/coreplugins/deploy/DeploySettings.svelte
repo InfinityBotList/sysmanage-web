@@ -214,7 +214,7 @@
 {#each data.webhooks as webh}
     <Section title={webh?.id || "Not Specified"}>
         <DeployWebhook 
-            id={id}
+            id={webh?.id}
             bind:webhook={webh}
         />
     </Section>
