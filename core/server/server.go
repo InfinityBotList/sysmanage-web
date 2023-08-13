@@ -40,37 +40,6 @@ func routeStatic(next http.Handler) http.Handler {
 
 			serverRoot := http.FS(serverRootSubbed)
 
-			// Get file extension
-			fileExt := ""
-			if strings.Contains(r.URL.Path, ".") {
-				fileExt = r.URL.Path[strings.LastIndex(r.URL.Path, "."):]
-			}
-
-			if fileExt == "" && r.URL.Path != "/" {
-				r.URL.Path += ".html"
-			}
-
-			if r.URL.Path != "/" {
-				r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
-			}
-
-			var checkPath = r.URL.Path
-
-			if r.URL.Path == "/" {
-				checkPath = "/index.html"
-			}
-
-			// Check if file exists
-			f, err := serverRoot.Open(checkPath)
-
-			if err != nil {
-				w.Header().Set("Location", "/404?from="+r.URL.Path)
-				w.WriteHeader(http.StatusFound)
-				return
-			}
-
-			f.Close()
-
 			fserve := http.FileServer(serverRoot)
 			fserve.ServeHTTP(w, r)
 		} else {
@@ -206,18 +175,27 @@ Sysmanage has undergone some big changes between v0 and v1
 		w.Write([]byte("API endpoint not found..."))
 	})
 
-	if meta.Port == 0 {
-		meta.Port = 30010
+	var port int
+	if meta.Port == 0 && config.Port == 0 {
+		port = 30010
+	}
+
+	if meta.Port != 0 {
+		port = meta.Port
+	}
+
+	if config.Port != 0 {
+		port = config.Port
 	}
 
 	// Create server
 	s := &http.Server{
-		Addr:    ":" + strconv.Itoa(meta.Port),
+		Addr:    ":" + strconv.Itoa(port),
 		Handler: r,
 	}
 
 	// Start server
-	fmt.Println("Starting server on port " + strconv.Itoa(meta.Port))
+	fmt.Println("Starting server on port " + strconv.Itoa(port))
 	err = s.ListenAndServe()
 
 	if err != nil {

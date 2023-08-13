@@ -2,12 +2,17 @@ package deploy
 
 import "time"
 
+type DeployMetaListItem struct {
+	ID   string
+	Meta *DeployMeta
+}
+
 type DeployMeta struct {
 	AllowedIps  []string          `yaml:"allowed_ips"`
 	Src         *DeploySource     `yaml:"src"`
 	Broken      bool              `yaml:"broken"`
 	OutputPath  string            `yaml:"output_path"`
-	Script      string            `yaml:"script"`
+	Commands    []string          `yaml:"commands"`
 	Webhooks    []*DeployWebhook  `yaml:"webhooks"`
 	Timeout     int               `yaml:"timeout"`
 	Env         map[string]string `yaml:"env"`
@@ -26,7 +31,7 @@ func (d DeploySource) String() string {
 }
 
 type DeployWebhook struct {
-	Url   string `yaml:"url"`
+	Id    string `yaml:"id"`
 	Token string `yaml:"token"`
 	Type  string `yaml:"type"`
 }

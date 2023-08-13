@@ -372,6 +372,36 @@ var BuildActions = []action{
 		},
 	},
 	{
+		Name: "Sanity checks",
+		Func: func() {
+			// Check for sm-build/src/routes/layout.js
+			f, err := os.Open("sm-build/src/routes/+layout.js")
+
+			if err != nil {
+				fmt.Println("Remove any layout.ts file you may have in sm-build/src/routes")
+				fmt.Println("Then set it to the following")
+				fmt.Println("")
+				fmt.Println("export const prerender = true")
+				fmt.Println("export const trailingSlash = 'always';")
+				panic(err)
+			}
+
+			// Look for trailingSlash in f
+			fStr, err := io.ReadAll(f)
+
+			if err != nil {
+				panic(err)
+			}
+
+			if !strings.Contains(string(fStr), "export const trailingSlash = 'always';") {
+				fmt.Println("Trailing slash config is INVALID. Please add the below to sm-build/src/routes/layout.js")
+				fmt.Println("")
+				fmt.Println("export const trailingSlash = 'always';")
+				os.Exit(1)
+			}
+		},
+	},
+	{
 		Name: "Build frontend",
 		Func: func() {
 			cmd := exec.Command("npm", "install")

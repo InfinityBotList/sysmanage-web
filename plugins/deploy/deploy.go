@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"html/template"
 	"os"
 	"os/exec"
 	"strings"
@@ -11,7 +12,18 @@ import (
 	"github.com/infinitybotlist/sysmanage-web/core/logger"
 )
 
-func initDeploy(logId string, d *DeployMeta) {
+const scriptTmpl = `
+#!/bin/bash
+
+{{range $val := .}}
+echo "> {{$val}}"
+{{$val}}
+{{end}}
+`
+
+var templ = template.Must(template.New("script").Parse(scriptTmpl))
+
+func InitDeploy(logId string, d *DeployMeta) {
 	if d.Src == nil {
 		logger.LogMap.Add(logId, "FATAL: Deploy does not have an associated source setup.", true)
 		return
@@ -82,6 +94,24 @@ func initDeploy(logId string, d *DeployMeta) {
 		return
 	}
 
+	// Create script
+	f, err := os.Create(buildDir + "/builder")
+
+	if err != nil {
+		logger.LogMap.Add(logId, "Error creating script: "+err.Error(), true)
+		return
+	}
+
+	defer f.Close()
+
+	// Write script
+	err = templ.Execute(f, d.Commands)
+
+	if err != nil {
+		logger.LogMap.Add(logId, "Error writing script: "+err.Error(), true)
+		return
+	}
+
 	// Run script using bash as a seperate contained process
 	// This is to prevent the script from doing anything malicious
 	// to the system
@@ -94,7 +124,7 @@ func initDeploy(logId string, d *DeployMeta) {
 		defer cancel()
 	}
 
-	cmd := exec.CommandContext(ctx, "bash", "-c", d.Script)
+	cmd := exec.CommandContext(ctx, "bash", buildDir+"/builder")
 	cmd.Dir = buildDir
 	cmd.Env = os.Environ()
 	cmd.SysProcAttr = &syscall.SysProcAttr{

@@ -28,7 +28,7 @@ func LoadConfig(name string) (*DeployMeta, error) {
 	return meta, nil
 }
 
-func GetDeployList() ([]*DeployMeta, error) {
+func GetDeployList() ([]*DeployMetaListItem, error) {
 	// Get all files in path
 	fsd, err := os.ReadDir(deployConfigPath)
 
@@ -36,7 +36,7 @@ func GetDeployList() ([]*DeployMeta, error) {
 		return nil, errors.New("Failed to load deployConfigPath " + err.Error())
 	}
 
-	dms := make([]*DeployMeta, 0)
+	dms := make([]*DeployMetaListItem, 0)
 
 	for _, file := range fsd {
 		if file.IsDir() {
@@ -63,7 +63,10 @@ func GetDeployList() ([]*DeployMeta, error) {
 			return nil, errors.New("Failed to read deploy config " + err.Error() + file.Name())
 		}
 
-		dms = append(dms, meta)
+		dms = append(dms, &DeployMetaListItem{
+			ID:   strings.TrimSuffix(file.Name(), ".yaml"),
+			Meta: meta,
+		})
 	}
 
 	return dms, nil

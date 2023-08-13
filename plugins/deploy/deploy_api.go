@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/infinitybotlist/eureka/crypto"
 	"golang.org/x/exp/slices"
 )
 
@@ -29,6 +28,68 @@ func loadDeployApi(r chi.Router) {
 
 		// JSON encode defines
 		jsonStr, err := json.Marshal(cfg)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode service definitions."))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonStr)
+	})
+
+	r.Post("/getDeployList", func(w http.ResponseWriter, r *http.Request) {
+		cfg, err := GetDeployList()
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("failed to load config: " + err.Error()))
+			return
+		}
+
+		// JSON encode defines
+		jsonStr, err := json.Marshal(cfg)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode service definitions."))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonStr)
+	})
+
+	r.Post("/getDeploySourceTypes", func(w http.ResponseWriter, r *http.Request) {
+		var srcs []string
+
+		for k := range DeploySources {
+			srcs = append(srcs, k)
+		}
+
+		// JSON encode defines
+		jsonStr, err := json.Marshal(srcs)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to encode service definitions."))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonStr)
+	})
+
+	r.Post("/getDeployWebhookSourceTypes", func(w http.ResponseWriter, r *http.Request) {
+		var srcs []string
+
+		for k := range DeployWebhookSources {
+			srcs = append(srcs, k)
+		}
+
+		// JSON encode defines
+		jsonStr, err := json.Marshal(srcs)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -71,28 +132,38 @@ func loadDeployApi(r chi.Router) {
 			return
 		}
 
-		var flag bool
-		for _, webh := range cfg.Webhooks {
-			if webh.Type != "api" {
-				continue
-			}
+		typ := r.URL.Query().Get("type")
 
-			if webh.Token == token {
-				flag = true
-				break
-			}
-		}
-
-		if !flag {
+		if typ == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("invalid token"))
+			w.Write([]byte("missing type"))
 			return
 		}
 
-		reqId := crypto.RandString(64)
+		wid := r.URL.Query().Get("wid")
 
-		go initDeploy(reqId, cfg)
+		if wid == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("missing wid"))
+			return
+		}
 
-		w.Write([]byte(reqId))
+		fn, ok := DeployWebhookSources[typ]
+
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("invalid type"))
+			return
+		}
+
+		logId, err := fn(cfg, wid, id, token)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.Write([]byte(logId))
 	})
 }

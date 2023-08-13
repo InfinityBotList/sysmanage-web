@@ -1,9 +1,12 @@
 package deploy
 
 import (
+	"errors"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/infinitybotlist/eureka/crypto"
 	"github.com/infinitybotlist/sysmanage-web/core/logger"
 )
 
@@ -30,5 +33,32 @@ var DeploySources = map[string]func(logId, buildDir string, d *DeployMeta) error
 		}
 
 		return nil
+	},
+}
+
+// Public API to allow plugins to define custom webhook sources
+var DeployWebhookSources = map[string]func(cfg *DeployMeta, wid, id, token string) (logId string, err error){
+	"api": func(cfg *DeployMeta, wid, id, token string) (logId string, err error) {
+		var flag bool
+		for _, webh := range cfg.Webhooks {
+			if webh.Type != "api" {
+				continue
+			}
+
+			if wid == webh.Id && webh.Token == token {
+				flag = true
+				break
+			}
+		}
+
+		if !flag {
+			return "", errors.New("invalid token")
+		}
+
+		reqId := crypto.RandString(64)
+
+		go InitDeploy(reqId, cfg)
+
+		return reqId, nil
 	},
 }

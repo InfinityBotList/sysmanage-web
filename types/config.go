@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	Plugins map[string]map[string]any `yaml:"plugins"`
+	Port    int                       `yaml:"port"`
 }
 
 type PluginConfig struct {

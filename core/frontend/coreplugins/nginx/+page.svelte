@@ -82,8 +82,8 @@
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>NGINX config</title>
+	<meta name="description" content="NGINX management" />
 </svelte:head>
 
 <section>
@@ -106,7 +106,7 @@
 
 	<div class="mb-3"></div>
 	
-	<h2 class="text-xl font-semibold">Services</h2>
+	<h2 class="text-xl font-semibold">Nginx Domain List</h2>
 
 	{#if buildNginxTaskId != ""}
 		<TaskWindow 

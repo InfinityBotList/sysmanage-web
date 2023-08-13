@@ -8,6 +8,7 @@ import (
 
 	"github.com/infinitybotlist/sysmanage-web/core/plugins"
 	"github.com/infinitybotlist/sysmanage-web/core/state"
+	"github.com/infinitybotlist/sysmanage-web/plugins/frontend"
 	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
@@ -22,10 +23,18 @@ var (
 )
 
 func InitPlugin(c *types.PluginConfig) error {
+	// Register links
+	frontend.AddLink(c, frontend.Link{
+		Title:       "Deploy Management",
+		Description: "Manage deployment configs on the system.",
+		LinkText:    "View Service List",
+		Href:        "@root",
+	})
+
 	cfgData, err := plugins.GetConfig(c.Name)
 
 	if err != nil {
-		return errors.New("Failed to get nginx config: " + err.Error())
+		return errors.New("Failed to get deploy config: " + err.Error())
 	}
 
 	maxConcurrency, err = cfgData.GetInt("max_concurrency")

@@ -5,15 +5,16 @@ import (
 
 	"github.com/infinitybotlist/sysmanage-web/plugins/actions"
 	"github.com/infinitybotlist/sysmanage-web/plugins/authdp"
+	"github.com/infinitybotlist/sysmanage-web/plugins/deploy"
 	"github.com/infinitybotlist/sysmanage-web/plugins/frontend"
 	"github.com/infinitybotlist/sysmanage-web/plugins/logger"
 	"github.com/infinitybotlist/sysmanage-web/plugins/nginx"
-	"github.com/infinitybotlist/sysmanage-web/plugins/persist"
 	"github.com/infinitybotlist/sysmanage-web/plugins/systemd"
 	"github.com/infinitybotlist/sysmanage-web/types"
 )
 
 var meta = types.ServerMeta{
+	Port:          29393,
 	ConfigVersion: 1,
 	Plugins: []types.Plugin{
 		{
@@ -35,14 +36,16 @@ var meta = types.ServerMeta{
 				Provider: "@core",
 			},
 		},
-		// Persist has no frotend, it is a backend plugin
-		{
-			ID:   persist.ID,
-			Init: persist.InitPlugin,
-		},
 		{
 			ID:   actions.ID,
 			Init: actions.InitPlugin,
+			Frontend: types.Provider{
+				Provider: "@core",
+			},
+		},
+		{
+			ID:   deploy.ID,
+			Init: deploy.InitPlugin,
 			Frontend: types.Provider{
 				Provider: "@core",
 			},
