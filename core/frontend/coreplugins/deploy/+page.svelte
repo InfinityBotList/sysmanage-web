@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from '$lib/components/Button.svelte';
 	import InputSm from '$lib/components/InputSm.svelte';
 
 	const getDeployList = async () => {
@@ -35,6 +36,15 @@
 	<title>Deploy Management</title>
 	<meta name="description" content="Deploy view" />
 </svelte:head>
+
+<section>
+	<h2 class="text-xl font-semibold">Actions</h2>
+	<Button 
+		link="/plugins/systemd/new"
+	>
+		Add Deploy
+	</Button>
+</section>
 
 <section>	
 	<h2 class="text-xl font-semibold">Deploy List</h2>

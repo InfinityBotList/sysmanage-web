@@ -209,29 +209,6 @@
     minlength={1}
 />
 
-<h3 class="text-xl font-semibold">Webhooks</h3>
-
-{#each data.webhooks as webh}
-    <Section title={webh?.id || "Not Specified"}>
-        <DeployWebhook 
-            id={webh?.id}
-            bind:webhook={webh}
-        />
-    </Section>
-{/each}
-<ButtonReact onclick={() => {
-    data.webhooks.push({
-        id: "git",
-        token: "",
-        type: ""
-    })
-    data.webhooks = data.webhooks
-}}>
-    New Webhook
-</ButtonReact>
-
-<h3 class="text-xl font-semibold">Misc.</h3>
-
 <InputNumber
     id="timeout"
     label="Timeout"
@@ -256,5 +233,30 @@
     bind:values={data.configFiles}
     minlength={1}
 />
+
+<div class="mb-1"></div>
+
+<h3 class="text-xl font-semibold">Webhooks</h3>
+
+{#each data.webhooks as webh}
+    <Section title={webh?.id || "Not Specified"}>
+        <DeployWebhook 
+            id={webh?.id}
+            bind:webhook={webh}
+        />
+    </Section>
+{/each}
+<ButtonReact onclick={() => {
+    data.webhooks.push({
+        id: "git",
+        token: "",
+        type: ""
+    })
+    data.webhooks = data.webhooks
+}}>
+    New Webhook
+</ButtonReact>
+
+<h3 class="text-xl font-semibold">Misc.</h3>
 
 <!-- <ButtonReact onclick={() => createGit()}>Create/Update</ButtonReact> -->

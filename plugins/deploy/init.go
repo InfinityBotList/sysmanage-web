@@ -27,7 +27,7 @@ func InitPlugin(c *types.PluginConfig) error {
 	frontend.AddLink(c, frontend.Link{
 		Title:       "Deploy Management",
 		Description: "Manage deployment configs on the system.",
-		LinkText:    "View Service List",
+		LinkText:    "Manage Deploys",
 		Href:        "@root",
 	})
 
