@@ -277,6 +277,11 @@ func loadNginxApi(r chi.Router) {
 			return
 		}
 
+		if len(req.Servers) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("No servers found?"))
+		}
+
 		err = state.Validator.Struct(req)
 
 		if err != nil {
