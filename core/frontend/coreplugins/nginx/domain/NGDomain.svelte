@@ -59,7 +59,7 @@
             return;
         }
 
-        let res = await fetch(`/api/nginx/deleteDomain?domainName=${domain}`, {
+        let res = await fetch(`/api/nginx/deleteDomain?domain=${domain?.Domain}`, {
             method: "POST",
         });
 
