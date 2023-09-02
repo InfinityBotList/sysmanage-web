@@ -2,7 +2,7 @@ package nginx
 
 type NginxServerManage struct {
 	Domain string    `validate:"required"`
-	Server NginxYaml `validate:"required,dive"`
+	Server NginxYaml `validate:"required"`
 }
 
 type NginxServer struct {
