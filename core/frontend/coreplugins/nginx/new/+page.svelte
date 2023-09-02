@@ -68,7 +68,12 @@
         }
 
         let domainListRaw: AvailableDomainListData[] = await domainListRes.json();
-        let domainList: string[] = domainListRaw.map((domainObj) => domainObj.Domain.replace(".", "-"));
+
+	if(!domainListRaw || domainListRaw?.length == 0) {
+		throw new Error("No domains found?")
+	}
+
+        let domainList: string[] = domainListRaw.map((domainObj) => domainObj.Domain);
 
         let certListRes = await fetch(`/api/nginx/getCertList`, {
             method: "POST"
