@@ -243,7 +243,7 @@ func loadNginxApi(r chi.Router) {
 		}
 
 		// Add domain
-		f, err := os.Create(nginxDefinitions + "/" + domainFileName + ".yaml")
+		f, err := os.Create(nginxDefinitions + "/" + domainName + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -344,7 +344,7 @@ func loadNginxApi(r chi.Router) {
 		}
 
 		// Check that the domain exists
-		_, err = os.Stat(nginxDefinitions + "/" + domainName + ".yaml")
+		_, err = os.Stat(nginxDefinitions + "/" + req.Domain + ".yaml")
 
 		if errors.Is(err, fs.ErrNotExist) {
 			w.WriteHeader(http.StatusBadRequest)
@@ -353,7 +353,7 @@ func loadNginxApi(r chi.Router) {
 		}
 
 		// Update domain
-		f, err := os.Create(nginxDefinitions + "/" + domainName + ".yaml")
+		f, err := os.Create(nginxDefinitions + "/" + req.Domain + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
