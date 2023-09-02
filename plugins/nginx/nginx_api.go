@@ -117,10 +117,8 @@ func loadNginxApi(r chi.Router) {
 			}
 		}
 
-		domain := strings.ReplaceAll(req.Domain, ".", "-")
-
-		certFile := meta.NginxCertPath + "/cert-" + domain + ".pem"
-		keyFile := meta.NginxCertPath + "/key-" + domain + ".pem"
+		certFile := meta.NginxCertPath + "/cert-" + req.Domain + ".pem"
+		keyFile := meta.NginxCertPath + "/key-" + req.Domain + ".pem"
 
 		// Check that the cert and key files do not already exists
 		if r.URL.Query().Get("force") != "true" {
@@ -216,9 +214,8 @@ func loadNginxApi(r chi.Router) {
 		}
 
 		// Check that cert and key exists
-		domainFileName := strings.ReplaceAll(domainName, ".", "-")
-		certFile := meta.NginxCertPath + "/cert-" + domainFileName + ".pem"
-		keyFile := meta.NginxCertPath + "/key-" + domainFileName + ".pem"
+		certFile := meta.NginxCertPath + "/cert-" + domainName + ".pem"
+		keyFile := meta.NginxCertPath + "/key-" + domainName + ".pem"
 
 		_, err = tls.LoadX509KeyPair(certFile, keyFile)
 
@@ -305,9 +302,9 @@ func loadNginxApi(r chi.Router) {
 
 				srv.Names[i] = strings.Replace(srv.Names[i], "."+req.Domain, "", 1)
 
-				if strings.Contains(srv.Names[i], ".") || strings.Contains(srv.Names[i], " ") {
+				if strings.Contains(srv.Names[i], " ") {
 					w.WriteHeader(http.StatusBadRequest)
-					w.Write([]byte("Subdomains should not include dots or spaces"))
+					w.Write([]byte("Subdomains should not spaces"))
 					return
 				}
 
@@ -328,21 +325,10 @@ func loadNginxApi(r chi.Router) {
 					if loc.Path == "/" {
 						gotRoot = true
 					}
-					if loc.Path == "Not specified" {
-						w.WriteHeader(http.StatusBadRequest)
-						w.Write([]byte("Location Path must be specified"))
-						return
-					}
 
 					if strings.Contains(loc.Proxy, ";") || strings.Contains(loc.Proxy, " ") {
 						w.WriteHeader(http.StatusBadRequest)
 						w.Write([]byte("Proxy cannot contain spaces or semicolons"))
-						return
-					}
-
-					if slices.Contains(gotPaths, loc.Path) {
-						w.WriteHeader(http.StatusBadRequest)
-						w.Write([]byte("All locations must have a unique Path"))
 						return
 					}
 
@@ -358,9 +344,7 @@ func loadNginxApi(r chi.Router) {
 		}
 
 		// Check that the domain exists
-		domainFileName := strings.ReplaceAll(req.Domain, ".", "-")
-
-		_, err = os.Stat(nginxDefinitions + "/" + domainFileName + ".yaml")
+		_, err = os.Stat(nginxDefinitions + "/" + domainName + ".yaml")
 
 		if errors.Is(err, fs.ErrNotExist) {
 			w.WriteHeader(http.StatusBadRequest)
@@ -369,7 +353,7 @@ func loadNginxApi(r chi.Router) {
 		}
 
 		// Update domain
-		f, err := os.Create(nginxDefinitions + "/" + domainFileName + ".yaml")
+		f, err := os.Create(nginxDefinitions + "/" + domainName + ".yaml")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

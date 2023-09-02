@@ -87,7 +87,7 @@ func getNginxDomainList() ([]NginxServerManage, error) {
 			server.Servers = []NginxServer{}
 		}
 
-		domain := strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", ".")
+		domain := strings.TrimSuffix(file.Name(), ".yaml")
 
 		if server.RealName != "" {
 			domain = server.RealName
@@ -256,7 +256,7 @@ func buildNginx(reqId string) {
 
 		defer out.Close()
 
-		domain := strings.ReplaceAll(strings.TrimSuffix(file.Name(), ".yaml"), "-", ".")
+		domain := strings.TrimSuffix(file.Name(), ".yaml")
 
 		if nginxCfg.RealName != "" {
 			domain = nginxCfg.RealName
@@ -423,8 +423,6 @@ func updateDnsRecordCf(reqId string) {
 }
 
 func deleteDomain(reqId, domain string) {
-	domain = strings.ReplaceAll(domain, ".", "-")
-
 	// Load meta
 	meta, err := loadNginxMeta()
 
