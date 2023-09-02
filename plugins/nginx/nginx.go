@@ -423,6 +423,8 @@ func updateDnsRecordCf(reqId string) {
 }
 
 func deleteDomain(reqId, domain string) {
+	defer logger.LogMap.MarkDone(reqId)
+
 	// Load meta
 	meta, err := loadNginxMeta()
 
@@ -469,9 +471,19 @@ func deleteDomain(reqId, domain string) {
 	if err != nil {
 		logger.LogMap.Add(reqId, "Failed to delete nginx config file: "+err.Error(), true)
 		return
-	} else {
-		logger.LogMap.Add(reqId, "Deleted nginx config file", true)
 	}
+
+	logger.LogMap.Add(reqId, "Deleted nginx config file", true)
+
+	// Delete the yaml file itself
+	err = os.Remove(nginxDefinitions + "/" + domain + ".yaml")
+
+	if err != nil {
+		logger.LogMap.Add(reqId, "ERROR: Failed to delete YAML config: "+err.Error(), true)
+		return
+	}
+
+	// TODO: Here, consider removing cloudflare domains?
 
 	// Reload nginx
 	// Run nginx -t to validate config
