@@ -70,7 +70,7 @@
         let domainListRaw: AvailableDomainListData[] = await domainListRes.json();
 
 	if(!domainListRaw || domainListRaw?.length == 0) {
-		throw new Error("No domains found?")
+		domainListRaw = []		
 	}
 
         let domainList: string[] = domainListRaw.map((domainObj) => domainObj.Domain);
