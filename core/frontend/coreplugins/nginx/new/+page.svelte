@@ -86,6 +86,10 @@
 
         let certList: string[] = await certListRes.json();
 
+	if(!certList || certList?.length == 0) {
+		certList = []
+	}
+
         let availableDomains = []
         let claimedDomains = []
 
