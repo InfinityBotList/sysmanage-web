@@ -390,7 +390,7 @@ func updateDnsRecordCf(reqId string) {
 						ID:      r.ID,
 						Type:    "A",
 						Content: ip.String(),
-						Comment: cf.String("CI: sysmanage on " + time.Now().Format("2006-01-02 15:04:05")),
+						Comment: cloudflare.StringPtr("CI: sysmanage on " + time.Now().Format("2006-01-02 15:04:05")),
 						Proxied: &trueBool,
 					})
 
