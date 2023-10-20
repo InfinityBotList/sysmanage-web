@@ -1,0 +1,15 @@
+- name: ibl
+  description: "Infinity Bot List"
+  components:
+    - name: popplio
+      integrations:
+        - name: ping
+          config:
+            url: "https://spider.infinitybots.gg"
+          export:
+            - response_time
+            - uptime
+        - name: instatus
+          config:
+            page_id: secret/ibl.instatus_page_id
+            metrics_id: secret/ibl.instatus_metrics_id

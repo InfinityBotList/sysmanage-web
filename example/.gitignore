@@ -4,3 +4,5 @@ deploys
 sm-build
 .gitignore
 sysmanage
+**/secrets.yaml
+secrets.yaml

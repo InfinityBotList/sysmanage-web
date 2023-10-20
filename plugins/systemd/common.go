@@ -16,6 +16,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var ManualSystemdExtensions = []string{
+	"service",
+	"timer",
+	"target",
+}
+
 func GetServiceStatus(ids []string) []string {
 	ids = append([]string{"check"}, ids...)
 	cmd := exec.Command("systemctl", ids...)
@@ -165,9 +171,18 @@ func BuildServices(reqId string) {
 			continue // Skip _meta.yaml
 		}
 
-		if strings.HasSuffix(file.Name(), ".service") {
+		var isRecognizedSuffix bool
+
+		for _, suffix := range ManualSystemdExtensions {
+			if strings.HasSuffix(file.Name(), "."+suffix) {
+				isRecognizedSuffix = true
+				break
+			}
+		}
+
+		if isRecognizedSuffix {
 			// Copy to service out
-			logger.LogMap.Add(reqId, "Copying "+file.Name()+" to service out", true)
+			logger.LogMap.Add(reqId, "Copying "+file.Name()+" to output path: "+serviceOut, true)
 
 			// Open source
 			src, err := os.Open(serviceDefinitions + "/" + file.Name())
