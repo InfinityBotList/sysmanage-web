@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
@@ -339,6 +340,9 @@ func loadNginxApi(r chi.Router) {
 
 					gotPaths = append(gotPaths, loc.Path)
 				}
+
+				// TODO: Use gotPaths (???) or remove it
+				fmt.Println(gotPaths)
 
 				if !gotRoot {
 					w.WriteHeader(http.StatusBadRequest)
