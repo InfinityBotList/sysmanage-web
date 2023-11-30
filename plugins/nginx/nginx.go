@@ -334,13 +334,24 @@ func updateDnsRecordCf(reqId string) {
 	logger.LogMap.Add(reqId, "Updating DNS record", true)
 
 	// Get current IP
-	ip, err := getOutboundIP()
+	var ip net.IP
+	var err error
 
-	if err != nil {
-		logger.LogMap.Add(reqId, "Failed to get IP address:"+err.Error(), true)
+	if cfIp == "" {
+		ip, err = getOutboundIP()
+
+		if err != nil {
+			logger.LogMap.Add(reqId, "Failed to get IP address:"+err.Error(), true)
+		}
+
+		logger.LogMap.Add(reqId, "Current IP address is "+ip.String(), true)
+	} else {
+		ip = net.ParseIP(cfIp)
+
+		if ip == nil {
+			logger.LogMap.Add(reqId, "Failed to get IP address:"+err.Error(), true)
+		}
 	}
-
-	logger.LogMap.Add(reqId, "Current IP address is "+ip.String(), true)
 
 	// Get servers to update
 	srv, err := getNginxDomainList()

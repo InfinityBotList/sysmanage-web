@@ -15,6 +15,7 @@ var (
 	nginxTemplate    string
 	nginxDefinitions string
 	cf               *cloudflare.API
+	cfIp             string
 )
 
 const ID = "nginx"
@@ -69,6 +70,8 @@ func InitPlugin(c *types.PluginConfig) error {
 
 		setupCf()
 	}
+
+	cfIp, _ = cfgData.GetString("cf_ip")
 
 	loadNginxApi(c.Mux)
 
