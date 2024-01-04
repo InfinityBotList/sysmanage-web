@@ -17,6 +17,7 @@ var (
 	serviceOut                    string
 	ignoreSuffixForCopy           bool
 	ignoreSuffixForGetServiceList bool
+	trimSuffixForManualUnits      bool
 	srvModBypass                  []string
 )
 
@@ -83,13 +84,19 @@ func InitPlugin(c *types.PluginConfig) error {
 	ignoreSuffixForCopy, err = cfgData.GetBool("ignore_suffix_for_copy")
 
 	if err != nil {
-		fmt.Println("Failed to get ignore_suffix_for_copy: " + err.Error())
+		fmt.Println("Ignoring config option ignore_suffix_for_copy: " + err.Error())
 	}
 
 	ignoreSuffixForGetServiceList, err = cfgData.GetBool("ignore_suffix_for_get_service_list")
 
 	if err != nil {
-		fmt.Println("Failed to get ignore_suffix_for_get_service_list: " + err.Error())
+		fmt.Println("Ignoring config option ignore_suffix_for_get_service_list: " + err.Error())
+	}
+
+	trimSuffixForManualUnits, err = cfgData.GetBool("trim_suffix_for_manual_units")
+
+	if err != nil {
+		fmt.Println("Ignoring config option trim_suffix_for_manual_units: " + err.Error())
 	}
 
 	loadServiceApi(c.Mux)

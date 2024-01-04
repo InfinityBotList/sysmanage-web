@@ -78,7 +78,11 @@ func GetServiceList(getStatus bool) ([]ServiceManage, error) {
 			for _, suffix := range ManualSystemdExtensions {
 				if strings.HasSuffix(file.Name(), "."+suffix) {
 					isRecognizedSuffix = true
-					services[len(services)-1].ID = strings.TrimSuffix(file.Name(), "."+suffix)
+
+					if trimSuffixForManualUnits {
+						services[len(services)-1].ID = strings.TrimSuffix(file.Name(), "."+suffix)
+					}
+
 					break
 				}
 			}

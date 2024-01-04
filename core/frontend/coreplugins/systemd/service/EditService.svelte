@@ -146,8 +146,8 @@
             method: "POST",
             body: JSON.stringify({
                 raw_service: {
-                    filename: service?.RawService?.filename,
-                    body: service?.RawService?.body,
+                    filename: service?.RawService?.FileName,
+                    body: service?.RawService?.Body,
                 }
             }),
         });
@@ -233,7 +233,7 @@
             id="name"
             label="File Name"
             placeholder="zfsmongo.service"
-            value={service?.RawService?.filename || service?.ID || ""}
+            value={service?.RawService?.FileName || ""}
             disabled={true}
             minlength={1}
         />
@@ -242,7 +242,7 @@
             id="body"
             label="Body"
             placeholder="[Unit]\nDescription=Arcadia\n\n[Service]\nExecStart=/usr/bin/arcadia\nWorkingDirectory=/root/arcadia\n\n[Install]\nWantedBy=ibl-maint"
-            bind:value={service.RawService.body}
+            bind:value={service.RawService.Body}
             minlength={3}
         />
 
