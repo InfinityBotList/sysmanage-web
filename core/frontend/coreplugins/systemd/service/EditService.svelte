@@ -2,8 +2,7 @@
 	import ButtonReact from "$lib/components/ButtonReact.svelte";
 	import DangerButton from "$lib/components/DangerButton.svelte";
 	import InputSm from "$lib/components/InputSm.svelte";
-	import KvMultiInput from "$lib/components/KVMultiInput.svelte";
-	import MultiInput from "$lib/components/MultiInput.svelte";
+    import Input from "$lib/components/Input.svelte";
 	import TaskWindow from "$lib/components/TaskWindow.svelte";
 	import { error, success } from "$lib/corelib/strings";
 	import { newTask } from "$lib/corelib/tasks";
@@ -26,7 +25,7 @@
 		let res = await fetch(`/api/systemd/deleteService`, {
 			method: "POST",
 			body: JSON.stringify({
-				name: service?.ID,
+				name: service?.RawService?.FileName || service?.ID,
 			})
 		});
 
@@ -102,15 +101,20 @@
         return obj;
     }
 
-    let name: string = service?.ID || "";
-    let command: string = service?.Service?.Command || "";
-    let directory: string = service?.Service?.Directory || "";
-    let target: string = service?.Service?.Target || "ibl-maint";
-    let description: string = service?.Service?.Description || "";
-    let after: string = service?.Service?.After;
-    let brokenValue: string = service?.Service?.Broken ? "0" : "1";
-    let user: string = service?.Service?.User || "";
-    let group: string = service?.Service?.Group || "";
+    let serviceDataYaml = {
+        name: service?.ID || "",
+        service: {
+            cmd: service?.Service?.Command || "",
+            dir: service?.Service?.Directory || "",
+            target: service?.Service?.Target || "ibl-maint",
+            description: service?.Service?.Description || "",
+            after: service?.Service?.After,
+            broken: service?.Service?.Broken ? true : false,
+            user: service?.Service?.User || "",
+            group: service?.Service?.Group || "",
+        }
+    }
+    let brokenValue = service?.Service?.Broken ? "0" : "1";
 
     interface Meta {
         Targets?: MetaTarget[]
@@ -137,20 +141,34 @@
         return meta;
     }
 
-    const editService = async () => {
+    const editServiceRaw = async () => {
         let editService = await fetch(`/api/systemd/createService?update=true`, {
             method: "POST",
             body: JSON.stringify({
-                name,
+                raw_service: {
+                    FileName: service?.RawService?.FileName || service?.ID,
+                    Body: service?.RawService?.Body,
+                }
+            }),
+        });
+
+        if(!editService.ok) {
+            let errorText = await editService.text()
+            error(errorText)
+            return
+        }
+
+        success("Service editted successfully!")
+    }
+
+    const editServiceYaml = async () => {
+        let editService = await fetch(`/api/systemd/createService?update=true`, {
+            method: "POST",
+            body: JSON.stringify({
+                name: serviceDataYaml.name,
                 service: {
-                    cmd: command,
-                    dir: directory,
-                    target,
-                    description,
-                    after,
+                    ...serviceDataYaml.service,
                     broken: brokenValue === "0" ? true : false,
-                    user,
-                    group,
                 }
             }),
         });
@@ -206,88 +224,119 @@
 
 <h2 class="font-semibold text-xl">Service Info</h2>
 
-<div>
-    {#await getMeta()}
-        <GreyText>Loading metadata...</GreyText>
-    {:then meta}
-        <Service service={service} />
-        
+{#if service?.RawService}
+    <div class="edit-service-raw-container">
+        <h2 class="text-xl font-semibold mt-4">Raw Service</h2>
+        <GreyText>Warning: Manually managed units should be manually verified for correctness!</GreyText>
+
         <InputSm 
             id="name"
-            label="Service Name"
-            placeholder="arcadia, ibl-backup etc."
-            bind:value={name}
+            label="File Name"
+            placeholder="zfsmongo.service"
+            value={service?.RawService?.FileName || service?.ID || ""}
+            disabled={true}
             minlength={1}
         />
-        <InputSm 
-            id="command"
-            label="Command (must start with /usr/bin/)"
-            placeholder="E.g. /usr/bin/arcadia"
-            bind:value={command}
+
+        <Input 
+            id="body"
+            label="Body"
+            placeholder="[Unit]\nDescription=Arcadia\n\n[Service]\nExecStart=/usr/bin/arcadia\nWorkingDirectory=/root/arcadia\n\n[Install]\nWantedBy=ibl-maint"
+            bind:value={service.RawService.Body}
             minlength={3}
         />
-        <InputSm 
-            id="directory"
-            label="Directory"
-            placeholder="E.g. /root/arcadia"
-            bind:value={directory}
-            minlength={3}
-        />
-        <Select
-            name="target"
-            placeholder="Choose Target"
-            bind:value={target}
-            options={
-                new Map(meta?.Targets?.map(target => [
-                    target?.Name + " - " + target?.Description, 
-                    target?.Name
-                ]))
-            }
-        />
-        <InputSm
-            id="description"
-            label="Description"
-            placeholder="E.g. Arcadia"
-            bind:value={description}
-            minlength={5}
-        />
-        <InputSm
-            id="after"
-            label="After"
-            placeholder="E.g. ibl-maint"
-            bind:value={after}
-            minlength={1}
-        />
-        <Select
-            name="broken"
-            placeholder="Is the service broken/disabled?"
-            bind:value={brokenValue}
-            options={new Map([
-                ["Yes, it is", "0"],
-                ["No, its not", "1"],
-            ])}
-        />
-        <h2 class="text-xl font-semibold mt-4">Service User</h2>
-        <GreyText>Defaults to root if unset. Note that this could be a possible security risk to use the wrong user/group!</GreyText>
-        <InputSm
-            id="user"
-            label="User"
-            placeholder="E.g. root"
-            bind:value={user}
-            minlength={1}
-        />
-        <InputSm
-            id="group"
-            label="Group"
-            placeholder="E.g. root"
-            bind:value={group}
-            minlength={1}
-        />
-        <div class="mb-2"></div>
+
         <ButtonReact
-                onclick={() => editService()}
+            onclick={() => editServiceRaw()}
         >
             Edit Service
         </ButtonReact>
-    {/await}
-</div>
+    </div>
+{:else}
+    <div class="edit-service-yaml-container">
+        {#await getMeta()}
+            <GreyText>Loading metadata...</GreyText>
+        {:then meta}
+            <Service service={service} />
+            
+            <InputSm 
+                id="name"
+                label="Service Name"
+                placeholder="arcadia, ibl-backup etc."
+                value={service.name}
+                disabled={true}
+                minlength={1}
+            />
+            <InputSm 
+                id="command"
+                label="Command (must start with /usr/bin/)"
+                placeholder="E.g. /usr/bin/arcadia"
+                bind:value={service.service.command}
+                minlength={3}
+            />
+            <InputSm 
+                id="directory"
+                label="Directory"
+                placeholder="E.g. /root/arcadia"
+                bind:value={service.service.directory}
+                minlength={3}
+            />
+            <Select
+                name="target"
+                placeholder="Choose Target"
+                bind:value={service.service.target}
+                options={
+                    new Map(meta?.Targets?.map(target => [
+                        target?.Name + " - " + target?.Description, 
+                        target?.Name
+                    ]))
+                }
+            />
+            <InputSm
+                id="description"
+                label="Description"
+                placeholder="E.g. Arcadia"
+                bind:value={service.service.description}
+                minlength={5}
+            />
+            <InputSm
+                id="after"
+                label="After"
+                placeholder="E.g. ibl-maint"
+                bind:value={service.service.after}
+                minlength={1}
+            />
+            <Select
+                name="broken"
+                placeholder="Is the service broken/disabled?"
+                bind:value={brokenValue}
+                options={new Map([
+                    ["Yes, it is", "0"],
+                    ["No, its not", "1"],
+                ])}
+            />
+            <h2 class="text-xl font-semibold mt-4">Service User</h2>
+            <GreyText>Defaults to root if unset. Note that this could be a possible security risk to use the wrong user/group!</GreyText>
+            <InputSm
+                id="user"
+                label="User"
+                placeholder="E.g. root"
+                bind:value={service.service.user}
+                minlength={1}
+            />
+            <InputSm
+                id="group"
+                label="Group"
+                placeholder="E.g. root"
+                bind:value={service.service.group}
+                minlength={1}
+            />
+            <div class="mb-2"></div>
+            <ButtonReact
+                    onclick={() => editServiceYaml()}
+            >
+                Edit Service
+            </ButtonReact>
+        {/await}
+    </div>
+{/if}

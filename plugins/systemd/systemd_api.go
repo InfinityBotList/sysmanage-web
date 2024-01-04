@@ -100,83 +100,128 @@ func loadServiceApi(r chi.Router) {
 			return
 		}
 
-		// validate createService
-		err = state.Validator.Struct(createService)
-
-		if err != nil {
+		if createService.Service == nil && createService.RawService == nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("Service or RawService must be set."))
 			return
 		}
 
-		// Open _meta.yaml
-		f, err := os.Open(serviceDefinitions + "/_meta.yaml")
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to read service definition." + err.Error()))
+		if createService.Service != nil && createService.RawService != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Service and RawService cannot both be set."))
 			return
 		}
 
-		// Read file into TemplateYaml
-		var metaYaml MetaYAML
-
-		err = yaml.NewDecoder(f).Decode(&metaYaml)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to read service definition" + err.Error()))
-			return
-		}
-
-		// ensure service target is in _meta.yaml
-		flag := false
-		for _, target := range metaYaml.Targets {
-			if target.Name == createService.Service.Target {
-				flag = true
+		if createService.Service != nil {
+			if createService.Name == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Name must be set."))
+				return
 			}
-		}
 
-		if !flag {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Service target is not in _meta.yaml."))
-			return
-		}
+			// validate createService
+			err = state.Validator.Struct(createService.Service)
 
-		if strings.Contains(createService.Name, " ") {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Service name cannot contain spaces."))
-			return
-		}
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+				return
+			}
 
-		if strings.Contains(createService.Name, "/") {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Service name cannot contain slashes."))
-			return
-		}
+			// Open _meta.yaml
+			f, err := os.Open(serviceDefinitions + "/_meta.yaml")
 
-		if strings.Contains(createService.Name, ".") {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Service name cannot contain dots."))
-			return
-		}
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition." + err.Error()))
+				return
+			}
 
-		// Create file
-		f, err = os.Create(serviceDefinitions + "/" + createService.Name + ".yaml")
+			// Read file into TemplateYaml
+			var metaYaml MetaYAML
 
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to create service file."))
-			return
-		}
+			err = yaml.NewDecoder(f).Decode(&metaYaml)
 
-		// Create service
-		err = yaml.NewEncoder(f).Encode(createService.Service)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to read service definition" + err.Error()))
+				return
+			}
 
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to encode service."))
-			return
+			// ensure service target is in _meta.yaml
+			flag := false
+			for _, target := range metaYaml.Targets {
+				if target.Name == createService.Service.Target {
+					flag = true
+				}
+			}
+
+			if !flag {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Service target is not in _meta.yaml."))
+				return
+			}
+
+			if strings.Contains(createService.Name, " ") {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Service name cannot contain spaces."))
+				return
+			}
+
+			if strings.Contains(createService.Name, "/") {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Service name cannot contain slashes."))
+				return
+			}
+
+			if strings.Contains(createService.Name, ".") {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Service name cannot contain dots."))
+				return
+			}
+
+			// Create file
+			f, err = os.Create(serviceDefinitions + "/" + createService.Name + ".yaml")
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to create service file."))
+				return
+			}
+
+			// Create service
+			err = yaml.NewEncoder(f).Encode(createService.Service)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to encode service."))
+				return
+			}
+		} else {
+			// Save file
+			f, err := os.Create(serviceDefinitions + "/" + createService.RawService.FileName)
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to create service file."))
+				return
+			}
+
+			_, err = f.Write([]byte(createService.RawService.Body))
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to write service file."))
+				return
+			}
+
+			err = f.Close()
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to close service file."))
+				return
+			}
 		}
 
 		go persist.PersistToGit("")
@@ -581,6 +626,10 @@ func loadServiceApi(r chi.Router) {
 			}
 
 			for _, s := range serviceList {
+				if s.Service == nil {
+					continue
+				}
+
 				if s.Service.Target == target.Name {
 					w.WriteHeader(http.StatusBadRequest)
 					w.Write([]byte("Target is in use by service " + s.ID + "."))

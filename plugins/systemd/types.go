@@ -1,15 +1,22 @@
 package systemd
 
 type ServiceManage struct {
-	Service TemplateYaml
-	Status  string
-	ID      string
+	Service    *TemplateYaml
+	RawService *RawService // Only set when service is not the typical yaml file format
+	Status     string
+	ID         string
+}
+
+type RawService struct {
+	Body     string
+	FileName string
 }
 
 // Struct used to create a service
 type CreateTemplate struct {
-	Name    string       `yaml:"name" validate:"required"`
-	Service TemplateYaml `yaml:"service" validate:"required"`
+	Name       string        `yaml:"name"`
+	Service    *TemplateYaml `yaml:"service"`
+	RawService *RawService   `yaml:"raw_service"` // Only set when service is not the typical yaml file format
 }
 
 // Struct used to delete a service

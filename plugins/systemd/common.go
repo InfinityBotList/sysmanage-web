@@ -50,15 +50,44 @@ func GetServiceList(getStatus bool) ([]ServiceManage, error) {
 			continue // Skip directories
 		}
 
-		if !strings.HasSuffix(file.Name(), ".yaml") {
-			continue // Skip non-yaml files
-		}
-
 		// Read file into TemplateYaml
 		f, err := os.Open(serviceDefinitions + "/" + file.Name())
 
 		if err != nil {
 			return nil, errors.New("Failed to read service definition " + err.Error() + file.Name())
+		}
+
+		if !strings.HasSuffix(file.Name(), ".yaml") {
+			// Add as rawservice
+			body, err := io.ReadAll(f)
+
+			if err != nil {
+				return nil, errors.New("Failed to read service definition " + err.Error() + file.Name())
+			}
+
+			services = append(services, ServiceManage{
+				RawService: &RawService{
+					Body:     string(body),
+					FileName: file.Name(),
+				},
+				ID: file.Name(),
+			})
+
+			var isRecognizedSuffix bool
+
+			for _, suffix := range ManualSystemdExtensions {
+				if strings.HasSuffix(file.Name(), "."+suffix) {
+					isRecognizedSuffix = true
+					services[len(services)-1].ID = strings.TrimSuffix(file.Name(), "."+suffix)
+					break
+				}
+			}
+
+			if isRecognizedSuffix || ignoreSuffixForGetServiceList {
+				ids = append(ids, file.Name())
+			}
+
+			continue
 		}
 
 		// Read file into TemplateYaml
@@ -74,7 +103,7 @@ func GetServiceList(getStatus bool) ([]ServiceManage, error) {
 		sname := strings.TrimSuffix(file.Name(), ".yaml")
 
 		services = append(services, ServiceManage{
-			Service: service,
+			Service: &service,
 			ID:      sname,
 		})
 
@@ -180,7 +209,7 @@ func BuildServices(reqId string) {
 			}
 		}
 
-		if isRecognizedSuffix {
+		if isRecognizedSuffix || ignoreSuffixForCopy {
 			// Copy to service out
 			logger.LogMap.Add(reqId, "Copying "+file.Name()+" to output path: "+serviceOut, true)
 

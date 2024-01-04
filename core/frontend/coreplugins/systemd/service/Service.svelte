@@ -76,7 +76,12 @@
 	title={service?.ID}
 	onclick={() => showServiceInfo = !showServiceInfo}
 >
-	<GreyText>{service?.Service?.Description}</GreyText>
+	{#if service?.Service}
+		<GreyText>{service?.Service?.Description}</GreyText>
+	{:else}
+		<p class="font-semibold">Manually Managed Unit</p>
+		<GreyText>No description is currently available for manually managed units!</GreyText>
+	{/if}
 
 	<!--Activity-->
 	{#if service?.Status == "active"}
@@ -99,7 +104,11 @@
 	{#if showServiceInfo}
 		<p class="font-semibold text-lg">More information</p>
 		<div class="text-sm">
-			<ObjectRender object={service?.Service} />
+			{#if service?.Service}
+				<ObjectRender object={service?.Service} />
+			{:else}
+			<ObjectRender object={service?.RawService} />
+			{/if}
 		</div>
 
 		<ButtonReact 

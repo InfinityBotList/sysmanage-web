@@ -2,10 +2,12 @@
     import GreyText from "$lib/components/GreyText.svelte";
 	import EditService from "./EditService.svelte";
 
+    let serviceId: string | null = null
     const getServiceId = (): string => {
+        if(serviceId) return serviceId;
         let searchParams = new URLSearchParams(window.location.search);
-
-        return searchParams.get("id") || "";
+        serviceId = searchParams.get("id") || "";
+        return serviceId
     }
 
     const getService = async () => {
@@ -37,7 +39,7 @@
 
 <div>
     {#await getService()}
-        <GreyText>Loading metadata...</GreyText>
+        <GreyText>Loading service...</GreyText>
     {:then service}
         <h1 class="text-2xl font-semibold">Viewing {service?.ID}</h1>
         <EditService service={service} />

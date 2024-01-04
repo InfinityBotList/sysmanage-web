@@ -2,6 +2,7 @@ package systemd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/infinitybotlist/sysmanage-web/core/plugins"
@@ -10,11 +11,13 @@ import (
 )
 
 var (
-	targetTemplate     string
-	serviceTemplate    string
-	serviceDefinitions string
-	serviceOut         string
-	srvModBypass       []string
+	targetTemplate                string
+	serviceTemplate               string
+	serviceDefinitions            string
+	serviceOut                    string
+	ignoreSuffixForCopy           bool
+	ignoreSuffixForGetServiceList bool
+	srvModBypass                  []string
 )
 
 const ID = "systemd"
@@ -75,6 +78,18 @@ func InitPlugin(c *types.PluginConfig) error {
 
 	if err != nil {
 		return err
+	}
+
+	ignoreSuffixForCopy, err = cfgData.GetBool("ignore_suffix_for_copy")
+
+	if err != nil {
+		fmt.Println("Failed to get ignore_suffix_for_copy: " + err.Error())
+	}
+
+	ignoreSuffixForGetServiceList, err = cfgData.GetBool("ignore_suffix_for_get_service_list")
+
+	if err != nil {
+		fmt.Println("Failed to get ignore_suffix_for_get_service_list: " + err.Error())
 	}
 
 	loadServiceApi(c.Mux)
