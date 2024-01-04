@@ -198,12 +198,24 @@ func loadServiceApi(r chi.Router) {
 				return
 			}
 		} else {
+			if createService.RawService.FileName == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("FileName must be set."))
+				return
+			}
+
+			if createService.RawService.Body == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("Body must be set."))
+				return
+			}
+
 			// Save file
 			f, err := os.Create(serviceDefinitions + "/" + createService.RawService.FileName)
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to create service file."))
+				w.Write([]byte("Failed to create service file:" + err.Error()))
 				return
 			}
 
