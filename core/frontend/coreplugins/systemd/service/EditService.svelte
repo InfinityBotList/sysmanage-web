@@ -271,7 +271,7 @@
                 id="command"
                 label="Command (must start with /usr/bin/)"
                 placeholder="E.g. /usr/bin/arcadia"
-                bind:value={service.service.command}
+                bind:value={service.service.cmd}
                 minlength={3}
             />
             <InputSm 
