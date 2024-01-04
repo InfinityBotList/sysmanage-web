@@ -146,8 +146,8 @@
             method: "POST",
             body: JSON.stringify({
                 raw_service: {
-                    FileName: service?.RawService?.FileName || service?.ID,
-                    Body: service?.RawService?.Body,
+                    filename: service?.RawService?.filename,
+                    body: service?.RawService?.body,
                 }
             }),
         });
@@ -233,7 +233,7 @@
             id="name"
             label="File Name"
             placeholder="zfsmongo.service"
-            value={service?.RawService?.FileName || service?.ID || ""}
+            value={service?.RawService?.filename || service?.ID || ""}
             disabled={true}
             minlength={1}
         />
@@ -242,7 +242,7 @@
             id="body"
             label="Body"
             placeholder="[Unit]\nDescription=Arcadia\n\n[Service]\nExecStart=/usr/bin/arcadia\nWorkingDirectory=/root/arcadia\n\n[Install]\nWantedBy=ibl-maint"
-            bind:value={service.RawService.Body}
+            bind:value={service.RawService.body}
             minlength={3}
         />
 
@@ -263,7 +263,7 @@
                 id="name"
                 label="Service Name"
                 placeholder="arcadia, ibl-backup etc."
-                value={service.name}
+                value={serviceDataYaml.name}
                 disabled={true}
                 minlength={1}
             />
@@ -271,20 +271,20 @@
                 id="command"
                 label="Command (must start with /usr/bin/)"
                 placeholder="E.g. /usr/bin/arcadia"
-                bind:value={service.service.cmd}
+                bind:value={serviceDataYaml.service.cmd}
                 minlength={3}
             />
             <InputSm 
                 id="directory"
                 label="Directory"
                 placeholder="E.g. /root/arcadia"
-                bind:value={service.service.directory}
+                bind:value={serviceDataYaml.service.dir}
                 minlength={3}
             />
             <Select
                 name="target"
                 placeholder="Choose Target"
-                bind:value={service.service.target}
+                bind:value={serviceDataYaml.service.target}
                 options={
                     new Map(meta?.Targets?.map(target => [
                         target?.Name + " - " + target?.Description, 
@@ -296,14 +296,14 @@
                 id="description"
                 label="Description"
                 placeholder="E.g. Arcadia"
-                bind:value={service.service.description}
+                bind:value={serviceDataYaml.service.description}
                 minlength={5}
             />
             <InputSm
                 id="after"
                 label="After"
                 placeholder="E.g. ibl-maint"
-                bind:value={service.service.after}
+                bind:value={serviceDataYaml.service.after}
                 minlength={1}
             />
             <Select
@@ -321,14 +321,14 @@
                 id="user"
                 label="User"
                 placeholder="E.g. root"
-                bind:value={service.service.user}
+                bind:value={serviceDataYaml.service.user}
                 minlength={1}
             />
             <InputSm
                 id="group"
                 label="Group"
                 placeholder="E.g. root"
-                bind:value={service.service.group}
+                bind:value={serviceDataYaml.service.group}
                 minlength={1}
             />
             <div class="mb-2"></div>

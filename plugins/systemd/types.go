@@ -8,8 +8,8 @@ type ServiceManage struct {
 }
 
 type RawService struct {
-	Body     string
-	FileName string
+	Body     string `yaml:"body"`
+	FileName string `yaml:"filename"`
 }
 
 // Struct used to create a service

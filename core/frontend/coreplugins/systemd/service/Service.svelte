@@ -107,7 +107,7 @@
 			{#if service?.Service}
 				<ObjectRender object={service?.Service} />
 			{:else}
-			<ObjectRender object={service?.RawService} />
+				<ObjectRender object={service?.RawService} />
 			{/if}
 		</div>
 
