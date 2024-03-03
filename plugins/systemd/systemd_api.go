@@ -534,7 +534,7 @@ func loadServiceApi(r chi.Router) {
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to start services."))
+				w.Write([]byte("Failed to start all services: " + err.Error()))
 				return
 			}
 		}
