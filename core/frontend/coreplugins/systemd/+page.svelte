@@ -28,7 +28,7 @@
 		p.forEach((service: any) => {
             if (!categories.find((i) => i.category === service.Service.Target)) categories.push({
                 category: service.Service.Target,
-                services: service
+                services: [...service]
             });
             else {
                 let category = categories.find((i) => i.category === service.Service.Target);
