@@ -9,34 +9,17 @@
 	import Button from '$lib/components/Button.svelte';
 
 	const getServiceList = async () => {
-        const categories: {
-            category: string,
-            services: any[]
-        }[] = [];
-
 		let serviceList = await fetch(`/api/systemd/getServiceList`, {
 			method: "POST",
 		});
 
 		if(!serviceList.ok) {
 			let error = await serviceList.text()
+
 			throw new Error(error)
 		} 
 
-
-        const p = await serviceList.json();
-		p.forEach((service: any) => {
-            if (!categories.find((i) => i.category === service.Service.Target)) categories.push({
-                category: service.Service.Target,
-                services: [...service]
-            });
-            else {
-                let category = categories.find((i) => i.category === service.Service.Target);
-                category?.services.push(service);
-            }
-        });
-
-        return categories;
+		return await serviceList.json();
 	}
 
 	let query: string = "";
@@ -223,19 +206,15 @@
 	{#await getServiceList()}
 		<h2 class="text-xl">Loading service list</h2>
 	{:then data}
-        {#each data as category}
-            <h2 class="text-xl font-semibold text-white">{category.category}</h2>
-
-            {#each category.services as service}
-                <div class="mt-2 flex flex-wrap justify-center items-center justify-evenly">
-				    {#if showService(service, query, targetFilter)}
-					    <Service 
-						    service={service} 
-					    />
-				    {/if}
-                </div>
-            {/each}
-		{/each}
+		<div class="flex flex-wrap justify-center items-center justify-evenly">
+			{#each data as service}
+				{#if showService(service, query, targetFilter)}
+					<Service 
+						service={service} 
+					/>
+				{/if}
+			{/each}
+		</div>
 	{:catch err}
 		<h2 class="text-red-500">{err}</h2>
 	{/await}
