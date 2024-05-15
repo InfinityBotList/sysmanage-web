@@ -41,30 +41,30 @@ class DummyFile(object):
 class ProjectBuilder(SingletonClass):
     repo_root: str
     target_dir: str
-    step: list[Step]
+    step: typing.List[Step]
     pbar: tqdm.tqdm
 
     def __init__(
-            self: typing.Self,
+            self,
         ):
         self.repo_root = self.get_repo_root()
         self.target_dir = None
         self.pbar = None
         self.steps = []
     
-    def get_input(self: typing.Self, str: str):
+    def get_input(self, s: str):
         """Get input from the user"""
         try:
-            return input(str + ": ")
+            return input(s + ": ")
         except (KeyboardInterrupt, EOFError):
             print("Aborting due to KeyboardInterrupt or EOFError")
             sys.exit(1)
             
 
-    def get_input_bool(self: typing.Self, str: str):
+    def get_input_bool(self, s: str):
         """Get input from the user, but only allow y/n"""
         while True:
-            inp = self.get_input(str + " (y/n)")
+            inp = self.get_input(s + " (y/n)")
             if inp == "y":
                 return True
             elif inp == "n":
@@ -72,42 +72,42 @@ class ProjectBuilder(SingletonClass):
             else:
                 print("Invalid input, please enter y or n")
     
-    def get_input_choice(self: typing.Self, str: str, choices: typing.List[str]):
+    def get_input_choice(self, s: str, choices: typing.List[str]):
         """Get input from the user, but only allow one of the choices"""
         while True:
-            inp = self.get_input(str + " ({})".format(", ".join(choices)))
+            inp = self.get_input(s + " ({})".format(", ".join(choices)))
             if inp in choices:
                 return inp
             else:
                 print("Invalid input, please enter one of the choices")
     
-    def get_input_int(self: typing.Self, str: str):
+    def get_input_int(self, s: str):
         """Get input from the user, but only allow integers"""
         while True:
-            inp = self.get_input(str)
+            inp = self.get_input(s)
             try:
                 return int(inp)
             except ValueError:
                 print("Invalid input, please enter an integer")
     
-    def get_repo_root(self: typing.Self):
+    def get_repo_root(self):
         """Call git", "rev-parse", "--show-toplevel to get the root of the git repo"""
         return subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf-8").strip()
 
     @contextlib.contextmanager
-    def _redirect(rds: typing.Self):
+    def _redirect(rds):
         save_stdout = sys.stdout
         sys.stdout = DummyFile(rds, sys.stdout)
         yield
         sys.stdout = save_stdout
     
-    def exec(self: typing.Self, cmd: typing.List[str]):
+    def exec(self, cmd: typing.List[str]):
         """Execute a command, redirecting stdout to tqdm.write and returning the output"""
         proj.pbar.write(f"> `{' '.join(cmd)}`")
         with contextlib.redirect_stdout(DummyFile(self, sys.stdout)):
             return subprocess.check_call(cmd, stdout=sys.stdout, stderr=sys.stdout)
 
-    def main(self: typing.Self, target_dir: str):
+    def main(self, target_dir: str):
         self.repo_root = self.get_repo_root()
         self.target_dir = target_dir
 
@@ -141,7 +141,7 @@ class ProjectBuilder(SingletonClass):
 
             self.pbar.close()
     
-    def step(self: typing.Self, name: str):
+    def step(self, name: str):
         """Decorator for adding steps"""
         def decorator(func):
             self.steps.append(Step(name=name, func=func))

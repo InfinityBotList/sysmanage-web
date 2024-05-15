@@ -8,6 +8,7 @@ Simple system management framework for small-medium hosts/setups
 
 ## Automatic
 
+0. Run ``pip3 install -r projbuilder/requirements.txt``
 1. Run ``projbuilder/build.py``
 
 ## Manual
